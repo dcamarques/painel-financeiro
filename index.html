@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Boonus Financial Monitor</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; margin: 0; }
+        .header { display: flex; justify-content: space-around; padding: 30px; background: #111; border-bottom: 3px solid #00ff88; }
+        .clock-box { text-align: center; }
+        .label { font-size: 1.2rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .time { font-size: 4rem; font-weight: bold; color: #00ff88; }
+        .ticker-wrap { width: 100%; overflow: hidden; background: #1a1a1a; padding: 20px 0; border-bottom: 1px solid #333; }
+        .ticker { display: inline-block; white-space: nowrap; animation: marquee 40s linear infinite; }
+        .stock-item { display: inline-block; margin: 0 40px; font-size: 2.5rem; font-weight: 500; }
+        .up { color: #00ff88; } .down { color: #ff4444; }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="clock-box"> <div class="label">Brasília</div> <div id="br-time" class="time">00:00:00</div> </div>
+        <div class="clock-box"> <div class="label">New York</div> <div id="ny-time" class="time">00:00:00</div> </div>
+    </div>
+    <div class="ticker-wrap">
+        <div class="ticker" id="stock-ticker">
+            <span class="stock-item"><span class="up">▲</span> VALE3 +2.45%</span>
+            <span class="stock-item"><span class="up">▲</span> PETR4 +1.80%</span>
+            <span class="stock-item"><span class="down">▼</span> ITUB4 -0.95%</span>
+            <span class="stock-item"><span class="up">▲</span> BBDC4 +0.55%</span>
+            <span class="stock-item"><span class="down">▼</span> MGLU3 -3.20%</span>
+            <span class="stock-item"><span class="up">▲</span> BBAS3 +1.20%</span>
+            <span class="stock-item"><span class="down">▼</span> ABEV3 -0.40%</span>
+            <span class="stock-item"><span class="up">▲</span> WEGE3 +2.10%</span>
+            <span class="stock-item"><span class="up">▲</span> RENT3 +0.85%</span>
+            <span class="stock-item"><span class="down">▼</span> B3SA3 -1.15%</span>
+        </div>
+    </div>
+    <script>
+        function updateClocks() {
+            const now = new Date();
+            document.getElementById('br-time').innerText = now.toLocaleTimeString('pt-BR');
+            document.getElementById('ny-time').innerText = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+    </script>
+</body>
+</html>
