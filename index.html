@@ -5,74 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus TV - Monitor Financeiro</title>
     <style>
-        body { background: #050505; color: white; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; margin: 0; }
+        body { background: #050505; color: white; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho com Relógios */
+        /* Cabeçalho */
         .header { 
             display: flex; justify-content: space-around; align-items: center; 
-            padding: 20px; background: linear-gradient(to bottom, #111, #000); 
-            border-bottom: 4px solid #00ff88; box-shadow: 0 4px 20px rgba(0,255,136,0.2);
+            padding: 15px; background: #111; border-bottom: 4px solid #00ff88;
         }
-        .logo { font-size: 2.2rem; font-weight: 900; color: #fff; letter-spacing: -1px; }
+        .logo { font-size: 2rem; font-weight: 900; color: #fff; }
         .logo span { color: #00ff88; }
         .clock-box { text-align: center; }
-        .label { font-size: 1rem; color: #888; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
-        .time { font-size: 3.5rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .time { font-size: 3rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: #00ff88; }
         #ny-time { color: #55aaff; }
 
         /* Esteira de Ações */
-        .ticker-container { 
-            width: 100%; overflow: hidden; background: #111; 
-            padding: 25px 0; border-bottom: 1px solid #222; position: relative;
-        }
-        .ticker-wrapper { display: flex; white-space: nowrap; }
-        .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; }
-        
-        .stock-item { 
-            display: inline-flex; align-items: center; 
-            margin: 0 50px; font-size: 2.8rem; font-weight: 600; 
-        }
-        .symbol { margin-right: 15px; color: #eee; }
-        .percent { font-weight: 800; }
-        .up { color: #00ff88; }
-        .down { color: #ff4444; }
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 15px 0; border-bottom: 1px solid #333; }
+        .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 40px; font-size: 2.2rem; font-weight: 600; }
+        .up { color: #00ff88; } .down { color: #ff4444; }
 
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        /* ÁREA DE NOTÍCIAS (O MEIO) */
+        .news-container {
+            flex: 1; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; padding: 40px; text-align: center; background: radial-gradient(circle, #111 0%, #050505 100%);
         }
+        #news-source { font-size: 1.2rem; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; }
+        #news-title { font-size: 3.5rem; font-weight: bold; line-height: 1.2; max-width: 90%; transition: opacity 0.5s; }
 
-        /* Rodapé Informativo */
-        .footer { position: absolute; bottom: 0; width: 100%; padding: 10px; background: #000; color: #444; font-size: 0.9rem; text-align: center; border-top: 1px solid #111; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .footer { padding: 10px; background: #000; color: #444; font-size: 0.8rem; text-align: center; border-top: 1px solid #111; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="logo">BOONUS<span>.APP.BR</span></div>
-        <div class="clock-box">
-            <div class="label">Brasília</div>
-            <div id="br-time" class="time">00:00:00</div>
-        </div>
-        <div class="clock-box">
-            <div class="label">New York</div>
-            <div id="ny-time" class="time">00:00:00</div>
-        </div>
+        <div class="clock-box"> <div class="label">Brasília</div> <div id="br-time" class="time">00:00:00</div> </div>
+        <div class="clock-box"> <div class="label">New York</div> <div id="ny-time" class="time">00:00:00</div> </div>
     </div>
 
     <div class="ticker-container">
-        <div class="ticker-wrapper">
-            <div id="stock-ticker" class="ticker-content">
-                <span class="stock-item">CARREGANDO DADOS DA B3...</span>
-            </div>
+        <div id="stock-ticker" class="ticker-content">
+            <span class="stock-item">CARREGANDO ÍNDICES B3...</span>
         </div>
     </div>
 
-    <div class="footer">Dados atualizados via Brapi API • tv.boonus.app.br</div>
+    <div class="news-container">
+        <div id="news-source">INFO MONEY</div>
+        <div id="news-title">Carregando as últimas notícias do mercado...</div>
+    </div>
+
+    <div class="footer">Fontes: Brapi API & InfoMoney RSS • tv.boonus.app.br</div>
 
     <script>
-        // Atualização dos Relógios
+        // Relógios
         function updateClocks() {
             const now = new Date();
             document.getElementById('br-time').innerText = now.toLocaleTimeString('pt-BR');
@@ -81,44 +69,51 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Busca de Dados da B3 (Altas e Baixas)
-        async function fetchMarketData() {
+        // Notícias Automáticas (RSS do InfoMoney via Feednami)
+        let newsList = [];
+        let newsIndex = 0;
+
+        async function fetchNews() {
             try {
-                // Consultamos a API da Brapi (plano gratuito)
-                const response = await fetch('https://brapi.dev/api/quote/list?sortBy=changePercent&sortOrder=desc&limit=10');
+                // Usamos um serviço que converte o RSS do InfoMoney para algo que o site lê
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.infomoney.com.br%2Ffeed%2F');
                 const data = await response.json();
-                
-                // Pegamos as 10 maiores altas e 10 maiores baixas
-                const stocks = data.stocks;
-                const topGainers = stocks.slice(0, 10);
-                const topLosers = stocks.slice(-10).reverse();
-                const allItems = [...topGainers, ...topLosers];
-
-                let html = '';
-                // Duplicamos os itens para o efeito de loop infinito suave
-                const displayList = [...allItems, ...allItems]; 
-
-                displayList.forEach(stock => {
-                    const isUp = stock.changePercent >= 0;
-                    const icon = isUp ? '▲' : '▼';
-                    const cssClass = isUp ? 'up' : 'down';
-                    
-                    html += `
-                        <span class="stock-item">
-                            <span class="symbol">${stock.stock}</span>
-                            <span class="percent ${cssClass}">${icon} ${stock.changePercent.toFixed(2)}%</span>
-                        </span>
-                    `;
-                });
-
-                document.getElementById('stock-ticker').innerHTML = html;
-            } catch (error) {
-                console.error('Erro ao buscar dados:', error);
-                document.getElementById('stock-ticker').innerHTML = '<span class="stock-item">Aguardando abertura do mercado...</span>';
-            }
+                newsList = data.items;
+                displayNextNews();
+            } catch (e) { console.error("Erro notícias:", e); }
         }
 
-        // Atualiza os dados agora e depois a cada 15 minutos
+        function displayNextNews() {
+            if (newsList.length === 0) return;
+            const titleElement = document.getElementById('news-title');
+            titleElement.style.opacity = 0;
+            
+            setTimeout(() => {
+                titleElement.innerText = newsList[newsIndex].title;
+                titleElement.style.opacity = 1;
+                newsIndex = (newsIndex + 1) % newsList.length;
+            }, 500);
+        }
+
+        // Troca a notícia na tela a cada 10 segundos
+        setInterval(displayNextNews, 10000);
+        fetchNews();
+
+        // Dados da B3 (Ações)
+        async function fetchMarketData() {
+            try {
+                const response = await fetch('https://brapi.dev/api/quote/list?sortBy=changePercent&sortOrder=desc&limit=10');
+                const data = await response.json();
+                const stocks = data.stocks;
+                const items = [...stocks.slice(0, 10), ...stocks.slice(-10).reverse()];
+                let html = '';
+                [...items, ...items].forEach(stock => {
+                    const isUp = stock.changePercent >= 0;
+                    html += `<span class="stock-item"><span style="color:#eee;margin-right:10px">${stock.stock}</span><span class="${isUp?'up':'down'}">${isUp?'▲':'▼'} ${stock.changePercent.toFixed(2)}%</span></span>`;
+                });
+                document.getElementById('stock-ticker').innerHTML = html;
+            } catch (e) { document.getElementById('stock-ticker').innerHTML = "Mercado Fechado"; }
+        }
         fetchMarketData();
         setInterval(fetchMarketData, 900000);
     </script>
