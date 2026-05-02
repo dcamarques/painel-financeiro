@@ -3,43 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus TV - Monitor Pro Visual</title>
+    <title>Boonus TV - Monitor Adaptativo</title>
     <style>
-        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
+        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background: #111; border-bottom: 4px solid #00ff88; }
-        .logo img { height: 65px; width: auto; }
-        .clocks-container { display: flex; gap: 40px; }
-        .clock-box { text-align: center; }
-        .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 2px; }
-        .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        /* Cabeçalho Responsivo */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #111; border-bottom: 4px solid #00ff88; flex-wrap: wrap; }
+        .logo img { height: 50px; width: auto; }
+        .clocks-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .clock-box { text-align: center; min-width: 80px; }
+        .label { font-size: 0.6rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .time { font-size: 1.5rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        
         #br-time { color: #00ff88; } #ny-time { color: #55aaff; } #ld-time { color: #ffcc00; } #sh-time { color: #ff5555; }
 
         /* Esteira B3 */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 12px 0; border-bottom: 1px solid #333; }
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 10px 0; border-bottom: 1px solid #333; }
         .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 40px; font-size: 2rem; font-weight: 600; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: #00ff88; } .down { color: #ff4444; }
 
-        /* Área Central Dinâmica */
-        .main-display { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; overflow: hidden; }
+        /* Área Central Adaptativa */
+        .main-display { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; overflow-y: auto; }
         
-        .news-wrapper { display: flex; align-items: center; justify-content: center; padding: 40px; gap: 40px; position: absolute; width: 100%; transition: opacity 1s; box-sizing: border-box; }
+        .news-wrapper { display: flex; align-items: center; justify-content: center; padding: 20px; gap: 30px; position: absolute; width: 100%; transition: opacity 1s; box-sizing: border-box; }
         
-        /* Imagem da Notícia */
-        .news-image { width: 45%; height: 450px; border-radius: 8px; object-fit: cover; border: 2px solid #222; display: none; }
-
+        .news-image { width: 40%; max-height: 400px; border-radius: 8px; object-fit: cover; border: 2px solid #222; display: none; }
         .news-text-content { flex: 1; text-align: left; }
-        #news-source { font-size: 1.2rem; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; font-weight: bold; }
-        #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; transition: opacity 0.5s; }
+        #news-source { font-size: 1rem; color: #00ff88; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; }
+        #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; }
 
-        /* Modo Publicidade (Capa Total) */
+        /* MUDANÇAS PARA CELULAR (Telas menores que 768px) */
+        @media (max-width: 768px) {
+            .header { justify-content: center; gap: 15px; }
+            .clocks-container { gap: 10px; }
+            .time { font-size: 1.2rem; }
+            .news-wrapper { flex-direction: column; text-align: center; position: relative; padding-top: 50px; }
+            .news-image { width: 90%; height: 200px; }
+            .news-text-content { text-align: center; }
+            #news-title { font-size: 1.8rem; }
+            .stock-item { font-size: 1.2rem; }
+        }
+
         .publi-wrapper { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 1s; }
         .publi-wrapper img { width: 100%; height: 100%; object-fit: contain; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .footer { padding: 8px; background: #000; color: #444; font-size: 0.75rem; text-align: center; border-top: 1px solid #111; }
+        .footer { padding: 8px; background: #000; color: #444; font-size: 0.7rem; text-align: center; border-top: 1px solid #111; }
     </style>
 </head>
 <body>
@@ -48,32 +58,30 @@
         <div class="logo"><img src="logo.png" alt="Boonus Logo"></div>
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">00:00</div></div>
-            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">00:00</div></div>
+            <div class="clock-box"><div class="label">NY</div><div id="ny-time" class="time">00:00</div></div>
             <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">00:00</div></div>
             <div class="clock-box"><div class="label">Shanghai</div><div id="sh-time" class="time">00:00</div></div>
         </div>
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO AO MERCADO...</span></div>
+        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO B3...</span></div>
     </div>
 
     <div class="main-display">
-        <!-- Bloco de Notícias com Suporte a Imagem -->
         <div id="news-block" class="news-wrapper">
             <img id="news-img" class="news-image" src="" alt="Thumbnail">
             <div class="news-text-content">
-                <div id="news-source">CARREGANDO FONTES</div>
-                <div id="news-title">Sincronizando manchetes e imagens...</div>
+                <div id="news-source">FONTES</div>
+                <div id="news-title">Sincronizando...</div>
             </div>
         </div>
-        <!-- Bloco de Publicidade -->
         <div id="publi-block" class="publi-wrapper">
             <img id="publi-img" src="" alt="Publicidade">
         </div>
     </div>
 
-    <div class="footer">Monitor Multi-Mercado • tv.boonus.app.br • B3, InfoMoney, Valor, Exame</div>
+    <div class="footer">Monitor Multi-Mercado • tv.boonus.app.br</div>
 
     <script>
         function updateClocks() {
@@ -89,7 +97,7 @@
 
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let currentPubliIndex = 0;
-        const timeNews = 90000; // 1,5 minuto
+        const timeNews = 90000; 
         const timePubli = 15000; 
 
         function toggleDisplay(showPubli) {
@@ -122,7 +130,7 @@
         const feeds = [
             { name: "B3 - NOTÍCIAS", url: "https://www.b3.com.br/pt_br/noticias/rss" },
             { name: "INFO MONEY", url: "https://www.infomoney.com.br/feed/" },
-            { name: "VALOR ECONÔMICO", url: "https://valor.globo.com/rss/valor/" },
+            { name: "VALOR", url: "https://valor.globo.com/rss/valor/" },
             { name: "EXAME", url: "https://exame.com/feed/" }
         ];
         let combinedNews = [];
@@ -152,25 +160,18 @@
             const imgEl = document.getElementById('news-img');
             const wrapperEl = document.getElementById('news-block');
 
-            if (document.getElementById('news-block').style.display !== 'none') {
+            if (wrapperEl.style.display !== 'none') {
                 wrapperEl.style.opacity = 0;
-                
                 setTimeout(() => {
                     const news = combinedNews[currentIndex];
                     sourceEl.innerText = "FONTE: " + news.sourceName;
                     titleEl.innerText = news.title;
-                    
                     if (news.thumb) {
                         imgEl.src = news.thumb;
                         imgEl.style.display = 'block';
-                        wrapperEl.style.textAlign = 'left';
-                        wrapperEl.style.justifyContent = 'flex-start';
                     } else {
                         imgEl.style.display = 'none';
-                        wrapperEl.style.textAlign = 'center';
-                        wrapperEl.style.justifyContent = 'center';
                     }
-                    
                     wrapperEl.style.opacity = 1;
                     currentIndex = (currentIndex + 1) % combinedNews.length;
                 }, 500);
