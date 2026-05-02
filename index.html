@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus TV - Monitor Pro</title>
+    <title>Boonus TV - Monitor Pro Visual</title>
     <style>
         body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
@@ -12,10 +12,7 @@
         .logo img { height: 65px; width: auto; }
         .clocks-container { display: flex; gap: 40px; }
         .clock-box { text-align: center; }
-        
-        /* Legendas dos relógios em Branco */
         .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 2px; }
-        
         .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: #00ff88; } #ny-time { color: #55aaff; } #ld-time { color: #ffcc00; } #sh-time { color: #ff5555; }
 
@@ -25,13 +22,19 @@
         .stock-item { display: inline-flex; align-items: center; margin: 0 40px; font-size: 2rem; font-weight: 600; }
         .up { color: #00ff88; } .down { color: #ff4444; }
 
-        /* Área Central (Notícias ou Publi) */
-        .main-display { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; }
+        /* Área Central Dinâmica */
+        .main-display { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; overflow: hidden; }
         
-        .news-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 30px; position: absolute; width: 100%; transition: opacity 1s; }
-        #news-source { font-size: 1.1rem; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 15px; font-weight: bold; }
-        #news-title { font-size: 3.2rem; font-weight: bold; line-height: 1.2; max-width: 85%; }
+        .news-wrapper { display: flex; align-items: center; justify-content: center; padding: 40px; gap: 40px; position: absolute; width: 100%; transition: opacity 1s; box-sizing: border-box; }
+        
+        /* Imagem da Notícia */
+        .news-image { width: 45%; height: 450px; border-radius: 8px; object-fit: cover; border: 2px solid #222; display: none; }
 
+        .news-text-content { flex: 1; text-align: left; }
+        #news-source { font-size: 1.2rem; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; font-weight: bold; }
+        #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; transition: opacity 0.5s; }
+
+        /* Modo Publicidade (Capa Total) */
         .publi-wrapper { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 1s; }
         .publi-wrapper img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -56,19 +59,23 @@
     </div>
 
     <div class="main-display">
+        <!-- Bloco de Notícias com Suporte a Imagem -->
         <div id="news-block" class="news-wrapper">
-            <div id="news-source">CARREGANDO FONTES</div>
-            <div id="news-title">Sincronizando notícias financeiras globais...</div>
+            <img id="news-img" class="news-image" src="" alt="Thumbnail">
+            <div class="news-text-content">
+                <div id="news-source">CARREGANDO FONTES</div>
+                <div id="news-title">Sincronizando manchetes e imagens...</div>
+            </div>
         </div>
+        <!-- Bloco de Publicidade -->
         <div id="publi-block" class="publi-wrapper">
             <img id="publi-img" src="" alt="Publicidade">
         </div>
     </div>
 
-    <div class="footer">Boonus TV • Fontes: B3, InfoMoney, Valor, Exame, Brapi</div>
+    <div class="footer">Monitor Multi-Mercado • tv.boonus.app.br • B3, InfoMoney, Valor, Exame</div>
 
     <script>
-        // Relógios Mundiais
         function updateClocks() {
             const now = new Date();
             const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -80,11 +87,10 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Configurações de Publicidade e Ciclo (2 MINUTOS)
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let currentPubliIndex = 0;
-        const timeNews = 90000; // Alterado para 1,5 minuto (90.000 ms)
-        const timePubli = 15000;  // 15 segundos
+        const timeNews = 90000; // 1,5 minuto
+        const timePubli = 15000; 
 
         function toggleDisplay(showPubli) {
             const news = document.getElementById('news-block');
@@ -113,7 +119,6 @@
         }
         setTimeout(() => toggleDisplay(true), timeNews);
 
-        // Fontes de Notícias (Agora incluindo a B3)
         const feeds = [
             { name: "B3 - NOTÍCIAS", url: "https://www.b3.com.br/pt_br/noticias/rss" },
             { name: "INFO MONEY", url: "https://www.infomoney.com.br/feed/" },
@@ -129,7 +134,11 @@
                 try {
                     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`);
                     const data = await res.json();
-                    combinedNews.push(...data.items.map(i => ({ ...i, sourceName: feed.name })));
+                    combinedNews.push(...data.items.map(i => ({ 
+                        ...i, 
+                        sourceName: feed.name,
+                        thumb: i.thumbnail || i.enclosure?.link || "" 
+                    })));
                 } catch (e) {}
             }
             combinedNews.sort(() => Math.random() - 0.5);
@@ -140,13 +149,29 @@
             if (combinedNews.length === 0) return;
             const sourceEl = document.getElementById('news-source');
             const titleEl = document.getElementById('news-title');
+            const imgEl = document.getElementById('news-img');
+            const wrapperEl = document.getElementById('news-block');
+
             if (document.getElementById('news-block').style.display !== 'none') {
-                titleEl.style.opacity = 0;
+                wrapperEl.style.opacity = 0;
+                
                 setTimeout(() => {
                     const news = combinedNews[currentIndex];
                     sourceEl.innerText = "FONTE: " + news.sourceName;
                     titleEl.innerText = news.title;
-                    titleEl.style.opacity = 1;
+                    
+                    if (news.thumb) {
+                        imgEl.src = news.thumb;
+                        imgEl.style.display = 'block';
+                        wrapperEl.style.textAlign = 'left';
+                        wrapperEl.style.justifyContent = 'flex-start';
+                    } else {
+                        imgEl.style.display = 'none';
+                        wrapperEl.style.textAlign = 'center';
+                        wrapperEl.style.justifyContent = 'center';
+                    }
+                    
+                    wrapperEl.style.opacity = 1;
                     currentIndex = (currentIndex + 1) % combinedNews.length;
                 }, 500);
             }
@@ -155,7 +180,6 @@
         fetchAllNews();
         setInterval(fetchAllNews, 3600000);
 
-        // Mercado B3 (Ticker)
         async function fetchMarketData() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=changePercent&sortOrder=desc&limit=10');
