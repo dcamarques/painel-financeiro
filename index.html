@@ -13,7 +13,7 @@
         .clocks-container { display: flex; gap: 40px; }
         .clock-box { text-align: center; }
         
-        /* Ajuste solicitado: Cor branca para os nomes dos países/cidades */
+        /* Legendas dos relógios em Branco */
         .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 2px; }
         
         .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
@@ -58,17 +58,17 @@
     <div class="main-display">
         <div id="news-block" class="news-wrapper">
             <div id="news-source">CARREGANDO FONTES</div>
-            <div id="news-title">Sincronizando notícias financeiras...</div>
+            <div id="news-title">Sincronizando notícias financeiras globais...</div>
         </div>
         <div id="publi-block" class="publi-wrapper">
             <img id="publi-img" src="" alt="Publicidade">
         </div>
     </div>
 
-    <div class="footer">Monitor Multi-Mercado • tv.boonus.app.br • Fontes: Brapi, InfoMoney, Valor, Exame</div>
+    <div class="footer">Boonus TV • Fontes: B3, InfoMoney, Valor, Exame, Brapi</div>
 
     <script>
-        // Relógios
+        // Relógios Mundiais
         function updateClocks() {
             const now = new Date();
             const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -80,11 +80,11 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Configurações de Publicidade (Ajustado para .png)
+        // Configurações de Publicidade e Ciclo (2 MINUTOS)
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let currentPubliIndex = 0;
-        const timeNews = 120000; // 2 minutos de notícias
-        const timePubli = 15000;  // 15 segundos de publicidade
+        const timeNews = 120000; // Alterado para 2 minutos (120.000 ms)
+        const timePubli = 15000;  // 15 segundos
 
         function toggleDisplay(showPubli) {
             const news = document.getElementById('news-block');
@@ -111,11 +111,11 @@
                 setTimeout(() => toggleDisplay(true), timeNews);
             }
         }
-
         setTimeout(() => toggleDisplay(true), timeNews);
 
-        // Sistema de Notícias de Múltiplas Fontes
+        // Fontes de Notícias (Agora incluindo a B3)
         const feeds = [
+            { name: "B3 - NOTÍCIAS", url: "https://www.b3.com.br/pt_br/noticias/rss" },
             { name: "INFO MONEY", url: "https://www.infomoney.com.br/feed/" },
             { name: "VALOR ECONÔMICO", url: "https://valor.globo.com/rss/valor/" },
             { name: "EXAME", url: "https://exame.com/feed/" }
@@ -133,6 +133,7 @@
                 } catch (e) {}
             }
             combinedNews.sort(() => Math.random() - 0.5);
+            if (combinedNews.length > 0) displayNextNews();
         }
 
         function displayNextNews() {
@@ -154,7 +155,7 @@
         fetchAllNews();
         setInterval(fetchAllNews, 3600000);
 
-        // Dados da B3
+        // Mercado B3 (Ticker)
         async function fetchMarketData() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=changePercent&sortOrder=desc&limit=10');
