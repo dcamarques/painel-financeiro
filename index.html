@@ -7,49 +7,53 @@
     <style>
         body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho Responsivo */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #111; border-bottom: 4px solid #00ff88; flex-wrap: wrap; }
-        .logo img { height: 50px; width: auto; }
-        .clocks-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .clock-box { text-align: center; min-width: 80px; }
-        .label { font-size: 0.6rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .time { font-size: 1.5rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        /* Cabeçalho Responsivo com Fontes Maiores */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #111; border-bottom: 4px solid #00ff88; flex-wrap: wrap; }
+        .logo img { height: 60px; width: auto; }
+        .clocks-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .clock-box { text-align: center; min-width: 100px; }
+        
+        /* Aumento do tamanho das etiquetas das cidades */
+        .label { font-size: 0.9rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 4px; }
+        
+        /* Aumento do tamanho dos números do relógio */
+        .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         
         #br-time { color: #00ff88; } #ny-time { color: #55aaff; } #ld-time { color: #ffcc00; } #sh-time { color: #ff5555; }
 
         /* Esteira B3 */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 10px 0; border-bottom: 1px solid #333; }
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 12px 0; border-bottom: 1px solid #333; }
         .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 30px; font-size: 1.8rem; font-weight: 600; }
         .up { color: #00ff88; } .down { color: #ff4444; }
 
         /* Área Central Adaptativa */
         .main-display { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; overflow-y: auto; }
-        
-        .news-wrapper { display: flex; align-items: center; justify-content: center; padding: 20px; gap: 30px; position: absolute; width: 100%; transition: opacity 1s; box-sizing: border-box; }
-        
-        .news-image { width: 40%; max-height: 400px; border-radius: 8px; object-fit: cover; border: 2px solid #222; display: none; }
+        .news-wrapper { display: flex; align-items: center; justify-content: center; padding: 30px; gap: 40px; position: absolute; width: 100%; transition: opacity 1s; box-sizing: border-box; }
+        .news-image { width: 40%; max-height: 450px; border-radius: 8px; object-fit: cover; border: 2px solid #222; display: none; }
         .news-text-content { flex: 1; text-align: left; }
-        #news-source { font-size: 1rem; color: #00ff88; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; }
-        #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; }
+        #news-source { font-size: 1.2rem; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 15px; font-weight: bold; }
+        #news-title { font-size: 2.8rem; font-weight: bold; line-height: 1.2; }
 
-        /* MUDANÇAS PARA CELULAR (Telas menores que 768px) */
+        /* AJUSTES PARA DISPOSITIVOS MÓVEIS */
         @media (max-width: 768px) {
-            .header { justify-content: center; gap: 15px; }
-            .clocks-container { gap: 10px; }
-            .time { font-size: 1.2rem; }
-            .news-wrapper { flex-direction: column; text-align: center; position: relative; padding-top: 50px; }
-            .news-image { width: 90%; height: 200px; }
+            .header { justify-content: center; gap: 20px; padding: 15px; }
+            .logo img { height: 45px; }
+            .clocks-container { gap: 15px; }
+            .label { font-size: 0.75rem; }
+            .time { font-size: 1.6rem; } /* Relógio ainda legível no celular */
+            .news-wrapper { flex-direction: column; text-align: center; position: relative; padding-top: 40px; }
+            .news-image { width: 95%; height: 220px; }
             .news-text-content { text-align: center; }
             #news-title { font-size: 1.8rem; }
-            .stock-item { font-size: 1.2rem; }
+            .stock-item { font-size: 1.3rem; }
         }
 
         .publi-wrapper { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 1s; }
         .publi-wrapper img { width: 100%; height: 100%; object-fit: contain; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .footer { padding: 8px; background: #000; color: #444; font-size: 0.7rem; text-align: center; border-top: 1px solid #111; }
+        .footer { padding: 8px; background: #000; color: #444; font-size: 0.75rem; text-align: center; border-top: 1px solid #111; }
     </style>
 </head>
 <body>
