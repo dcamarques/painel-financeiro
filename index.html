@@ -3,60 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus TV - Monitor de Mercado Pro</title>
+    <title>Boonus TV - Terminal de Investimentos</title>
+    <meta name="description" content="Boonus TV - Monitor de mercado financeiro em tempo real com cotações B3 e indicadores Focus/BACEN.">
+    <meta name="robots" content="index, follow">
     <style>
         :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
         /* Cabeçalho */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
         .logo img { height: 55px; width: auto; }
         .clocks-container { display: flex; gap: 25px; }
         .clock-box { text-align: center; min-width: 90px; }
-        .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
-        .time { font-size: 2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .label { font-size: 0.9rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+        .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-green); }
 
         /* Esteira B3 */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 8px 0; border-bottom: 1px solid #333; }
         .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 30px; font-size: 1.6rem; font-weight: 600; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 30px; font-size: 1.8rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
 
-        /* Estrutura Principal: Conteúdo | Barra Lateral */
+        /* Estrutura Principal: Conteúdo (75%) | Barra Lateral (25%) */
         .main-container { flex: 1; display: flex; overflow: hidden; }
         
-        /* Lado Esquerdo: Notícias e Publi */
+        /* Área de Notícias/Publi */
         .content-area { flex: 3; position: relative; display: flex; justify-content: center; align-items: center; border-right: 2px solid #222; }
         .news-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px; width: 100%; transition: opacity 1s; }
-        .news-image { width: 80%; max-height: 350px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; display: none; }
-        #news-title { font-size: 2.8rem; font-weight: bold; line-height: 1.2; }
+        .news-image { width: 70%; max-height: 380px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; display: none; border: 2px solid #333; }
+        #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
 
-        /* Lado Direito: Barra Lateral de Inteligência */
-        .sidebar { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; padding: 20px; gap: 20px; box-sizing: border-box; }
-        .side-panel { background: #151515; border-radius: 10px; padding: 15px; border-left: 3px solid var(--neon-green); }
-        .side-title { font-size: 0.9rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 10px; display: block; }
+        /* Barra Lateral de Inteligência */
+        .sidebar { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; padding: 25px; gap: 20px; box-sizing: border-box; }
+        .side-panel { background: #151515; border-radius: 10px; padding: 18px; border-left: 4px solid var(--neon-green); }
+        .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 12px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
         
-        /* Indicadores */
-        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.2rem; }
-        .ind-val { font-weight: bold; color: #fff; }
+        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.2rem; align-items: center; }
+        .ind-label { font-size: 0.9rem; color: #ccc; }
+        .ind-val { font-weight: bold; color: #fff; font-size: 1.4rem; }
 
-        /* Agenda */
-        .event-item { font-size: 1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        .event-time { color: var(--neon-green); font-weight: bold; margin-right: 8px; }
+        .event-item { font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .event-time { color: var(--neon-green); font-weight: bold; margin-right: 10px; }
 
-        /* QR Code */
-        .qr-section { margin-top: auto; text-align: center; padding-bottom: 10px; }
-        .qr-box { background: white; padding: 10px; border-radius: 8px; width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 0.7rem; }
-        .qr-text { font-size: 0.9rem; font-weight: bold; color: var(--neon-green); }
+        /* QR Code WhatsApp Business */
+        .qr-section { margin-top: auto; text-align: center; padding: 15px; background: #111; border-radius: 10px; border: 1px dashed var(--neon-green); }
+        .qr-box { background: white; padding: 8px; border-radius: 5px; width: 140px; height: 140px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
+        .qr-text { font-size: 0.9rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.2; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         
-        /* Responsividade Celular */
+        /* Ajuste Celular */
         @media (max-width: 1024px) {
             .main-container { flex-direction: column; overflow-y: auto; }
-            .sidebar { flex: none; width: 100%; order: 2; }
-            .content-area { flex: none; height: 500px; border-right: none; border-bottom: 2px solid #222; }
+            .sidebar { flex: none; width: 100%; }
+            .content-area { flex: none; min-height: 450px; border-right: none; border-bottom: 2px solid #222; }
+            .time { font-size: 1.5rem; }
+            #news-title { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -65,24 +68,24 @@
     <div class="header">
         <div class="logo"><img src="logo.png" alt="Boonus Logo"></div>
         <div class="clocks-container">
-            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">00:00</div></div>
-            <div class="clock-box"><div class="label">NY</div><div id="ny-time" class="time">00:00</div></div>
-            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">00:00</div></div>
+            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--</div></div>
+            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--</div></div>
+            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--</div></div>
         </div>
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO B3...</span></div>
+        <div id="stock-ticker" class="ticker-content"><span class="stock-item">SINCRONIZANDO B3...</span></div>
     </div>
 
     <div class="main-container">
         <div class="content-area">
             <div id="news-block" class="news-wrapper">
                 <img id="news-img" class="news-image" src="" alt="Thumbnail">
-                <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 10px;">CARREGANDO</div>
-                <div id="news-title">Sincronizando mercado...</div>
+                <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">FONTE</div>
+                <div id="news-title">Carregando informações do mercado...</div>
             </div>
-            <div id="publi-block" style="display:none; width:100%; height:100%;">
+            <div id="publi-block" style="display:none; width:100%; height:100%; opacity:0; transition: opacity 1s;">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain;">
             </div>
         </div>
@@ -90,28 +93,40 @@
         <div class="sidebar">
             <div class="side-panel">
                 <span class="side-title">Indicadores Macro</span>
-                <div class="indicator-row"><span>SELIC</span><span class="ind-val">10,75%</span></div>
-                <div class="indicator-row"><span>IPCA (12m)</span><span class="ind-val">4,50%</span></div>
-                <div class="indicator-row"><span>CDI</span><span class="ind-val">10,65%</span></div>
+                <div class="indicator-row">
+                    <span class="ind-label">SELIC (Meta)</span><span class="ind-val">14,50%</span>
+                </div>
+                
+                <div style="margin: 15px 0; border-top: 1px solid #333; padding-top: 10px;">
+                    <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">IPCA (Fonte: Focus)</span>
+                    <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val" style="font-size: 1.2rem;">2,15%</span></div>
+                    <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val" style="font-size: 1.2rem;">4,00%</span></div>
+                </div>
+
+                <div style="border-top: 1px solid #333; padding-top: 10px;">
+                    <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">CDI (12m - BACEN)</span>
+                    <div class="indicator-row"><span class="ind-label">Taxa:</span><span class="ind-val" style="font-size: 1.3rem;">13,25%</span></div>
+                </div>
             </div>
 
             <div class="side-panel">
                 <span class="side-title">Agenda do Dia</span>
-                <div class="event-item"><span class="event-time">10:00</span><span>IPCA Mensal (IBGE)</span></div>
-                <div class="event-item"><span class="event-time">15:30</span><span>Discurso FED (EUA)</span></div>
+                <div class="event-item"><span class="event-time">09:00</span><span>IPCA (IBGE)</span></div>
+                <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
+                <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
             </div>
 
             <div class="qr-section">
                 <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://tv.boonus.app.br" alt="QR Code" style="width:100%">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="QR Code WhatsApp Business">
                 </div>
-                <span class="qr-text">DÚVIDAS? FALE COM UM CONSULTOR</span>
+                <span class="qr-text">DÚVIDAS? ESCANEIE E<br>FALE COM UM CONSULTOR</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Funções de Relógio e API (Mantidas as que já funcionam)
+        // Relógios
         function updateClocks() {
             const now = new Date();
             const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -122,24 +137,24 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Lógica de Troca de Notícias e Publi (90s / 15s)
+        // Ciclo Notícias (90s) / Publicidade (15s)
         const timeNews = 90000;
         const timePubli = 15000;
+        const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let currentPubliIndex = 0;
-        const publiImages = ['publi1.png', 'publi2.png'];
 
         function toggleDisplay() {
             const news = document.getElementById('news-block');
             const publi = document.getElementById('publi-block');
-            const isShowingNews = news.style.display !== 'none';
+            const isNews = news.style.display !== 'none';
 
-            if (isShowingNews) {
+            if (isNews) {
                 news.style.opacity = 0;
                 setTimeout(() => {
                     news.style.display = 'none';
                     publi.style.display = 'block';
-                    document.getElementById('publi-img').src = publiImages[currentPubliIndex];
-                    publi.style.opacity = 1;
+                    document.getElementById('publi-img').src = publiImages[currentPubliIndex] + '?t=' + new Date().getTime();
+                    setTimeout(() => { publi.style.opacity = 1; }, 50);
                 }, 1000);
                 setTimeout(toggleDisplay, timePubli);
                 currentPubliIndex = (currentPubliIndex + 1) % publiImages.length;
@@ -148,46 +163,47 @@
                 setTimeout(() => {
                     publi.style.display = 'none';
                     news.style.display = 'flex';
-                    news.style.opacity = 1;
+                    setTimeout(() => { news.style.opacity = 1; }, 50);
                 }, 1000);
                 setTimeout(toggleDisplay, timeNews);
             }
         }
         setTimeout(toggleDisplay, timeNews);
 
-        // Fetch das Notícias (B3, InfoMoney, etc)
+        // Notícias RSS
         async function fetchNews() {
             const feeds = [
-                { name: "B3 - NOTÍCIAS", url: "https://www.b3.com.br/pt_br/noticias/rss" },
-                { name: "INFO MONEY", url: "https://www.infomoney.com.br/feed/" }
+                { name: "B3 Notícias", url: "https://www.b3.com.br/pt_br/noticias/rss" },
+                { name: "InfoMoney", url: "https://www.infomoney.com.br/feed/" },
+                { name: "Valor Econômico", url: "https://valor.globo.com/rss/valor/" }
             ];
-            let newsList = [];
+            let list = [];
             for (const f of feeds) {
                 try {
                     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
                     const data = await res.json();
-                    newsList.push(...data.items.map(i => ({ ...i, source: f.name })));
+                    list.push(...data.items.map(i => ({ ...i, srcName: f.name })));
                 } catch(e) {}
             }
             let idx = 0;
             setInterval(() => {
-                if (newsList.length) {
-                    const item = newsList[idx];
-                    document.getElementById('news-source').innerText = "FONTE: " + item.source;
+                if (list.length && document.getElementById('news-block').style.display !== 'none') {
+                    const item = list[idx];
+                    document.getElementById('news-source').innerText = "FONTE: " + item.srcName;
                     document.getElementById('news-title').innerText = item.title;
                     const img = document.getElementById('news-img');
-                    if (item.thumbnail) { img.src = item.thumbnail; img.style.display = 'block'; }
-                    else { img.style.display = 'none'; }
-                    idx = (idx + 1) % newsList.length;
+                    const thumb = item.thumbnail || item.enclosure?.link;
+                    if (thumb) { img.src = thumb; img.style.display = 'block'; } else { img.style.display = 'none'; }
+                    idx = (idx + 1) % list.length;
                 }
             }, 12000);
         }
         fetchNews();
 
-        // Ticker B3
-        async function fetchTicker() {
+        // Ticker B3 (Brapi)
+        async function fetchMarket() {
             try {
-                const res = await fetch('https://brapi.dev/api/quote/list?limit=15');
+                const res = await fetch('https://brapi.dev/api/quote/list?limit=20');
                 const data = await res.json();
                 let html = '';
                 data.stocks.forEach(s => {
@@ -197,8 +213,8 @@
                 document.getElementById('stock-ticker').innerHTML = html + html;
             } catch(e) {}
         }
-        fetchTicker();
-        setInterval(fetchTicker, 600000);
+        fetchMarket();
+        setInterval(fetchMarket, 600000);
     </script>
 </body>
 </html>
