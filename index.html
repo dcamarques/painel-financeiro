@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus TV - Terminal Integrado</title>
+    <title>Boonus TV - Terminal de Investimentos</title>
     <style>
         :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
@@ -17,11 +17,12 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-green); }
 
-        /* Esteira B3 */
+        /* Esteira B3 Inteligente */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
+        .tag-ticker { font-size: 0.65rem; background: #333; color: #fff; padding: 2px 5px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
 
         /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
@@ -30,10 +31,11 @@
 
         /* Grades e Cards */
         .macro-grid, .coins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 85%; text-align: left; }
-        .macro-card, .coin-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); }
+        .macro-card, .coin-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
         .macro-card h3, .coin-card h3 { color: var(--neon-green); margin: 0 0 10px 0; font-size: 0.9rem; text-transform: uppercase; }
         .macro-val, .coin-val { font-size: 2.2rem; font-weight: bold; display: block; }
         .coin-var { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
+        .market-status { font-size: 0.6rem; color: #888; position: absolute; top: 10px; right: 15px; border: 1px solid #444; padding: 2px 4px; border-radius: 3px; }
 
         #news-title { font-size: 2.8rem; font-weight: bold; line-height: 1.2; max-width: 85%; }
         .news-image { width: 60%; max-height: 300px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; border: 2px solid #333; }
@@ -105,7 +107,7 @@
             </div>
 
             <div id="block-coins" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL</h2>
+                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL <span id="coin-status-global" style="font-size:0.8rem; color:#888; font-weight:normal;"></span></h2>
                 <div class="coins-grid">
                     <div class="coin-card"><h3>Dólar Americano</h3><div id="usd-val" class="coin-val">R$ ---</div><div id="usd-var" class="coin-var">---</div></div>
                     <div class="coin-card"><h3>Euro</h3><div id="eur-val" class="coin-val">R$ ---</div><div id="eur-var" class="coin-var">---</div></div>
@@ -137,51 +139,61 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // INTEGRAÇÃO DE MERCADO
+        // LÓGICA DE MERCADO
         async function fetchMarket() {
-            try {
-                // Buscamos ativos da B3 e Moedas em uma única chamada (Brapi)
-                const res = await fetch('https://brapi.dev/api/quote/list,USDBRL,EURBRL,JPYBRL,GBPBRL,^GSPC,^IXIC?sortBy=change&sortOrder=desc&limit=15');
-                const data = await res.json();
-                
-                let tickerHtml = '';
-                data.stocks.forEach(s => {
-                    const up = s.change >= 0;
-                    const color = up ? 'up' : 'down';
-                    const icon = up ? '▲' : '▼';
-                    
-                    // Alimenta a Esteira B3
-                    if (!s.stock.includes('BRL') && !s.stock.startsWith('^')) {
-                        tickerHtml += `<span class="stock-item"><span>${s.stock}</span> <span class="${color}">${icon} ${s.change.toFixed(2)}%</span></span>`;
-                    }
+            const now = new Date();
+            const hour = now.getHours();
+            const day = now.getDay();
+            const isMarketOpen = (day >= 1 && day <= 5) && (hour >= 10 && hour < 18);
+            const statusLabel = isMarketOpen ? "(REAL-TIME)" : "(FECHAMENTO)";
+            document.getElementById('coin-status-global').innerText = statusLabel;
 
-                    // Alimenta Painéis
-                    if(s.stock === 'USDBRL') updateCoin('usd', s);
-                    if(s.stock === 'EURBRL') updateCoin('eur', s);
-                    if(s.stock === 'JPYBRL') updateCoin('jpy', s);
-                    if(s.stock === 'GBPBRL') updateCoin('gbp', s);
-                    if(s.stock === '^GSPC') document.getElementById('sp500-val').innerText = s.close.toLocaleString();
-                    if(s.stock === '^IXIC') document.getElementById('nasdaq-val').innerText = s.close.toLocaleString();
-                });
+            try {
+                // Maiores Altas/Baixas (B3)
+                const resB3 = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
+                const dataB3 = await resB3.json();
+                const allStocks = dataB3.stocks.filter(s => !s.stock.includes('BRL') && !s.stock.startsWith('^'));
+                const topGainers = allStocks.slice(0, 10);
+                const topLosers = allStocks.slice(-10).reverse();
+
+                let tickerHtml = '';
+                topGainers.forEach(s => tickerHtml += `<span class="stock-item"><span class="tag-ticker" style="color:#00ff88">ALTA</span><span>${s.stock}</span> <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
+                topLosers.forEach(s => tickerHtml += `<span class="stock-item"><span class="tag-ticker" style="color:#ff4444">BAIXA</span><span>${s.stock}</span> <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
+
+                // Painéis de Moedas e Índices
+                const resPanel = await fetch('https://brapi.dev/api/quote/^GSPC,^IXIC,USDBRL,EURBRL,JPYBRL,GBPBRL');
+                const dataPanel = await resPanel.json();
+                
+                dataPanel.results.forEach(s => {
+                    if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
+                    if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
+                    if(s.symbol === 'USDBRL') updateCoin('usd', s);
+                    if(s.symbol === 'EURBRL') updateCoin('eur', s);
+                    if(s.symbol === 'JPYBRL') updateCoin('jpy', s);
+                    if(s.symbol === 'GBPBRL') updateCoin('gbp', s);
+                });
+
             } catch(e) { console.error(e); }
         }
 
         function updateCoin(id, data) {
-            const up = data.change >= 0;
-            document.getElementById(`${id}-val`).innerText = 'R$ ' + data.close.toFixed(2);
+            const price = data.regularMarketPrice;
+            const change = data.regularMarketChangePercent;
+            const up = change >= 0;
+            document.getElementById(`${id}-val`).innerText = 'R$ ' + price.toFixed(2);
             const varEl = document.getElementById(`${id}-var`);
-            varEl.innerText = (up ? '▲ ' : '▼ ') + data.change.toFixed(2) + '%';
+            varEl.innerText = (up ? '▲ ' : '▼ ') + change.toFixed(2) + '%';
             varEl.style.color = up ? 'var(--neon-green)' : '#ff4444';
         }
 
         fetchMarket();
-        setInterval(fetchMarket, 300000);
+        setInterval(fetchMarket, 300000); // 5 minutos
 
-        // CARROSSEL UNIFICADO
+        // CARROSSEL
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
         let currentIdx = 0;
-        const publiImages = ['publi1.png', 'publi2.png'];
+        const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let currentPubIdx = 0;
 
         function cycleContent() {
@@ -202,7 +214,7 @@
                 nextEl.style.display = 'flex';
                 setTimeout(() => { nextEl.style.opacity = 1; }, 50);
 
-                let delay = 30000; // Padrão 30s
+                let delay = 30000; 
                 if(nextId === 'block-news') delay = 90000;
                 if(nextId === 'block-publi') delay = 18000;
 
@@ -211,7 +223,6 @@
         }
         setTimeout(cycleContent, 90000);
 
-        // Notícias
         async function fetchNews() {
             try {
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.infomoney.com.br/feed/')}`);
