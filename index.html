@@ -12,9 +12,11 @@
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
-        .clock-box { text-align: center; min-width: 70px; }
+        .clock-box { text-align: center; min-width: 85px; }
         .label { font-size: 0.65rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
-        .time { font-size: 1.4rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        
+        /* Ajuste de Fonte das Horas */
+        .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
         #br-time { color: var(--neon-green); }
 
         /* Esteira B3 Inteligente */
@@ -29,17 +31,13 @@
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
 
-        /* Grades de Dados (Restauradas) */
-        .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 90%; text-align: left; }
-        .macro-column { display: flex; flex-direction: column; gap: 15px; }
-        .macro-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
-        .macro-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
-        .macro-val { font-size: 1.8rem; font-weight: bold; display: block; }
-
-        .coins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 85%; text-align: left; }
-        .coin-card { background: #111; padding: 15px; border-radius: 12px; border-left: 5px solid var(--neon-green); }
-        .coin-val { font-size: 2rem; font-weight: bold; display: block; }
-        .coin-var { font-size: 1rem; font-weight: bold; margin-top: 3px; }
+        /* PADRONIZAÇÃO DE GRADES (Cards) */
+        .macro-grid, .coins-grid, .agenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 90%; text-align: left; }
+        .card-column { display: flex; flex-direction: column; gap: 15px; }
+        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
+        .info-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
+        .info-val { font-size: 1.8rem; font-weight: bold; display: block; }
+        .info-sub { font-size: 1rem; font-weight: bold; margin-top: 3px; }
 
         /* Notícias */
         #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
@@ -54,15 +52,14 @@
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Ajustes Mobile/Tablet */
+        /* Ajustes Responsivos */
         @media (max-width: 1024px) {
-            .header { padding: 10px; }
-            .clocks-container { gap: 10px; }
-            .time { font-size: 1.1rem; }
             .main-container { flex-direction: column; }
             .sidebar-qr { flex: none; height: 250px; border-left: none; border-top: 2px solid #1a1a1a; padding: 15px; }
-            .macro-grid, .coins-grid { grid-template-columns: 1fr; gap: 10px; }
+            .macro-grid, .coins-grid, .agenda-grid { grid-template-columns: 1fr; gap: 10px; }
             #news-title { font-size: 1.5rem; }
+            .info-val { font-size: 1.4rem; }
+            .time { font-size: 1.3rem; }
         }
     </style>
 </head>
@@ -71,15 +68,15 @@
     <div class="header">
         <div class="logo"><img src="logo.png" alt="Boonus Logo"></div>
         <div class="clocks-container">
-            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--</div></div>
-            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--</div></div>
-            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--</div></div>
-            <div class="clock-box"><div class="label">Tokyo</div><div id="tk-time" class="time">--:--</div></div>
+            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">Tokyo</div><div id="tk-time" class="time">--:--:--</div></div>
         </div>
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Sincronizando B3...</div>
+        <div id="stock-ticker" class="ticker-content">Sincronizando mercado B3...</div>
     </div>
 
     <div class="main-container">
@@ -98,35 +95,40 @@
             <div id="block-macro" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
-                    <div class="macro-column">
-                        <div class="macro-card"><h3>SELIC (META COPOM)</h3><div class="macro-val">14,50%</div></div>
-                        <div class="macro-card"><h3>IPCA (PROJ. 2026)</h3><div class="macro-val">4,00%</div></div>
-                        <div class="macro-card"><h3>CDI 2026 ACUM.</h3><div class="macro-val">5,25%</div></div>
+                    <div class="card-column">
+                        <div class="info-card"><h3>SELIC (META COPOM)</h3><div class="info-val">14,50%</div></div>
+                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>CDI 2026 ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
-                    <div class="macro-column">
-                        <div class="macro-card"><h3>IBOVESPA</h3><div id="ibov-val" class="macro-val">---</div></div>
-                        <div class="macro-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="macro-val">---</div></div>
-                        <div class="macro-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="macro-val">---</div></div>
+                    <div class="card-column">
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">---</div></div>
                     </div>
                 </div>
             </div>
 
             <div id="block-agenda" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">AGENDA ECONÔMICA</h2>
-                <div class="agenda-list">
-                    <div class="event-row"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
-                    <div class="event-row"><span class="event-time">10:30</span><span>Abertura NY</span></div>
-                    <div class="event-row"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
+                <h2 style="color:var(--neon-green); margin-bottom:20px;">AGENDA ECONÔMICA DO DIA</h2>
+                <div class="agenda-grid">
+                    <div class="card-column">
+                        <div class="info-card"><h3>09:00</h3><div class="info-val">IPCA Mensal</div><div class="info-sub" style="color:#888;">Fonte: IBGE</div></div>
+                        <div class="info-card"><h3>10:30</h3><div class="info-val">Abertura NY</div><div class="info-sub" style="color:#888;">Wall Street</div></div>
+                    </div>
+                    <div class="card-column">
+                        <div class="info-card"><h3>15:30</h3><div class="info-val">Leilão Tesouro</div><div class="info-sub" style="color:#888;">Títulos Públicos</div></div>
+                        <div class="info-card"><h3>---</h3><div class="info-val">Fique Atento</div><div class="info-sub" style="color:var(--neon-green);">Boonus TV</div></div>
+                    </div>
                 </div>
             </div>
 
             <div id="block-coins" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL <span id="coin-status-global" style="font-size:0.8rem; color:#888;"></span></h2>
                 <div class="coins-grid">
-                    <div class="coin-card"><h3>Dólar</h3><div id="usd-val" class="coin-val">R$ ---</div><div id="usd-var" class="coin-var">---</div></div>
-                    <div class="coin-card"><h3>Euro</h3><div id="eur-val" class="coin-val">R$ ---</div><div id="eur-var" class="coin-var">---</div></div>
-                    <div class="coin-card"><h3>Iene Japonês</h3><div id="jpy-val" class="coin-val">R$ ---</div><div id="jpy-var" class="coin-var">---</div></div>
-                    <div class="coin-card"><h3>Libra Esterlina</h3><div id="gbp-val" class="coin-val">R$ ---</div><div id="gbp-var" class="coin-var">---</div></div>
+                    <div class="info-card"><h3>Dólar</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Euro</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Iene Japonês</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Libra Esterlina</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
                 </div>
             </div>
         </div>
@@ -138,14 +140,14 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1</div>
+            <div class="version-tag">v: 1.1.1</div>
         </div>
     </div>
 
     <script>
         function updateClocks() {
             const now = new Date();
-            const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', timeZone: tz});
+            const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
             document.getElementById('br-time').innerText = f('America/Sao_Paulo');
             document.getElementById('ny-time').innerText = f('America/New_York');
             document.getElementById('ld-time').innerText = f('Europe/London');
@@ -213,13 +215,12 @@
                 const img = document.getElementById('news-img');
                 const thumb = item.thumbnail || item.enclosure?.link;
                 if(thumb){
-                    // Força recarregamento da imagem para o tablet
                     img.src = `https://images.weserv.nl/?url=${encodeURIComponent(thumb)}&w=800&fit=contain&cache=31d`;
                     img.style.display = 'block';
                 } else { img.style.display = 'none'; }
                 newsIdx = (newsIdx + 1) % newsList.length;
             }
-        }, 12000);
+        }, 15000);
 
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
         let bIdx = 0;
