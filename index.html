@@ -33,26 +33,72 @@
         .news-image { width: 70%; max-height: 380px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; display: none; border: 2px solid #333; }
         #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
 
-        /* Barra Lateral com Altura Fixa para travar o QR Code */
-        .sidebar { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; padding: 25px; gap: 20px; box-sizing: border-box; height: 100%; }
+        /* BARRA LATERAL ADAPTATIVA */
+        .sidebar { 
+            flex: 1; 
+            background: #0a0a0a; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            gap: 15px; 
+            box-sizing: border-box; 
+            height: 100%; 
+            overflow: hidden; 
+        }
         
-        /* Container que alterna (Indicadores vs Agenda) */
-        .dynamic-panel-container { height: 320px; position: relative; }
-        .side-panel { background: #151515; border-radius: 10px; padding: 18px; border-left: 4px solid var(--neon-green); position: absolute; width: 100%; top: 0; left: 0; transition: opacity 1s; box-sizing: border-box; }
+        .dynamic-panel-container { 
+            flex: 1; 
+            position: relative; 
+            min-height: 0; 
+        }
+
+        .side-panel { 
+            background: #151515; 
+            border-radius: 10px; 
+            padding: 15px; 
+            border-left: 4px solid var(--neon-green); 
+            position: absolute; 
+            width: 100%; 
+            top: 0; 
+            left: 0; 
+            transition: opacity 1s; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
         
         .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 12px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
         
-        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.2rem; align-items: center; }
-        .ind-label { font-size: 0.9rem; color: #ccc; }
-        .ind-val { font-weight: bold; color: #fff; font-size: 1.4rem; }
+        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+        .ind-label { font-size: 0.85rem; color: #ccc; }
+        .ind-val { font-weight: bold; color: #fff; font-size: 1.25rem; }
 
-        .event-item { font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .event-item { font-size: 1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
         .event-time { color: var(--neon-green); font-weight: bold; margin-right: 10px; }
 
-        /* QR Code sempre visível no rodapé da sidebar */
-        .qr-section { margin-top: auto; text-align: center; padding: 15px; background: #111; border-radius: 10px; border: 1px dashed var(--neon-green); }
-        .qr-box { background: white; padding: 8px; border-radius: 5px; width: 140px; height: 140px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
-        .qr-text { font-size: 0.9rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.2; }
+        /* QR Code Blindado no Rodapé */
+        .qr-section { 
+            flex-shrink: 0; 
+            text-align: center; 
+            padding: 12px; 
+            background: #111; 
+            border-radius: 10px; 
+            border: 1px dashed var(--neon-green);
+            margin-top: auto; 
+        }
+        .qr-box { 
+            background: white; 
+            padding: 6px; 
+            border-radius: 5px; 
+            width: 125px; 
+            height: 125px; 
+            margin: 0 auto 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .qr-text { font-size: 0.85rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.1; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     </style>
@@ -69,7 +115,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"><span class="stock-item">SINCRONIZANDO B3...</span></div>
+        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO B3...</span></div>
     </div>
 
     <div class="main-container">
@@ -77,7 +123,7 @@
             <div id="news-block" class="news-wrapper">
                 <img id="news-img" class="news-image" src="" alt="Thumbnail">
                 <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">FONTE</div>
-                <div id="news-title">Sincronizando informações oficiais...</div>
+                <div id="news-title">Sincronizando mercado financeiro...</div>
             </div>
             <div id="publi-block" style="display:none; width:100%; height:100%; opacity:0; transition: opacity 1s;">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain;">
@@ -91,14 +137,14 @@
                     <div class="indicator-row">
                         <span class="ind-label">SELIC (Meta)</span><span class="ind-val">14,50%</span>
                     </div>
-                    <div style="margin: 10px 0; border-top: 1px solid #333; padding-top: 10px;">
+                    <div style="margin: 8px 0; border-top: 1px solid #333; padding-top: 8px;">
                         <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">IPCA (Fonte: Focus)</span>
-                        <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val" style="font-size: 1.2rem;">2,15%</span></div>
-                        <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val" style="font-size: 1.2rem;">4,00%</span></div>
+                        <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val">2,15%</span></div>
+                        <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val">4,00%</span></div>
                     </div>
-                    <div style="border-top: 1px solid #333; padding-top: 10px;">
+                    <div style="border-top: 1px solid #333; padding-top: 8px;">
                         <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">CDI (12m - BACEN)</span>
-                        <div class="indicator-row"><span class="ind-label">Taxa:</span><span class="ind-val" style="font-size: 1.3rem;">13,25%</span></div>
+                        <div class="indicator-row"><span class="ind-label">Taxa Atual:</span><span class="ind-val">13,25%</span></div>
                     </div>
                 </div>
 
@@ -106,13 +152,14 @@
                     <span class="side-title">Agenda do Dia</span>
                     <div class="event-item"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
                     <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
+                    <div class="event-item"><span class="event-time">12:00</span><span>Relatório Focus</span></div>
                     <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
                 </div>
             </div>
 
             <div class="qr-section">
                 <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="QR Code WhatsApp Business">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=125x125&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="WhatsApp QR Code">
                 </div>
                 <span class="qr-text">DÚVIDAS? ESCANEIE E<br>FALE COM UM CONSULTOR</span>
             </div>
@@ -120,7 +167,6 @@
     </div>
 
     <script>
-        // Relógios
         function updateClocks() {
             const now = new Date();
             const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -131,7 +177,6 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Alternância dos Painéis da Sidebar (1 minuto)
         function toggleSidebarPanels() {
             const ind = document.getElementById('panel-indicators');
             const age = document.getElementById('panel-agenda');
@@ -143,9 +188,8 @@
                 ind.style.opacity = "1"; ind.style.zIndex = "2";
             }
         }
-        setInterval(toggleSidebarPanels, 60000); // 60 segundos
+        setInterval(toggleSidebarPanels, 60000);
 
-        // Ciclo Notícias (90s) / Publicidade (15s)
         const timeNews = 90000;
         const timePubli = 15000;
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
@@ -176,7 +220,6 @@
         }
         setTimeout(toggleDisplay, timeNews);
 
-        // Notícias RSS
         async function fetchNews() {
             const feeds = [
                 { name: "B3 Notícias", url: "https://www.b3.com.br/pt_br/noticias/rss" },
@@ -206,7 +249,6 @@
         }
         fetchNews();
 
-        // Ticker B3
         async function fetchMarket() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?limit=20');
