@@ -17,34 +17,30 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-green); }
 
-        /* Esteira B3 */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; }
-        .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
+        /* Esteira B3 Inteligente */
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
+        .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
+        .closed-tag { font-size: 0.7rem; color: #888; border: 1px solid #444; padding: 2px 5px; margin-right: 10px; border-radius: 3px; }
 
         /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
-        
-        /* Centro: Carrossel Unificado (Notícias, Publi, Indicadores) */
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
-        
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; text-align: center; }
 
-        /* Estilos específicos dos blocos centrais */
+        /* Blocos Centrais */
         #news-title { font-size: 2.8rem; font-weight: bold; line-height: 1.2; max-width: 85%; }
         .news-image { width: 60%; max-height: 300px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; border: 2px solid #333; }
-        
         .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 80%; text-align: left; }
         .macro-card { background: #111; padding: 25px; border-radius: 15px; border-left: 5px solid var(--neon-green); }
         .macro-card h3 { color: var(--neon-green); margin: 0 0 15px 0; font-size: 1rem; text-transform: uppercase; }
         .macro-val { font-size: 2.5rem; font-weight: bold; }
-
         .agenda-list { width: 70%; text-align: left; background: #111; padding: 30px; border-radius: 15px; border-left: 5px solid var(--neon-green); }
         .event-row { font-size: 1.4rem; padding: 10px 0; border-bottom: 1px solid #222; }
         .event-time { color: var(--neon-green); font-weight: bold; margin-right: 15px; }
 
-        /* Lateral Direita: Apenas QR Code */
+        /* Lateral Direita */
         .sidebar-qr { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 2px solid #1a1a1a; padding: 20px; }
         .qr-section { text-align: center; width: 100%; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 160px; height: 160px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; }
@@ -52,7 +48,6 @@
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Ajuste para Mobile */
         @media (max-width: 768px) {
             .main-container { flex-direction: column; }
             .sidebar-qr { flex: none; height: 250px; border-left: none; border-top: 2px solid #1a1a1a; }
@@ -75,41 +70,37 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO B3...</span></div>
+        <div id="stock-ticker" class="ticker-content">
+            </div>
     </div>
 
     <div class="main-container">
         <div class="content-area">
-            
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" alt="">
                 <div id="news-source" style="color:var(--neon-green); font-weight:bold; margin-bottom:10px; text-transform:uppercase;">Fonte</div>
-                <div id="news-title">Carregando notícias do mercado...</div>
+                <div id="news-title">Sincronizando mercado...</div>
             </div>
-
             <div id="block-publi" class="display-block">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain;">
             </div>
-
             <div id="block-macro" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:30px;">INDICADORES MACRO (FOCUS/BACEN)</h2>
                 <div class="macro-grid">
                     <div class="macro-card"><h3>SELIC (META)</h3><div class="macro-val">14,50%</div></div>
                     <div class="macro-card"><h3>CDI (12M)</h3><div class="macro-val">13,25%</div></div>
                     <div class="macro-card"><h3>IPCA (PROJ. 2026)</h3><div class="macro-val">4,00%</div></div>
-                    <div class="macro-card"><h3>IBOVESPA</h3><div id="ibov-val" class="macro-val">---</div></div>
+                    <div class="macro-card"><h3>DOLAR COMERCIAL</h3><div id="usd-val" class="macro-val">R$ ---</div></div>
                 </div>
             </div>
-
             <div id="block-agenda" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:30px;">AGENDA ECONÔMICA</h2>
                 <div class="agenda-list">
                     <div class="event-row"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
                     <div class="event-row"><span class="event-time">10:30</span><span>Abertura New York</span></div>
-                    <div class="event-item" style="border:none; padding:10px 0; font-size:1.4rem;"><span class="event-time">15:30</span><span>Leilão do Tesouro Nacional</span></div>
+                    <div class="event-row"><span class="event-time">15:30</span><span>Leilão do Tesouro Nacional</span></div>
                 </div>
             </div>
-
         </div>
 
         <div class="sidebar-qr">
@@ -123,7 +114,6 @@
     </div>
 
     <script>
-        // Relógios
         function updateClocks() {
             const now = new Date();
             const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -134,7 +124,52 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // LÓGICA DO CARROSSEL UNIFICADO
+        // INTEGRAÇÃO DE MERCADO B3
+        async function fetchMarket() {
+            const ticker = document.getElementById('stock-ticker');
+            const now = new Date();
+            const hour = now.getHours();
+            const day = now.getDay();
+            // Mercado Aberto: Seg-Sex, 10h às 18h
+            const isMarketOpen = (day >= 1 && day <= 5) && (hour >= 10 && hour < 18);
+
+            try {
+                // Buscamos as cotações via Brapi (limitado a 20 ativos principais)
+                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc&limit=20');
+                const data = await res.json();
+                
+                if (data.stocks) {
+                    let html = '';
+                    const statusTag = isMarketOpen ? '' : '<span class="closed-tag">FECHAMENTO</span>';
+                    
+                    data.stocks.forEach(s => {
+                        const up = s.change >= 0;
+                        html += `<span class="stock-item">
+                                    ${statusTag}
+                                    <span>${s.stock}</span> 
+                                    <span class="${up?'up':'down'}">${up?'▲':'▼'} ${s.change.toFixed(2)}%</span>
+                                 </span>`;
+                        
+                        // Atualiza Dólar no card macro se disponível
+                        if(s.stock === 'USDBRL') {
+                            document.getElementById('usd-val').innerText = 'R$ ' + s.close.toFixed(2);
+                        }
+                    });
+                    
+                    // Duplicamos o conteúdo para o efeito de loop infinito
+                    ticker.innerHTML = html + html;
+                }
+            } catch(e) {
+                console.error("Erro ao buscar B3:", e);
+                if(!ticker.innerHTML) ticker.innerHTML = '<span class="stock-item">Sincronizando dados B3...</span>';
+            }
+        }
+
+        // Atualização: 5 minutos se aberto, 1 hora se fechado
+        fetchMarket();
+        setInterval(fetchMarket, 300000); 
+
+        // CARROSSEL (Lógica anterior mantida)
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda'];
         let currentBlockIndex = 0;
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
@@ -143,19 +178,14 @@
         function cycleContent() {
             const currentId = blocks[currentBlockIndex];
             const currentEl = document.getElementById(currentId);
-
-            // Esconde o atual
             currentEl.style.opacity = 0;
             
             setTimeout(() => {
                 currentEl.style.display = 'none';
-                
-                // Vai para o próximo
                 currentBlockIndex = (currentBlockIndex + 1) % blocks.length;
                 const nextId = blocks[currentBlockIndex];
                 const nextEl = document.getElementById(nextId);
 
-                // Configurações específicas antes de mostrar
                 if(nextId === 'block-publi') {
                     document.getElementById('publi-img').src = publiImages[currentPubliIndex] + '?t=' + new Date().getTime();
                     currentPubliIndex = (currentPubliIndex + 1) % publiImages.length;
@@ -164,24 +194,15 @@
                 nextEl.style.display = 'flex';
                 setTimeout(() => { nextEl.style.opacity = 1; }, 50);
 
-                // Define o tempo do próximo ciclo
-                let delay = 90000; // Notícias (Padrão)
-                if(nextId === 'block-publi') delay = 15000;
-                if(nextId === 'block-macro' || nextId === 'block-agenda') delay = 30000;
-
+                let delay = (nextId === 'block-publi') ? 15000 : (nextId === 'block-news' ? 90000 : 30000);
                 setTimeout(cycleContent, delay);
             }, 800);
         }
-
-        // Inicia o ciclo após o primeiro tempo de notícias
         setTimeout(cycleContent, 90000);
 
         // Notícias RSS
         async function fetchNews() {
-            const feeds = [
-                { name: "B3 Notícias", url: "https://www.b3.com.br/pt_br/noticias/rss" },
-                { name: "InfoMoney", url: "https://www.infomoney.com.br/feed/" }
-            ];
+            const feeds = [{ name: "B3", url: "https://www.b3.com.br/pt_br/noticias/rss" }, { name: "InfoMoney", url: "https://www.infomoney.com.br/feed/" }];
             let list = [];
             for (const f of feeds) {
                 try {
@@ -198,29 +219,13 @@
                     document.getElementById('news-title').innerText = item.title;
                     const img = document.getElementById('news-img');
                     const thumb = item.thumbnail || item.enclosure?.link;
-                    if (thumb) { img.src = thumb; img.style.display = 'block'; } else { img.style.display = 'none'; }
+                    img.src = thumb || "";
+                    img.style.display = thumb ? 'block' : 'none';
                     idx = (idx + 1) % list.length;
                 }
             }, 12000);
         }
         fetchNews();
-
-        // Ticker e IBOV
-        async function fetchMarket() {
-            try {
-                const res = await fetch('https://brapi.dev/api/quote/list?limit=20');
-                const data = await res.json();
-                let html = '';
-                data.stocks.forEach(s => {
-                    const up = s.changePercent >= 0;
-                    html += `<span class="stock-item"><span>${s.stock}</span> <span class="${up?'up':'down'}">${up?'▲':'▼'} ${s.changePercent.toFixed(2)}%</span></span>`;
-                    if(s.stock === 'IBOV') document.getElementById('ibov-val').innerText = s.close.toLocaleString('pt-BR');
-                });
-                document.getElementById('stock-ticker').innerHTML = html + html;
-            } catch(e) {}
-        }
-        fetchMarket();
-        setInterval(fetchMarket, 600000);
     </script>
 </body>
 </html>
