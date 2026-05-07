@@ -5,42 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus TV - Terminal de Investimentos</title>
     <meta name="description" content="Boonus TV - Monitor de mercado financeiro em tempo real com cotações B3 e indicadores Focus/BACEN.">
-    <meta name="robots" content="index, follow">
     <style>
         :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
         /* Cabeçalho */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
-        .logo img { height: 55px; width: auto; }
-        .clocks-container { display: flex; gap: 25px; }
-        .clock-box { text-align: center; min-width: 90px; }
-        .label { font-size: 0.9rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
-        .time { font-size: 2.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .logo img { height: 50px; width: auto; }
+        .clocks-container { display: flex; gap: 20px; }
+        .clock-box { text-align: center; min-width: 80px; }
+        .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; }
+        .time { font-size: 1.8rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-green); }
 
         /* Esteira B3 */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 8px 0; border-bottom: 1px solid #333; }
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; }
         .ticker-content { display: inline-flex; animation: marquee 50s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 30px; font-size: 1.8rem; font-weight: 600; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.6rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
 
         /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
-        
         .content-area { flex: 3; position: relative; display: flex; justify-content: center; align-items: center; border-right: 2px solid #222; }
-        .news-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px; width: 100%; transition: opacity 1s; }
-        .news-image { width: 70%; max-height: 380px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; display: none; border: 2px solid #333; }
-        #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
+        .news-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px; width: 100%; transition: opacity 1s; }
+        .news-image { width: 65%; max-height: 350px; border-radius: 8px; object-fit: cover; margin-bottom: 15px; display: none; border: 2px solid #333; }
+        #news-title { font-size: 2.5rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
 
-        /* BARRA LATERAL ADAPTATIVA */
+        /* BARRA LATERAL - CORREÇÃO DE ESPAÇAMENTO */
         .sidebar { 
             flex: 1; 
             background: #0a0a0a; 
             display: flex; 
             flex-direction: column; 
-            padding: 20px; 
-            gap: 15px; 
+            padding: 15px; 
+            gap: 10px; 
             box-sizing: border-box; 
             height: 100%; 
             overflow: hidden; 
@@ -53,9 +51,9 @@
         }
 
         .side-panel { 
-            background: #151515; 
-            border-radius: 10px; 
-            padding: 20px; 
+            background: #121212; 
+            border-radius: 8px; 
+            padding: 12px 15px; 
             border-left: 4px solid var(--neon-green); 
             position: absolute; 
             width: 100%; 
@@ -66,39 +64,41 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            justify-content: flex-start;
         }
         
-        .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 15px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .side-title { font-size: 0.8rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 4px; }
         
-        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
-        .ind-label { font-size: 0.9rem; color: #ccc; }
-        .ind-val { font-weight: bold; color: #fff; font-size: 1.3rem; }
+        /* Compactação dos Indicadores */
+        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 4px; align-items: center; }
+        .ind-label { font-size: 0.8rem; color: #bbb; }
+        .ind-val { font-weight: bold; color: #fff; font-size: 1.15rem; }
 
-        .event-item { font-size: 1rem; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .event-time { color: var(--neon-green); font-weight: bold; margin-right: 10px; }
+        .event-item { font-size: 0.95rem; margin-bottom: 6px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+        .event-time { color: var(--neon-green); font-weight: bold; margin-right: 8px; }
 
-        /* QR Code Blindado no Rodapé */
+        /* QR Code Blindado */
         .qr-section { 
             flex-shrink: 0; 
             text-align: center; 
-            padding: 12px; 
-            background: #111; 
-            border-radius: 10px; 
-            border: 1px dashed var(--neon-green);
+            padding: 10px; 
+            background: #0f0f0f; 
+            border-radius: 8px; 
+            border: 1px dashed rgba(0, 255, 136, 0.3);
             margin-top: auto; 
         }
         .qr-box { 
             background: white; 
-            padding: 6px; 
-            border-radius: 5px; 
-            width: 120px; 
-            height: 120px; 
-            margin: 0 auto 8px; 
+            padding: 5px; 
+            border-radius: 4px; 
+            width: 110px; 
+            height: 110px; 
+            margin: 0 auto 6px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
         }
-        .qr-text { font-size: 0.85rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.1; }
+        .qr-text { font-size: 0.75rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.1; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     </style>
@@ -122,8 +122,8 @@
         <div class="content-area">
             <div id="news-block" class="news-wrapper">
                 <img id="news-img" class="news-image" src="" alt="Thumbnail">
-                <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">FONTE</div>
-                <div id="news-title">Sincronizando mercado financeiro...</div>
+                <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 8px; text-transform: uppercase; font-size: 0.9rem;">FONTE</div>
+                <div id="news-title">Carregando mercado...</div>
             </div>
             <div id="publi-block" style="display:none; width:100%; height:100%; opacity:0; transition: opacity 1s;">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain;">
@@ -138,16 +138,16 @@
                         <span class="ind-label">SELIC (Meta Copom)</span><span class="ind-val">14,50%</span>
                     </div>
                     
-                    <div style="margin: 15px 0; border-top: 1px solid #333; padding-top: 15px;">
-                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">IPCA (Fonte: Focus)</span>
-                        <div class="indicator-row" style="margin-top:10px;">
+                    <div style="margin: 6px 0; border-top: 1px solid #333; padding-top: 6px;">
+                        <span style="font-size: 0.7rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">IPCA (Fonte: Focus)</span>
+                        <div class="indicator-row" style="margin-top:4px;">
                             <span class="ind-label">Projeção 2026:</span><span class="ind-val">4,00%</span>
                         </div>
                     </div>
 
-                    <div style="border-top: 1px solid #333; padding-top: 15px;">
-                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">CDI (12m - BACEN)</span>
-                        <div class="indicator-row" style="margin-top:10px;">
+                    <div style="border-top: 1px solid #333; padding-top: 6px;">
+                        <span style="font-size: 0.7rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">CDI (12m - BACEN)</span>
+                        <div class="indicator-row" style="margin-top:4px;">
                             <span class="ind-label">Taxa Atual:</span><span class="ind-val">13,25%</span>
                         </div>
                     </div>
@@ -155,7 +155,7 @@
 
                 <div id="panel-agenda" class="side-panel" style="opacity: 0; z-index: 1;">
                     <span class="side-title">Agenda do Dia</span>
-                    <div class="event-item"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
+                    <div class="event-item"><span class="event-time">09:00</span><span>IPCA (IBGE)</span></div>
                     <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
                     <div class="event-item"><span class="event-time">12:00</span><span>Relatório Focus</span></div>
                     <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
@@ -165,7 +165,7 @@
 
             <div class="qr-section">
                 <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="WhatsApp QR Code">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="WhatsApp QR Code">
                 </div>
                 <span class="qr-text">DÚVIDAS? ESCANEIE E<br>FALE COM UM CONSULTOR</span>
             </div>
@@ -183,7 +183,6 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Alternância dos Painéis da Sidebar (1 minuto)
         function toggleSidebarPanels() {
             const ind = document.getElementById('panel-indicators');
             const age = document.getElementById('panel-agenda');
