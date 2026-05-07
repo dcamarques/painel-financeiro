@@ -3,60 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus TV - Terminal Integrado</title>
+    <title>Boonus TV - Multi-Plataforma</title>
     <style>
         :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
-        .logo img { height: 40px; width: auto; }
-        .clocks-container { display: flex; gap: 15px; }
-        .clock-box { text-align: center; }
-        .label { font-size: 0.6rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; }
-        .time { font-size: 1.4rem; font-weight: bold; font-variant-numeric: tabular-nums; }
-        #br-time { color: var(--neon-green); }
+        /* Cabeçalho Responsivo */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: var(--panel-bg); border-bottom: 3px solid var(--neon-green); z-index: 10; }
+        .logo img { height: 35px; width: auto; }
+        .clocks-container { display: flex; gap: 10px; }
+        .clock-box { text-align: center; min-width: 60px; }
+        .label { font-size: 0.55rem; color: #aaa; text-transform: uppercase; }
+        .time { font-size: 1.2rem; font-weight: bold; font-variant-numeric: tabular-nums; }
 
         /* Esteira B3 */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 5px 0; border-bottom: 1px solid #333; }
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.4rem; font-weight: 600; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 20px; font-size: 1.2rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
-        .tag-ticker { font-size: 0.6rem; background: #333; color: #fff; padding: 2px 5px; border-radius: 3px; margin-right: 8px; vertical-align: middle; text-transform: uppercase; }
 
-        /* Estrutura Principal */
-        .main-container { flex: 1; display: flex; overflow: hidden; }
-        .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
-        .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
-
-        /* Blocos de Conteúdo */
-        #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; max-width: 90%; margin-top: 10px; }
-        .news-image { width: auto; max-width: 80%; height: 40vh; border-radius: 8px; object-fit: cover; border: 2px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        /* Estrutura Principal Flexível */
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
         
-        .macro-grid, .coins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; text-align: left; }
-        .macro-card, .coin-card { background: #111; padding: 15px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
-        .macro-val, .coin-val { font-size: 1.8rem; font-weight: bold; }
-        .macro-card h3, .coin-card h3 { font-size: 0.8rem; color: var(--neon-green); margin: 0 0 5px 0; text-transform: uppercase; }
+        /* Área Central (Ajustada para Mobile) */
+        .content-area { flex: 3; position: relative; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
+        .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
 
-        .agenda-list { width: 85%; text-align: left; background: #111; padding: 20px; border-radius: 15px; border-left: 5px solid var(--neon-green); }
-        .event-row { font-size: 1.2rem; padding: 10px 0; border-bottom: 1px solid #222; }
-        .event-time { color: var(--neon-green); font-weight: bold; margin-right: 15px; }
+        /* Notícias e Imagens */
+        .news-image { width: auto; max-width: 85%; max-height: 45%; border-radius: 8px; object-fit: contain; border: 2px solid #222; margin-bottom: 15px; background: #000; }
+        #news-title { font-size: 1.8rem; font-weight: bold; line-height: 1.2; max-width: 90%; color: #fff; }
+        #news-source { color: var(--neon-green); text-transform: uppercase; font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; }
 
-        /* Lateral Direita (QR Code) */
-        .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 2px solid #1a1a1a; padding: 15px; }
-        .qr-box { background: white; padding: 10px; border-radius: 10px; width: 140px; height: 140px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
-        .qr-box img { width: 100%; height: auto; }
-        .qr-text { font-size: 0.9rem; font-weight: bold; color: var(--neon-green); text-align: center; }
+        /* Grades de Dados */
+        .macro-grid, .coins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 90%; }
+        .card { background: #111; padding: 15px; border-radius: 10px; border-left: 4px solid var(--neon-green); }
+        .card h3 { font-size: 0.7rem; margin: 0 0 5px 0; color: var(--neon-green); text-transform: uppercase; }
+        .card-val { font-size: 1.5rem; font-weight: bold; }
+
+        /* Barra Lateral QR Code (Oculta ou Mini em mobile) */
+        .sidebar-qr { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 1px solid #222; padding: 15px; }
+        .qr-box { background: white; padding: 8px; border-radius: 8px; width: 130px; height: 130px; margin-bottom: 10px; }
+        .qr-box img { width: 100%; height: 100%; }
+        .qr-text { font-size: 0.85rem; font-weight: bold; color: var(--neon-green); text-align: center; line-height: 1.2; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Mobile / Vertical */
-        @media (max-width: 900px) {
+        /* RESPONSIVIDADE PARA CELULAR E TABLET VERTICAL */
+        @media (max-width: 850px) {
             .main-container { flex-direction: column; }
-            .sidebar-qr { flex: none; height: 200px; border-left: none; border-top: 2px solid #1a1a1a; }
-            .news-image { height: 25vh; }
-            #news-title { font-size: 1.5rem; }
-            .macro-grid, .coins-grid { grid-template-columns: 1fr; gap: 10px; }
+            .sidebar-qr { flex: none; height: 180px; border-left: none; border-top: 1px solid #222; }
+            .macro-grid, .coins-grid { grid-template-columns: 1fr; }
+            #news-title { font-size: 1.4rem; }
+            .news-image { max-height: 30%; }
         }
     </style>
 </head>
@@ -67,20 +65,19 @@
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--</div></div>
             <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--</div></div>
-            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--</div></div>
         </div>
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"></div>
+        <div id="stock-ticker" class="ticker-content">Sincronizando B3...</div>
     </div>
 
     <div class="main-container">
         <div class="content-area">
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
-                <div id="news-source" style="color:var(--neon-green); font-weight:bold; margin-top:15px; text-transform:uppercase; letter-spacing:1px; font-size:0.8rem;">Fonte</div>
-                <div id="news-title">Sincronizando mercado financeiro...</div>
+                <div id="news-source">Carregando...</div>
+                <div id="news-title">Buscando manchetes Valor e InfoMoney...</div>
             </div>
 
             <div id="block-publi" class="display-block">
@@ -88,140 +85,119 @@
             </div>
 
             <div id="block-macro" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px; font-size:1.5rem;">INDICADORES &amp; ÍNDICES</h2>
+                <h2 style="color:var(--neon-green); font-size:1.2rem; margin-bottom:15px;">INDICADORES & ÍNDICES</h2>
                 <div class="macro-grid">
-                    <div class="macro-card"><h3>SELIC (META)</h3><div class="macro-val">14,50%</div></div>
-                    <div class="macro-card"><h3>IPCA (PROJ. 2026)</h3><div class="macro-val">4,00%</div></div>
-                    <div class="macro-card"><h3>IBOVESPA</h3><div id="ibov-val" class="macro-val">---</div></div>
-                    <div class="macro-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="macro-val">---</div></div>
-                </div>
-            </div>
-
-            <div id="block-agenda" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px; font-size:1.5rem;">AGENDA ECONÔMICA</h2>
-                <div class="agenda-list">
-                    <div class="event-row"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
-                    <div class="event-row"><span class="event-time">10:30</span><span>Abertura NY</span></div>
-                    <div class="event-row"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
+                    <div class="card"><h3>SELIC (META)</h3><div class="card-val">14,50%</div></div>
+                    <div class="card"><h3>IPCA (2026)</h3><div class="card-val">4,00%</div></div>
+                    <div class="card"><h3>IBOVESPA</h3><div id="ibov-val" class="card-val">---</div></div>
+                    <div class="card"><h3>S&P 500</h3><div id="sp500-val" class="card-val">---</div></div>
                 </div>
             </div>
 
             <div id="block-coins" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px; font-size:1.5rem;">CÂMBIO GLOBAL <span id="coin-status-global" style="font-size:0.7rem; color:#888;"></span></h2>
+                <h2 style="color:var(--neon-green); font-size:1.2rem; margin-bottom:15px;">CÂMBIO GLOBAL <span id="coin-status" style="font-size:0.6rem; color:#888;"></span></h2>
                 <div class="coins-grid">
-                    <div class="coin-card"><h3>Dólar</h3><div id="usd-val" class="coin-val">R$ ---</div><div id="usd-var" class="coin-var">---</div></div>
-                    <div class="coin-card"><h3>Euro</h3><div id="eur-val" class="coin-val">R$ ---</div><div id="eur-var" class="coin-var">---</div></div>
+                    <div class="card"><h3>Dólar</h3><div id="usd-val" class="card-val">---</div></div>
+                    <div class="card"><h3>Euro</h3><div id="eur-val" class="card-val">---</div></div>
                 </div>
             </div>
         </div>
 
         <div class="sidebar-qr">
-            <div class="qr-section">
-                <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações." alt="WhatsApp">
-                </div>
-                <div class="qr-text">DÚVIDAS? ESCANEIE<br>E FALE CONOSCO</div>
+            <div class="qr-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://wa.me/5521981976661" alt="QR Code">
             </div>
+            <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
         </div>
     </div>
 
     <script>
-        // Funções de Relógio e Mercado (Mantidas as lógica anteriores de 5min)
+        // Relógios
         function updateClocks() {
             const now = new Date();
-            const opt = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            document.getElementById('br-time').innerText = now.toLocaleTimeString('pt-BR', opt);
-            document.getElementById('ny-time').innerText = now.toLocaleTimeString('en-US', { ...opt, timeZone: 'America/New_York' });
-            document.getElementById('ld-time').innerText = now.toLocaleTimeString('en-GB', { ...opt, timeZone: 'Europe/London' });
+            document.getElementById('br-time').innerText = now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('ny-time').innerText = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', timeZone: 'America/New_York'});
         }
-        setInterval(updateClocks, 1000);
-        updateClocks();
+        setInterval(updateClocks, 1000); updateClocks();
 
+        // Mercado e Cotações
         async function fetchMarket() {
-            const now = new Date();
-            const hour = now.getHours();
-            const day = now.getDay();
-            const isMarketOpen = (day >= 1 && day <= 5) && (hour >= 10 && hour < 18);
-            document.getElementById('coin-status-global').innerText = isMarketOpen ? "(AO VIVO)" : "(FECHAMENTO)";
-
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
                 const data = await res.json();
-                const actionRegex = /^[A-Z]{4}[3456]$/;
-                const actionsOnly = data.stocks.filter(s => actionRegex.test(s.stock));
-                
-                let tickerHtml = '';
-                const tag = isMarketOpen ? "" : '<span class="tag-ticker">FECHAMENTO</span>';
-                actionsOnly.slice(0, 10).forEach(s => tickerHtml += `<span class="stock-item">${tag}${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
-                actionsOnly.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${tag}${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
-                document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
+                const actions = data.stocks.filter(s => /^[A-Z]{4}[3456]$/.test(s.stock));
+                let html = '';
+                actions.slice(0,10).forEach(s => html += `<span class="stock-item">${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
+                actions.slice(-10).reverse().forEach(s => html += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
+                document.getElementById('stock-ticker').innerHTML = html + html;
 
-                const resPanel = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,USDBRL,EURBRL');
-                const dataP = await resPanel.json();
+                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,USDBRL,EURBRL');
+                const dataP = await resP.json();
                 dataP.results.forEach(s => {
                     if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
                     if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
-                    if(s.symbol === 'USDBRL') updateCoin('usd', s);
-                    if(s.symbol === 'EURBRL') updateCoin('eur', s);
+                    if(s.symbol === 'USDBRL') document.getElementById('usd-val').innerText = 'R$ ' + s.regularMarketPrice.toFixed(2);
+                    if(s.symbol === 'EURBRL') document.getElementById('eur-val').innerText = 'R$ ' + s.regularMarketPrice.toFixed(2);
                 });
             } catch(e) {}
         }
-        function updateCoin(id, data) {
-            document.getElementById(`${id}-val`).innerText = 'R$ ' + data.regularMarketPrice.toFixed(2);
-            const varEl = document.getElementById(`${id}-var`);
-            const up = data.regularMarketChangePercent >= 0;
-            varEl.innerText = (up ? '▲ ' : '▼ ') + data.regularMarketChangePercent.toFixed(2) + '%';
-            varEl.style.color = up ? 'var(--neon-green)' : '#ff4444';
-        }
         fetchMarket(); setInterval(fetchMarket, 300000);
 
-        // CICLO DE CONTEÚDO
-        const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
-        let currentIdx = 0;
-        function cycleContent() {
-            const currentEl = document.getElementById(blocks[currentIdx]);
-            currentEl.style.opacity = 0;
-            setTimeout(() => {
-                currentEl.style.display = 'none';
-                currentIdx = (currentIdx + 1) % blocks.length;
-                const nextEl = document.getElementById(blocks[currentIdx]);
-                if(blocks[currentIdx] === 'block-publi') document.getElementById('publi-img').src = 'publi1.png?t=' + Date.now();
-                nextEl.style.display = 'flex';
-                setTimeout(() => { nextEl.style.opacity = 1; }, 50);
-                let delay = 30000;
-                if(blocks[currentIdx] === 'block-news') delay = 90000;
-                if(blocks[currentIdx] === 'block-publi') delay = 18000;
-                setTimeout(cycleContent, delay);
-            }, 800);
-        }
-        setTimeout(cycleContent, 90000);
-
-        // NOTÍCIAS COM FIX DE IMAGEM (PROXY)
+        // Notícias (InfoMoney + Valor)
+        let newsList = [];
         async function fetchNews() {
-            try {
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.infomoney.com.br/feed/')}`);
-                const data = await res.json();
-                let idx = 0;
-                setInterval(() => {
-                    if (data.items && document.getElementById('block-news').style.display !== 'none') {
-                        const item = data.items[idx];
-                        document.getElementById('news-source').innerText = "FONTE: INFOMONEY";
-                        document.getElementById('news-title').innerText = item.title;
-                        const img = document.getElementById('news-img');
-                        
-                        if (item.thumbnail) {
-                            // Usando o proxy Weserv para contornar bloqueio de imagem no tablet
-                            img.src = `https://images.weserv.nl/?url=${encodeURIComponent(item.thumbnail)}&w=800&fit=cover`;
-                            img.style.display = 'block';
-                        } else {
-                            img.style.display = 'none';
-                        }
-                        idx = (idx + 1) % data.items.length;
-                    }
-                }, 15000);
-            } catch(e) {}
+            const feeds = [
+                { name: "INFOMONEY", url: "https://www.infomoney.com.br/feed/" },
+                { name: "VALOR ECONÔMICO", url: "https://valor.globo.com/rss/valor/" }
+            ];
+            for (let f of feeds) {
+                try {
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
+                    const data = await res.json();
+                    data.items.forEach(i => newsList.push({...i, source: f.name}));
+                } catch(e) {}
+            }
         }
         fetchNews();
+
+        let newsIdx = 0;
+        setInterval(() => {
+            if(newsList.length && document.getElementById('block-news').style.display !== 'none') {
+                const item = newsList[newsIdx];
+                document.getElementById('news-source').innerText = "FONTE: " + item.source;
+                document.getElementById('news-title').innerText = item.title;
+                const img = document.getElementById('news-img');
+                const thumb = item.thumbnail || item.enclosure?.link;
+                if(thumb) {
+                    // Proxy robusto para forçar carregamento no celular/tablet
+                    img.src = `https://images.weserv.nl/?url=${encodeURIComponent(thumb)}&w=600&fit=cover&output=jpg`;
+                    img.style.display = 'block';
+                } else { img.style.display = 'none'; }
+                newsIdx = (newsIdx + 1) % newsList.length;
+            }
+        }, 15000);
+
+        // Ciclo de Blocos
+        const blocks = ['block-news', 'block-publi', 'block-macro', 'block-coins'];
+        let blockIdx = 0;
+        function cycle() {
+            const cur = document.getElementById(blocks[blockIdx]);
+            cur.style.opacity = 0;
+            setTimeout(() => {
+                cur.style.display = 'none';
+                blockIdx = (blockIdx + 1) % blocks.length;
+                const next = document.getElementById(blocks[blockIdx]);
+                if(blocks[blockIdx] === 'block-publi') document.getElementById('publi-img').src = 'publi1.png?t=' + Date.now();
+                next.style.display = 'flex';
+                setTimeout(() => next.style.opacity = 1, 50);
+                
+                let delay = 30000;
+                if(blocks[blockIdx] === 'block-news') delay = 90000;
+                if(blocks[blockIdx] === 'block-publi') delay = 18000;
+                setTimeout(cycle, delay);
+            }, 800);
+        }
+        setTimeout(cycle, 90000);
     </script>
 </body>
 </html>
