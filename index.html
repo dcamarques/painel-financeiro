@@ -22,23 +22,27 @@
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
-        .tag-ticker { font-size: 0.65rem; background: #333; color: #fff; padding: 2px 5px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+        .tag-ticker { font-size: 0.65rem; background: #333; color: #fff; padding: 2px 5px; border-radius: 3px; margin-right: 8px; vertical-align: middle; text-transform: uppercase; }
 
         /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; text-align: center; }
 
-        /* Grades e Cards */
-        .macro-grid, .coins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 85%; text-align: left; }
-        .macro-card, .coin-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
-        .macro-card h3, .coin-card h3 { color: var(--neon-green); margin: 0 0 10px 0; font-size: 0.9rem; text-transform: uppercase; }
-        .macro-val, .coin-val { font-size: 2.2rem; font-weight: bold; display: block; }
+        /* Grades de Indicadores e Moedas */
+        .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 90%; text-align: left; }
+        .macro-column { display: flex; flex-direction: column; gap: 15px; }
+        .macro-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); }
+        .macro-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
+        .macro-val { font-size: 2rem; font-weight: bold; display: block; }
+
+        .coins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 85%; text-align: left; }
+        .coin-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); }
+        .coin-val { font-size: 2.2rem; font-weight: bold; display: block; }
         .coin-var { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
-        .market-status { font-size: 0.6rem; color: #888; position: absolute; top: 10px; right: 15px; border: 1px solid #444; padding: 2px 4px; border-radius: 3px; }
 
         #news-title { font-size: 2.8rem; font-weight: bold; line-height: 1.2; max-width: 85%; }
-        .news-image { width: 60%; max-height: 300px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; border: 2px solid #333; }
+        .news-image { width: 55%; max-height: 280px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; border: 2px solid #333; }
         
         .agenda-list { width: 75%; text-align: left; background: #111; padding: 25px; border-radius: 15px; border-left: 5px solid var(--neon-green); }
         .event-row { font-size: 1.4rem; padding: 12px 0; border-bottom: 1px solid #222; }
@@ -47,15 +51,15 @@
         /* Lateral Direita */
         .sidebar-qr { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 2px solid #1a1a1a; padding: 20px; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 160px; height: 160px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; }
-        .qr-text { font-size: 1rem; font-weight: bold; color: var(--neon-green); text-align: center; }
+        .qr-text { font-size: 1rem; font-weight: bold; color: var(--neon-green); text-align: center; line-height: 1.2; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
+            .macro-grid { gap: 15px; }
+            .macro-val { font-size: 1.5rem; }
             .main-container { flex-direction: column; }
             .sidebar-qr { flex: none; height: 220px; border-left: none; border-top: 2px solid #1a1a1a; }
-            .macro-grid, .coins-grid { grid-template-columns: 1fr; }
-            #news-title { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -88,12 +92,18 @@
             </div>
 
             <div id="block-macro" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
+                <h2 style="color:var(--neon-green); margin-bottom:30px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
-                    <div class="macro-card"><h3>SELIC (META)</h3><div class="macro-val">14,50%</div></div>
-                    <div class="macro-card"><h3>IPCA (PROJ. 2026)</h3><div class="macro-val">4,00%</div></div>
-                    <div class="macro-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="macro-val">---</div></div>
-                    <div class="macro-card"><h3>NASDAQ 100</h3><div id="nasdaq-val" class="macro-val">---</div></div>
+                    <div class="macro-column">
+                        <div class="macro-card"><h3>SELIC (META COPOM)</h3><div class="macro-val">14,50%</div></div>
+                        <div class="macro-card"><h3>IPCA (PROJ. 2026)</h3><div class="macro-val">4,00%</div></div>
+                        <div class="macro-card"><h3>CDI 2026 ACUM.</h3><div class="macro-val">5,25%</div></div>
+                    </div>
+                    <div class="macro-column">
+                        <div class="macro-card"><h3>IBOVESPA</h3><div id="ibov-val" class="macro-val">---</div></div>
+                        <div class="macro-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="macro-val">---</div></div>
+                        <div class="macro-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="macro-val">---</div></div>
+                    </div>
                 </div>
             </div>
 
@@ -145,29 +155,36 @@
             const hour = now.getHours();
             const day = now.getDay();
             const isMarketOpen = (day >= 1 && day <= 5) && (hour >= 10 && hour < 18);
-            const statusLabel = isMarketOpen ? "(REAL-TIME)" : "(FECHAMENTO)";
-            document.getElementById('coin-status-global').innerText = statusLabel;
+            const statusTag = isMarketOpen ? "" : '<span class="tag-ticker">FECHAMENTO</span>';
+            
+            document.getElementById('coin-status-global').innerText = isMarketOpen ? "(REAL-TIME)" : "(FECHAMENTO)";
 
             try {
-                // Maiores Altas/Baixas (B3)
+                // Busca lista completa para filtrar ações
                 const resB3 = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
                 const dataB3 = await resB3.json();
-                const allStocks = dataB3.stocks.filter(s => !s.stock.includes('BRL') && !s.stock.startsWith('^'));
-                const topGainers = allStocks.slice(0, 10);
-                const topLosers = allStocks.slice(-10).reverse();
+                
+                // Filtro rigoroso: apenas ações (Ex: PETR4, VALE3)
+                // Remove fundos (11), BDRs (34), Opções e Fracionados (F)
+                const actionRegex = /^[A-Z]{4}[3456]$/;
+                const actionsOnly = dataB3.stocks.filter(s => actionRegex.test(s.stock));
+                
+                const topGainers = actionsOnly.slice(0, 10);
+                const topLosers = actionsOnly.slice(-10).reverse();
 
                 let tickerHtml = '';
-                topGainers.forEach(s => tickerHtml += `<span class="stock-item"><span class="tag-ticker" style="color:#00ff88">ALTA</span><span>${s.stock}</span> <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
-                topLosers.forEach(s => tickerHtml += `<span class="stock-item"><span class="tag-ticker" style="color:#ff4444">BAIXA</span><span>${s.stock}</span> <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
+                topGainers.forEach(s => tickerHtml += `<span class="stock-item">${statusTag}<span>${s.stock}</span> <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
+                topLosers.forEach(s => tickerHtml += `<span class="stock-item">${statusTag}<span>${s.stock}</span> <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
 
                 // Painéis de Moedas e Índices
-                const resPanel = await fetch('https://brapi.dev/api/quote/^GSPC,^IXIC,USDBRL,EURBRL,JPYBRL,GBPBRL');
+                const resPanel = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC,USDBRL,EURBRL,JPYBRL,GBPBRL');
                 const dataPanel = await resPanel.json();
                 
                 dataPanel.results.forEach(s => {
-                    if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
-                    if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
+                    if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
+                    if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString('en-US');
+                    if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString('en-US');
                     if(s.symbol === 'USDBRL') updateCoin('usd', s);
                     if(s.symbol === 'EURBRL') updateCoin('eur', s);
                     if(s.symbol === 'JPYBRL') updateCoin('jpy', s);
@@ -188,7 +205,7 @@
         }
 
         fetchMarket();
-        setInterval(fetchMarket, 300000); // 5 minutos
+        setInterval(fetchMarket, 300000); // 5 min
 
         // CARROSSEL
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
