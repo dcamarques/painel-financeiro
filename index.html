@@ -25,18 +25,21 @@
         .stock-item { display: inline-flex; align-items: center; margin: 0 30px; font-size: 1.8rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
 
-        /* Estrutura Principal: Conteúdo (75%) | Barra Lateral (25%) */
+        /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
         
-        /* Área de Notícias/Publi */
         .content-area { flex: 3; position: relative; display: flex; justify-content: center; align-items: center; border-right: 2px solid #222; }
         .news-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px; width: 100%; transition: opacity 1s; }
         .news-image { width: 70%; max-height: 380px; border-radius: 8px; object-fit: cover; margin-bottom: 20px; display: none; border: 2px solid #333; }
         #news-title { font-size: 3rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
 
-        /* Barra Lateral de Inteligência */
-        .sidebar { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; padding: 25px; gap: 20px; box-sizing: border-box; }
-        .side-panel { background: #151515; border-radius: 10px; padding: 18px; border-left: 4px solid var(--neon-green); }
+        /* Barra Lateral com Altura Fixa para travar o QR Code */
+        .sidebar { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; padding: 25px; gap: 20px; box-sizing: border-box; height: 100%; }
+        
+        /* Container que alterna (Indicadores vs Agenda) */
+        .dynamic-panel-container { height: 320px; position: relative; }
+        .side-panel { background: #151515; border-radius: 10px; padding: 18px; border-left: 4px solid var(--neon-green); position: absolute; width: 100%; top: 0; left: 0; transition: opacity 1s; box-sizing: border-box; }
+        
         .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 12px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
         
         .indicator-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.2rem; align-items: center; }
@@ -46,21 +49,12 @@
         .event-item { font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
         .event-time { color: var(--neon-green); font-weight: bold; margin-right: 10px; }
 
-        /* QR Code WhatsApp Business */
+        /* QR Code sempre visível no rodapé da sidebar */
         .qr-section { margin-top: auto; text-align: center; padding: 15px; background: #111; border-radius: 10px; border: 1px dashed var(--neon-green); }
         .qr-box { background: white; padding: 8px; border-radius: 5px; width: 140px; height: 140px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
         .qr-text { font-size: 0.9rem; font-weight: bold; color: var(--neon-green); display: block; line-height: 1.2; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        
-        /* Ajuste Celular */
-        @media (max-width: 1024px) {
-            .main-container { flex-direction: column; overflow-y: auto; }
-            .sidebar { flex: none; width: 100%; }
-            .content-area { flex: none; min-height: 450px; border-right: none; border-bottom: 2px solid #222; }
-            .time { font-size: 1.5rem; }
-            #news-title { font-size: 1.8rem; }
-        }
     </style>
 </head>
 <body>
@@ -83,7 +77,7 @@
             <div id="news-block" class="news-wrapper">
                 <img id="news-img" class="news-image" src="" alt="Thumbnail">
                 <div id="news-source" style="color:var(--neon-green); font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">FONTE</div>
-                <div id="news-title">Carregando informações do mercado...</div>
+                <div id="news-title">Sincronizando informações oficiais...</div>
             </div>
             <div id="publi-block" style="display:none; width:100%; height:100%; opacity:0; transition: opacity 1s;">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain;">
@@ -91,29 +85,29 @@
         </div>
 
         <div class="sidebar">
-            <div class="side-panel">
-                <span class="side-title">Indicadores Macro</span>
-                <div class="indicator-row">
-                    <span class="ind-label">SELIC (Meta)</span><span class="ind-val">14,50%</span>
-                </div>
-                
-                <div style="margin: 15px 0; border-top: 1px solid #333; padding-top: 10px;">
-                    <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">IPCA (Fonte: Focus)</span>
-                    <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val" style="font-size: 1.2rem;">2,15%</span></div>
-                    <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val" style="font-size: 1.2rem;">4,00%</span></div>
+            <div class="dynamic-panel-container">
+                <div id="panel-indicators" class="side-panel" style="opacity: 1; z-index: 2;">
+                    <span class="side-title">Indicadores Macro</span>
+                    <div class="indicator-row">
+                        <span class="ind-label">SELIC (Meta)</span><span class="ind-val">14,50%</span>
+                    </div>
+                    <div style="margin: 10px 0; border-top: 1px solid #333; padding-top: 10px;">
+                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">IPCA (Fonte: Focus)</span>
+                        <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val" style="font-size: 1.2rem;">2,15%</span></div>
+                        <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val" style="font-size: 1.2rem;">4,00%</span></div>
+                    </div>
+                    <div style="border-top: 1px solid #333; padding-top: 10px;">
+                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">CDI (12m - BACEN)</span>
+                        <div class="indicator-row"><span class="ind-label">Taxa:</span><span class="ind-val" style="font-size: 1.3rem;">13,25%</span></div>
+                    </div>
                 </div>
 
-                <div style="border-top: 1px solid #333; padding-top: 10px;">
-                    <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">CDI (12m - BACEN)</span>
-                    <div class="indicator-row"><span class="ind-label">Taxa:</span><span class="ind-val" style="font-size: 1.3rem;">13,25%</span></div>
+                <div id="panel-agenda" class="side-panel" style="opacity: 0; z-index: 1;">
+                    <span class="side-title">Agenda do Dia</span>
+                    <div class="event-item"><span class="event-time">09:00</span><span>IPCA Mensal (IBGE)</span></div>
+                    <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
+                    <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
                 </div>
-            </div>
-
-            <div class="side-panel">
-                <span class="side-title">Agenda do Dia</span>
-                <div class="event-item"><span class="event-time">09:00</span><span>IPCA (IBGE)</span></div>
-                <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
-                <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
             </div>
 
             <div class="qr-section">
@@ -137,6 +131,20 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
+        // Alternância dos Painéis da Sidebar (1 minuto)
+        function toggleSidebarPanels() {
+            const ind = document.getElementById('panel-indicators');
+            const age = document.getElementById('panel-agenda');
+            if (ind.style.opacity == "1") {
+                ind.style.opacity = "0"; ind.style.zIndex = "1";
+                age.style.opacity = "1"; age.style.zIndex = "2";
+            } else {
+                age.style.opacity = "0"; age.style.zIndex = "1";
+                ind.style.opacity = "1"; ind.style.zIndex = "2";
+            }
+        }
+        setInterval(toggleSidebarPanels, 60000); // 60 segundos
+
         // Ciclo Notícias (90s) / Publicidade (15s)
         const timeNews = 90000;
         const timePubli = 15000;
@@ -146,9 +154,7 @@
         function toggleDisplay() {
             const news = document.getElementById('news-block');
             const publi = document.getElementById('publi-block');
-            const isNews = news.style.display !== 'none';
-
-            if (isNews) {
+            if (news.style.display !== 'none') {
                 news.style.opacity = 0;
                 setTimeout(() => {
                     news.style.display = 'none';
@@ -200,7 +206,7 @@
         }
         fetchNews();
 
-        // Ticker B3 (Brapi)
+        // Ticker B3
         async function fetchMarket() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?limit=20');
