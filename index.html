@@ -55,7 +55,7 @@
         .side-panel { 
             background: #151515; 
             border-radius: 10px; 
-            padding: 15px; 
+            padding: 20px; 
             border-left: 4px solid var(--neon-green); 
             position: absolute; 
             width: 100%; 
@@ -68,13 +68,13 @@
             height: 100%;
         }
         
-        .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 12px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .side-title { font-size: 0.85rem; color: var(--neon-green); text-transform: uppercase; font-weight: bold; margin-bottom: 15px; display: block; border-bottom: 1px solid #222; padding-bottom: 5px; }
         
-        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
-        .ind-label { font-size: 0.85rem; color: #ccc; }
-        .ind-val { font-weight: bold; color: #fff; font-size: 1.25rem; }
+        .indicator-row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
+        .ind-label { font-size: 0.9rem; color: #ccc; }
+        .ind-val { font-weight: bold; color: #fff; font-size: 1.3rem; }
 
-        .event-item { font-size: 1rem; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .event-item { font-size: 1rem; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         .event-time { color: var(--neon-green); font-weight: bold; margin-right: 10px; }
 
         /* QR Code Blindado no Rodapé */
@@ -91,8 +91,8 @@
             background: white; 
             padding: 6px; 
             border-radius: 5px; 
-            width: 125px; 
-            height: 125px; 
+            width: 120px; 
+            height: 120px; 
             margin: 0 auto 8px; 
             display: flex; 
             align-items: center; 
@@ -115,7 +115,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content"><span class="stock-item">CONECTANDO B3...</span></div>
+        <div id="stock-ticker" class="ticker-content"><span class="stock-item">SINCRONIZANDO B3...</span></div>
     </div>
 
     <div class="main-container">
@@ -135,16 +135,21 @@
                 <div id="panel-indicators" class="side-panel" style="opacity: 1; z-index: 2;">
                     <span class="side-title">Indicadores Macro</span>
                     <div class="indicator-row">
-                        <span class="ind-label">SELIC (Meta)</span><span class="ind-val">14,50%</span>
+                        <span class="ind-label">SELIC (Meta Copom)</span><span class="ind-val">14,50%</span>
                     </div>
-                    <div style="margin: 8px 0; border-top: 1px solid #333; padding-top: 8px;">
-                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">IPCA (Fonte: Focus)</span>
-                        <div class="indicator-row"><span class="ind-label">Acumulado Ano:</span><span class="ind-val">2,15%</span></div>
-                        <div class="indicator-row"><span class="ind-label">Projeção 2026:</span><span class="ind-val">4,00%</span></div>
+                    
+                    <div style="margin: 15px 0; border-top: 1px solid #333; padding-top: 15px;">
+                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">IPCA (Fonte: Focus)</span>
+                        <div class="indicator-row" style="margin-top:10px;">
+                            <span class="ind-label">Projeção 2026:</span><span class="ind-val">4,00%</span>
+                        </div>
                     </div>
-                    <div style="border-top: 1px solid #333; padding-top: 8px;">
-                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold;">CDI (12m - BACEN)</span>
-                        <div class="indicator-row"><span class="ind-label">Taxa Atual:</span><span class="ind-val">13,25%</span></div>
+
+                    <div style="border-top: 1px solid #333; padding-top: 15px;">
+                        <span style="font-size: 0.75rem; color: var(--neon-green); font-weight: bold; text-transform: uppercase;">CDI (12m - BACEN)</span>
+                        <div class="indicator-row" style="margin-top:10px;">
+                            <span class="ind-label">Taxa Atual:</span><span class="ind-val">13,25%</span>
+                        </div>
                     </div>
                 </div>
 
@@ -154,12 +159,13 @@
                     <div class="event-item"><span class="event-time">10:30</span><span>Abertura NY</span></div>
                     <div class="event-item"><span class="event-time">12:00</span><span>Relatório Focus</span></div>
                     <div class="event-item"><span class="event-time">15:30</span><span>Leilão Tesouro</span></div>
+                    <div class="event-item"><span class="event-time">18:00</span><span>Fechamento B3</span></div>
                 </div>
             </div>
 
             <div class="qr-section">
                 <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=125x125&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="WhatsApp QR Code">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://wa.me/5521981976661?text=Olá!%20Peço%20mais%20informações%20a%20respeito%20do%20site%20tv.boonus.app.br." alt="WhatsApp QR Code">
                 </div>
                 <span class="qr-text">DÚVIDAS? ESCANEIE E<br>FALE COM UM CONSULTOR</span>
             </div>
@@ -177,6 +183,7 @@
         setInterval(updateClocks, 1000);
         updateClocks();
 
+        // Alternância dos Painéis da Sidebar (1 minuto)
         function toggleSidebarPanels() {
             const ind = document.getElementById('panel-indicators');
             const age = document.getElementById('panel-agenda');
