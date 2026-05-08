@@ -34,8 +34,8 @@
         .card-column { display: flex; flex-direction: column; gap: 15px; }
         .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
         .info-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
-        .info-val { font-size: 1.8rem; font-weight: bold; display: block; }
-        .info-sub { font-size: 1rem; font-weight: bold; margin-top: 3px; }
+        .info-val { font-size: 1.6rem; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .info-sub { font-size: 0.9rem; font-weight: bold; margin-top: 3px; color: #888; }
 
         /* Notícias */
         #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
@@ -54,8 +54,8 @@
             .main-container { flex-direction: column; }
             .sidebar-qr { flex: none; height: 250px; border-left: none; border-top: 2px solid #1a1a1a; padding: 15px; }
             .macro-grid, .coins-grid, .agenda-grid { grid-template-columns: 1fr; gap: 10px; }
+            .info-val { font-size: 1.3rem; }
             #news-title { font-size: 1.5rem; }
-            .time { font-size: 1.3rem; }
         }
     </style>
 </head>
@@ -72,7 +72,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Sincronizando mercado...</div>
+        <div id="stock-ticker" class="ticker-content">Sincronizando mercado B3...</div>
     </div>
 
     <div class="main-container">
@@ -106,16 +106,7 @@
 
             <div id="block-agenda" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">AGENDA ECONÔMICA DO DIA</h2>
-                <div class="agenda-grid">
-                    <div class="card-column">
-                        <div class="info-card"><h3>09:00</h3><div class="info-val">IPCA Mensal</div><div class="info-sub" style="color:#888;">Fonte: IBGE</div></div>
-                        <div class="info-card"><h3>10:30</h3><div class="info-val">Abertura NY</div><div class="info-sub" style="color:#888;">Wall Street</div></div>
-                    </div>
-                    <div class="card-column">
-                        <div class="info-card"><h3>15:30</h3><div class="info-val">Leilão Tesouro</div><div class="info-sub" style="color:#888;">Títulos Públicos</div></div>
-                        <div class="info-card"><h3>---</h3><div class="info-val">Fique Atento</div><div class="info-sub" style="color:var(--neon-green);">Boonus TV</div></div>
-                    </div>
-                </div>
+                <div id="agenda-container" class="agenda-grid"></div>
             </div>
 
             <div id="block-coins" class="display-block">
@@ -136,7 +127,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.2</div>
+            <div class="version-tag">v: 1.1.4</div>
         </div>
     </div>
 
@@ -155,13 +146,10 @@
             const now = new Date();
             const isMarketOpen = (now.getDay() >= 1 && now.getDay() <= 5) && (now.getHours() >= 10 && now.getHours() < 18);
             document.getElementById('coin-status-global').innerText = isMarketOpen ? "(AO VIVO)" : "(FECHAMENTO)";
-
             try {
-                // Tenta Brapi para Ações e Índices
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
                 const data = await res.json();
-                const actionRegex = /^[A-Z]{4}[3456]$/;
-                const actions = data.stocks.filter(s => actionRegex.test(s.stock));
+                const actions = data.stocks.filter(s => /^[A-Z]{4}[3456]$/.test(s.stock));
                 let tickerHtml = '';
                 const tag = isMarketOpen ? "" : '<span class="tag-ticker">FECHAMENTO</span>';
                 actions.slice(0,10).forEach(s => tickerHtml += `<span class="stock-item">${tag}${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
@@ -170,9 +158,6 @@
 
                 const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC,USDBRL,EURBRL,JPYBRL,GBPBRL');
                 const dataP = await resP.json();
-                
-                if(!dataP.results) throw new Error("Fallback Moedas");
-
                 dataP.results.forEach(s => {
                     if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
                     if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
@@ -183,10 +168,7 @@
                     if(s.symbol === 'GBPBRL') updateCoin('gbp', s);
                 });
             } catch(e) {
-                // CONTINGÊNCIA: AwesomeAPI para moedas se a Brapi falhar
-                fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL')
-                .then(r => r.json())
-                .then(dB => {
+                fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL').then(r => r.json()).then(dB => {
                     updateCoin('usd', { regularMarketPrice: parseFloat(dB.USDBRL.bid), regularMarketChangePercent: parseFloat(dB.USDBRL.pctChange) });
                     updateCoin('eur', { regularMarketPrice: parseFloat(dB.EURBRL.bid), regularMarketChangePercent: parseFloat(dB.EURBRL.pctChange) });
                     updateCoin('jpy', { regularMarketPrice: parseFloat(dB.JPYBRL.bid), regularMarketChangePercent: parseFloat(dB.JPYBRL.pctChange) });
@@ -194,7 +176,6 @@
                 });
             }
         }
-
         function updateCoin(id, data) {
             document.getElementById(`${id}-val`).innerText = 'R$ ' + data.regularMarketPrice.toFixed(2);
             const varEl = document.getElementById(`${id}-var`);
@@ -202,7 +183,26 @@
             varEl.innerText = (up ? '▲ ' : '▼ ') + data.regularMarketChangePercent.toFixed(2) + '%';
             varEl.style.color = up ? 'var(--neon-green)' : '#ff4444';
         }
+
+        async function fetchAgenda() {
+            try {
+                const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
+                const data = await res.json();
+                const container = document.getElementById('agenda-container');
+                const eventos = data.slice(0, 4);
+                let html = '<div class="card-column">';
+                eventos.forEach((ev, idx) => {
+                    if(idx === 2) html += '</div><div class="card-column">';
+                    html += `<div class="info-card"><h3>${ev.date.split(' ')[1].substring(0,5)}</h3><div class="info-val">${ev.event}</div><div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ (ALTO)' : '★☆☆ (BAIXO)'}</div></div>`;
+                });
+                if(!eventos.length) html = '<div class="info-card" style="grid-column: span 2;"><h3>AVISO</h3><div class="info-val">Sem eventos previstos.</div></div>';
+                else html += '</div>';
+                container.innerHTML = html;
+            } catch(e) {}
+        }
+
         fetchMarket(); setInterval(fetchMarket, 300000);
+        fetchAgenda(); setInterval(fetchAgenda, 3600000);
 
         let newsList = [];
         async function fetchNews() {
@@ -233,8 +233,12 @@
             }
         }, 15000);
 
+        // LÓGICA DE ROTAÇÃO DE PUBLICIDADE CORRIGIDA
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
+        const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let bIdx = 0;
+        let pIdx = 0;
+
         function cycle() {
             const cur = document.getElementById(blocks[bIdx]);
             cur.style.opacity = 0;
@@ -242,7 +246,13 @@
                 cur.style.display = 'none';
                 bIdx = (bIdx + 1) % blocks.length;
                 const nxt = document.getElementById(blocks[bIdx]);
-                if(blocks[bIdx] === 'block-publi') document.getElementById('publi-img').src = 'publi1.png?v='+Date.now();
+                
+                if(blocks[bIdx] === 'block-publi') {
+                    // Seleciona a imagem atual do array e incrementa o índice para a próxima vez
+                    document.getElementById('publi-img').src = publiImages[pIdx] + '?v=' + Date.now();
+                    pIdx = (pIdx + 1) % publiImages.length;
+                }
+
                 nxt.style.display = 'flex';
                 setTimeout(() => nxt.style.opacity = 1, 50);
                 let d = 30000;
