@@ -1,3 +1,4 @@
+<!-- Boonus TV - Versão 1.1.6 | Terminal com Isolamento de Falhas -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -8,7 +9,6 @@
         :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
@@ -17,19 +17,15 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
         #br-time { color: var(--neon-green); }
 
-        /* Esteira B3 */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--neon-green); } .down { color: #ff4444; }
-        .tag-ticker { font-size: 0.65rem; background: #333; color: #fff; padding: 2px 5px; border-radius: 3px; margin-right: 8px; vertical-align: middle; text-transform: uppercase; }
 
-        /* Estrutura Principal */
         .main-container { flex: 1; display: flex; overflow: hidden; }
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
 
-        /* Grades de Dados */
         .macro-grid, .coins-grid, .agenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 90%; text-align: left; }
         .card-column { display: flex; flex-direction: column; gap: 15px; }
         .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; min-height: 80px; }
@@ -37,11 +33,9 @@
         .info-val { font-size: 1.5rem; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .info-sub { font-size: 0.9rem; font-weight: bold; margin-top: 3px; color: #888; }
 
-        /* Notícias */
         #news-title { font-size: 2.2rem; font-weight: bold; line-height: 1.2; max-width: 90%; }
         .news-image { width: auto; max-width: 70%; max-height: 40vh; border-radius: 8px; object-fit: contain; margin-bottom: 15px; border: 2px solid #333; }
         
-        /* Lateral Direita */
         .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-left: 2px solid #1a1a1a; padding: 25px 20px 10px 20px; box-sizing: border-box; }
         .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 150px; height: 150px; margin-bottom: 15px; }
@@ -49,14 +43,6 @@
         .version-tag { font-size: 0.65rem; color: #444; align-self: flex-end; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        @media (max-width: 1024px) {
-            .main-container { flex-direction: column; }
-            .sidebar-qr { flex: none; height: 250px; border-left: none; border-top: 2px solid #1a1a1a; padding: 15px; }
-            .macro-grid, .coins-grid, .agenda-grid { grid-template-columns: 1fr; gap: 10px; }
-            .info-val { font-size: 1.3rem; }
-            #news-title { font-size: 1.5rem; }
-        }
     </style>
 </head>
 <body>
@@ -72,16 +58,15 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Sincronizando mercado B3...</div>
+        <div id="stock-ticker" class="ticker-content">Carregando mercado...</div>
     </div>
 
     <div class="main-container">
         <div class="content-area">
-            
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
                 <div id="news-source" style="color:var(--neon-green); font-weight:bold; margin-bottom:10px; text-transform:uppercase;">Fonte</div>
-                <div id="news-title">Atualizando manchetes financeiras...</div>
+                <div id="news-title">Buscando notícias do mercado...</div>
             </div>
 
             <div id="block-publi" class="display-block">
@@ -92,31 +77,30 @@
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
-                        <div class="info-card"><h3>SELIC (META COPOM)</h3><div class="info-val">14,50%</div></div>
-                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
-                        <div class="info-card"><h3>CDI 2026 ACUM.</h3><div class="info-val">5,25%</div></div>
+                        <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
+                        <div class="info-card"><h3>IPCA (2026)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
-                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div></div>
-                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div></div>
-                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">Sincronizando...</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">Sincronizando...</div></div>
+                        <div class="info-card"><h3>NASDAQ</h3><div id="nasdaq-val" class="info-val">Sincronizando...</div></div>
                     </div>
                 </div>
             </div>
 
             <div id="block-agenda" class="display-block">
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">RADAR ECONÔMICO QUINZENAL</h2>
-                <div id="agenda-container" class="agenda-grid">
-                    </div>
+                <div id="agenda-container" class="agenda-grid"></div>
             </div>
 
             <div id="block-coins" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL <span id="coin-status-global" style="font-size:0.8rem; color:#888;"></span></h2>
+                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL</h2>
                 <div class="coins-grid">
                     <div class="info-card"><h3>Dólar</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
                     <div class="info-card"><h3>Euro</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Iene Japonês</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Libra Esterlina</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Iene</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Libra</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
                 </div>
             </div>
         </div>
@@ -128,7 +112,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.5</div>
+            <div class="version-tag">v: 1.1.6</div>
         </div>
     </div>
 
@@ -143,40 +127,40 @@
         }
         setInterval(updateClocks, 1000); updateClocks();
 
-        async function fetchMarket() {
-            const now = new Date();
-            const isMarketOpen = (now.getDay() >= 1 && now.getDay() <= 5) && (now.getHours() >= 10 && now.getHours() < 18);
-            document.getElementById('coin-status-global').innerText = isMarketOpen ? "(AO VIVO)" : "(FECHAMENTO)";
+        async function fetchBrapi() {
             try {
-                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 8000); // Timeout de 8 seg
+
+                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc', { signal: controller.signal });
                 const data = await res.json();
                 const actions = data.stocks.filter(s => /^[A-Z]{4}[3456]$/.test(s.stock));
                 let tickerHtml = '';
-                const tag = isMarketOpen ? "" : '<span class="tag-ticker">FECHAMENTO</span>';
-                actions.slice(0,10).forEach(s => tickerHtml += `<span class="stock-item">${tag}${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
-                actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${tag}${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
+                actions.slice(0,10).forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
+                actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
 
-                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC,USDBRL,EURBRL,JPYBRL,GBPBRL');
+                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC', { signal: controller.signal });
                 const dataP = await resP.json();
                 dataP.results.forEach(s => {
                     if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
                     if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
                     if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
-                    if(s.symbol === 'USDBRL') updateCoin('usd', s);
-                    if(s.symbol === 'EURBRL') updateCoin('eur', s);
-                    if(s.symbol === 'JPYBRL') updateCoin('jpy', s);
-                    if(s.symbol === 'GBPBRL') updateCoin('gbp', s);
                 });
-            } catch(e) {
-                fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL').then(r => r.json()).then(dB => {
-                    updateCoin('usd', { regularMarketPrice: parseFloat(dB.USDBRL.bid), regularMarketChangePercent: parseFloat(dB.USDBRL.pctChange) });
-                    updateCoin('eur', { regularMarketPrice: parseFloat(dB.EURBRL.bid), regularMarketChangePercent: parseFloat(dB.EURBRL.pctChange) });
-                    updateCoin('jpy', { regularMarketPrice: parseFloat(dB.JPYBRL.bid), regularMarketChangePercent: parseFloat(dB.JPYBRL.pctChange) });
-                    updateCoin('gbp', { regularMarketPrice: parseFloat(dB.GBPBRL.bid), regularMarketChangePercent: parseFloat(dB.GBPBRL.pctChange) });
-                });
-            }
+            } catch(e) { console.warn("Brapi Offline - Usando Fallback"); }
         }
+
+        async function fetchAwesome() {
+            try {
+                const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL');
+                const dB = await r.json();
+                updateCoin('usd', { regularMarketPrice: parseFloat(dB.USDBRL.bid), regularMarketChangePercent: parseFloat(dB.USDBRL.pctChange) });
+                updateCoin('eur', { regularMarketPrice: parseFloat(dB.EURBRL.bid), regularMarketChangePercent: parseFloat(dB.EURBRL.pctChange) });
+                updateCoin('jpy', { regularMarketPrice: parseFloat(dB.JPYBRL.bid), regularMarketChangePercent: parseFloat(dB.JPYBRL.pctChange) });
+                updateCoin('gbp', { regularMarketPrice: parseFloat(dB.GBPBRL.bid), regularMarketChangePercent: parseFloat(dB.GBPBRL.pctChange) });
+            } catch(e) { console.error("Erro Câmbio"); }
+        }
+
         function updateCoin(id, data) {
             document.getElementById(`${id}-val`).innerText = 'R$ ' + data.regularMarketPrice.toFixed(2);
             const varEl = document.getElementById(`${id}-var`);
@@ -190,61 +174,46 @@
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
-                
-                // LIMITADOR: Máximo 6 eventos para enquadramento perfeito
                 const eventos = data.slice(0, 6); 
-                
-                if (!eventos || eventos.length === 0) {
-                    container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Sem indicadores de alto impacto previstos.</div></div>`;
-                    return;
-                }
-
                 let html = '<div class="card-column">';
                 eventos.forEach((ev, idx) => {
                     if (idx === 3) html += '</div><div class="card-column">';
                     const dt = ev.date.split(' ');
                     const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
                     const hora = dt[1].substring(0, 5);
-                    html += `
-                        <div class="info-card">
-                            <h3>${dia} - ${hora}</h3>
-                            <div class="info-val" style="font-size: 1.3rem;">${ev.event}</div>
-                            <div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★☆☆ MÉDIO'}</div>
-                        </div>`;
+                    html += `<div class="info-card"><h3>${dia} - ${hora}</h3><div class="info-val" style="font-size: 1.3rem;">${ev.event}</div><div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★☆☆ MÉDIO'}</div></div>`;
                 });
-                html += '</div>';
-                container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Erro ao carregar radar econômico.</div></div>`;
-            }
+                container.innerHTML = html + '</div>';
+            } catch (e) { document.getElementById('agenda-container').innerHTML = "Sem dados de agenda."; }
         }
-
-        fetchMarket(); setInterval(fetchMarket, 300000);
-        fetchAgenda(); setInterval(fetchAgenda, 3600000);
 
         let newsList = [];
         async function fetchNews() {
-            const feeds = [{n:"INFOMONEY",u:"https://www.infomoney.com.br/feed/"},{n:"VALOR",u:"https://valor.globo.com/rss/valor/"}];
-            for(let f of feeds){
-                try {
-                    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.u)}`);
-                    const d = await r.json();
-                    d.items.forEach(i => newsList.push({...i, src: f.n}));
-                } catch(e) {}
-            }
+            try {
+                const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://www.infomoney.com.br/feed/")}`);
+                const d = await r.json();
+                newsList = d.items;
+            } catch(e) {}
         }
-        fetchNews();
+
+        function startSystem() {
+            fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
+            setInterval(fetchBrapi, 300000);
+            setInterval(fetchAwesome, 60000);
+            setInterval(fetchAgenda, 3600000);
+        }
+        startSystem();
 
         let newsIdx = 0;
         setInterval(() => {
             if(newsList.length && document.getElementById('block-news').style.display !== 'none'){
                 const item = newsList[newsIdx];
-                document.getElementById('news-source').innerText = "FONTE: " + item.src;
+                document.getElementById('news-source').innerText = "FONTE: INFOMONEY";
                 document.getElementById('news-title').innerText = item.title;
                 const img = document.getElementById('news-img');
                 const thumb = item.thumbnail || item.enclosure?.link;
                 if(thumb){
-                    img.src = `https://images.weserv.nl/?url=${encodeURIComponent(thumb)}&w=800&fit=contain&cache=31d`;
+                    img.src = `https://images.weserv.nl/?url=${encodeURIComponent(thumb)}&w=800&fit=contain`;
                     img.style.display = 'block';
                 } else { img.style.display = 'none'; }
                 newsIdx = (newsIdx + 1) % newsList.length;
@@ -253,8 +222,7 @@
 
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
-        let bIdx = 0;
-        let pIdx = 0;
+        let bIdx = 0; let pIdx = 0;
 
         function cycle() {
             const cur = document.getElementById(blocks[bIdx]);
@@ -263,10 +231,16 @@
                 cur.style.display = 'none';
                 bIdx = (bIdx + 1) % blocks.length;
                 const nxt = document.getElementById(blocks[bIdx]);
-                
                 if(blocks[bIdx] === 'block-publi') {
                     document.getElementById('publi-img').src = publiImages[pIdx] + '?v=' + Date.now();
                     pIdx = (pIdx + 1) % publiImages.length;
                 }
-
-                nxt.style.display = '
+                nxt.style.display = 'flex';
+                setTimeout(() => nxt.style.opacity = 1, 50);
+                setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 20000);
+            }, 800);
+        }
+        setTimeout(cycle, 60000);
+    </script>
+</body>
+</html>
