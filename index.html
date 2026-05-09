@@ -32,9 +32,9 @@
         /* Grades de Dados */
         .macro-grid, .coins-grid, .agenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 90%; text-align: left; }
         .card-column { display: flex; flex-direction: column; gap: 15px; }
-        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; }
+        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; min-height: 80px; }
         .info-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
-        .info-val { font-size: 1.6rem; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .info-val { font-size: 1.5rem; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .info-sub { font-size: 0.9rem; font-weight: bold; margin-top: 3px; color: #888; }
 
         /* Notícias */
@@ -62,7 +62,7 @@
 <body>
 
     <div class="header">
-        <div class="logo"><img src="LOGO.png" alt="Boonus Logo"></div>
+        <div class="logo"><img src="logo.png" alt="Boonus Logo"></div>
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
             <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
@@ -105,8 +105,9 @@
             </div>
 
             <div id="block-agenda" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">AGENDA ECONÔMICA DO DIA</h2>
-                <div id="agenda-container" class="agenda-grid"></div>
+                <h2 style="color:var(--neon-green); margin-bottom:20px;">RADAR ECONÔMICO QUINZENAL</h2>
+                <div id="agenda-container" class="agenda-grid">
+                    </div>
             </div>
 
             <div id="block-coins" class="display-block">
@@ -127,7 +128,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.4</div>
+            <div class="version-tag">v: 1.1.5</div>
         </div>
     </div>
 
@@ -189,16 +190,33 @@
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
-                const eventos = data.slice(0, 4);
+                
+                // LIMITADOR: Máximo 6 eventos para enquadramento perfeito
+                const eventos = data.slice(0, 6); 
+                
+                if (!eventos || eventos.length === 0) {
+                    container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Sem indicadores de alto impacto previstos.</div></div>`;
+                    return;
+                }
+
                 let html = '<div class="card-column">';
                 eventos.forEach((ev, idx) => {
-                    if(idx === 2) html += '</div><div class="card-column">';
-                    html += `<div class="info-card"><h3>${ev.date.split(' ')[1].substring(0,5)}</h3><div class="info-val">${ev.event}</div><div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ (ALTO)' : '★☆☆ (BAIXO)'}</div></div>`;
+                    if (idx === 3) html += '</div><div class="card-column">';
+                    const dt = ev.date.split(' ');
+                    const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
+                    const hora = dt[1].substring(0, 5);
+                    html += `
+                        <div class="info-card">
+                            <h3>${dia} - ${hora}</h3>
+                            <div class="info-val" style="font-size: 1.3rem;">${ev.event}</div>
+                            <div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★☆☆ MÉDIO'}</div>
+                        </div>`;
                 });
-                if(!eventos.length) html = '<div class="info-card" style="grid-column: span 2;"><h3>AVISO</h3><div class="info-val">Sem eventos previstos.</div></div>';
-                else html += '</div>';
+                html += '</div>';
                 container.innerHTML = html;
-            } catch(e) {}
+            } catch (e) {
+                container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Erro ao carregar radar econômico.</div></div>`;
+            }
         }
 
         fetchMarket(); setInterval(fetchMarket, 300000);
@@ -233,7 +251,6 @@
             }
         }, 15000);
 
-        // LÓGICA DE ROTAÇÃO DE PUBLICIDADE CORRIGIDA
         const blocks = ['block-news', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
         const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
         let bIdx = 0;
@@ -248,20 +265,8 @@
                 const nxt = document.getElementById(blocks[bIdx]);
                 
                 if(blocks[bIdx] === 'block-publi') {
-                    // Seleciona a imagem atual do array e incrementa o índice para a próxima vez
                     document.getElementById('publi-img').src = publiImages[pIdx] + '?v=' + Date.now();
                     pIdx = (pIdx + 1) % publiImages.length;
                 }
 
-                nxt.style.display = 'flex';
-                setTimeout(() => nxt.style.opacity = 1, 50);
-                let d = 30000;
-                if(blocks[bIdx] === 'block-news') d = 90000;
-                if(blocks[bIdx] === 'block-publi') d = 18000;
-                setTimeout(cycle, d);
-            }, 800);
-        }
-        setTimeout(cycle, 90000);
-    </script>
-</body>
-</html>
+                nxt.style.display = '
