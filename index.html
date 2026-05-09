@@ -1,4 +1,4 @@
-<!-- Boonus TV - Versão 1.1.7 | Radar Quinzenal Global & Sincronização em Segundo Plano -->
+<!-- Boonus TV - Versão 1.1.8 | Agenda Inteligente (Prioridade Impacto 3 > 2) -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -77,9 +77,9 @@
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
-                        <div class="info-card"><h3>SELIC (BACEN)</h3><div class="info-val">14,50%</div></div>
-                        <div class="info-card"><h3>IPCA (IBGE)</h3><div class="info-val">4,00%</div></div>
-                        <div class="info-card"><h3>CDI 2026 ACUM.</h3><div class="info-val">5,25%</div></div>
+                        <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
+                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
                         <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">...</div></div>
@@ -99,8 +99,8 @@
                 <div class="coins-grid">
                     <div class="info-card"><h3>Dólar</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
                     <div class="info-card"><h3>Euro</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Iene Japonês</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Libra Esterlina</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Iene</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Libra</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.7</div>
+            <div class="version-tag">v: 1.1.8</div>
         </div>
     </div>
 
@@ -144,7 +144,7 @@
                     if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
                     if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
                 });
-            } catch(e) { console.warn("Erro Brapi"); }
+            } catch(e) {}
         }
 
         async function fetchAwesome() {
@@ -155,7 +155,7 @@
                 updateCoin('eur', { regularMarketPrice: parseFloat(dB.EURBRL.bid), regularMarketChangePercent: parseFloat(dB.EURBRL.pctChange) });
                 updateCoin('jpy', { regularMarketPrice: parseFloat(dB.JPYBRL.bid), regularMarketChangePercent: parseFloat(dB.JPYBRL.pctChange) });
                 updateCoin('gbp', { regularMarketPrice: parseFloat(dB.GBPBRL.bid), regularMarketChangePercent: parseFloat(dB.GBPBRL.pctChange) });
-            } catch(e) { console.error("Erro Câmbio"); }
+            } catch(e) {}
         }
 
         function updateCoin(id, data) {
@@ -171,18 +171,48 @@
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
-                const eventos = data.filter(ev => ev.importance === '3').slice(0, 6); // Prioriza ALTO impacto (Bacen, Fed, etc)
+                
+                // Filtragem Inteligente: Prioriza Impacto 3, depois completa com 2
+                const impacto3 = data.filter(ev => ev.importance === '3');
+                const impacto2 = data.filter(ev => ev.importance === '2');
+                
+                // Consolida e pega as 6 primeiras linhas totais
+                let eventosValidos = [...impacto3, ...impacto2].slice(0, 6);
+
+                if (eventosValidos.length === 0) {
+                    container.innerHTML = `
+                        <div class="info-card" style="grid-column: span 2; border-left-color: #444; text-align: center;">
+                            <div class="info-val" style="font-size: 1.2rem; color: #888;">Não há agenda de impacto relevante no momento.</div>
+                        </div>`;
+                    return;
+                }
+
                 let html = '<div class="card-column">';
-                eventos.forEach((ev, idx) => {
+                eventosValidos.forEach((ev, idx) => {
                     if (idx === 3) html += '</div><div class="card-column">';
+                    
                     const dt = ev.date.split(' ');
                     const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
                     const hora = dt[1].substring(0, 5);
-                    html += `<div class="info-card"><h3>${dia} - ${hora}</h3><div class="info-val" style="font-size: 1.3rem;">${ev.event}</div><div class="info-sub">Impacto: ★★★ GLOBAL</div></div>`;
+                    const impactoStr = ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO';
+                    
+                    html += `
+                        <div class="info-card">
+                            <h3>${dia} às ${hora}</h3>
+                            <div class="info-val" style="font-size: 1.2rem;">${ev.event}</div>
+                            <div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${impactoStr}</div>
+                        </div>`;
                 });
                 container.innerHTML = html + '</div>';
-            } catch (e) { document.getElementById('agenda-container').innerHTML = "Sem dados de agenda."; }
+            } catch (e) {
+                document.getElementById('agenda-container').innerHTML = `<div class="info-val" style="text-align:center;">Não há agenda de impacto relevante no momento.</div>`;
+            }
         }
+
+        fetchBrapi(); fetchAwesome(); fetchAgenda();
+        setInterval(fetchBrapi, 300000);
+        setInterval(fetchAwesome, 60000);
+        setInterval(fetchAgenda, 3600000);
 
         let newsList = [];
         async function fetchNews() {
@@ -192,12 +222,7 @@
                 newsList = d.items;
             } catch(e) {}
         }
-
-        // CARREGAMENTO INICIAL INDEPENDENTE
-        fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-        setInterval(fetchBrapi, 300000);
-        setInterval(fetchAwesome, 60000);
-        setInterval(fetchAgenda, 3600000);
+        fetchNews();
 
         let newsIdx = 0;
         setInterval(() => {
@@ -232,12 +257,10 @@
                 }
                 nxt.style.display = 'flex';
                 setTimeout(() => nxt.style.opacity = 1, 50);
-                
-                // TEMPOS DE EXIBIÇÃO: Notícias 60s, Outros 25s (para dar tempo de ler)
                 setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 25000);
             }, 800);
         }
-        setTimeout(cycle, 60000); // Inicia o ciclo após o primeiro minuto de carregamento
+        setTimeout(cycle, 60000);
     </script>
 </body>
 </html>
