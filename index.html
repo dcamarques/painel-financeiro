@@ -1,4 +1,4 @@
-<!-- Boonus TV - Versão 1.1.6 | Terminal com Isolamento de Falhas -->
+<!-- Boonus TV - Versão 1.1.7 | Radar Quinzenal Global & Sincronização em Segundo Plano -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Carregando mercado...</div>
+        <div id="stock-ticker" class="ticker-content">Iniciando fluxo B3...</div>
     </div>
 
     <div class="main-container">
@@ -66,7 +66,7 @@
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
                 <div id="news-source" style="color:var(--neon-green); font-weight:bold; margin-bottom:10px; text-transform:uppercase;">Fonte</div>
-                <div id="news-title">Buscando notícias do mercado...</div>
+                <div id="news-title">Monitorando manchetes globais...</div>
             </div>
 
             <div id="block-publi" class="display-block">
@@ -77,14 +77,14 @@
                 <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
-                        <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
-                        <div class="info-card"><h3>IPCA (2026)</h3><div class="info-val">4,00%</div></div>
-                        <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
+                        <div class="info-card"><h3>SELIC (BACEN)</h3><div class="info-val">14,50%</div></div>
+                        <div class="info-card"><h3>IPCA (IBGE)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>CDI 2026 ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
-                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">Sincronizando...</div></div>
-                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">Sincronizando...</div></div>
-                        <div class="info-card"><h3>NASDAQ</h3><div id="nasdaq-val" class="info-val">Sincronizando...</div></div>
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">...</div></div>
                     </div>
                 </div>
             </div>
@@ -95,12 +95,12 @@
             </div>
 
             <div id="block-coins" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL</h2>
+                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL (LIVE)</h2>
                 <div class="coins-grid">
                     <div class="info-card"><h3>Dólar</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
                     <div class="info-card"><h3>Euro</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Iene</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Libra</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Iene Japonês</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Libra Esterlina</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.6</div>
+            <div class="version-tag">v: 1.1.7</div>
         </div>
     </div>
 
@@ -129,10 +129,7 @@
 
         async function fetchBrapi() {
             try {
-                const controller = new AbortController();
-                setTimeout(() => controller.abort(), 8000); // Timeout de 8 seg
-
-                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc', { signal: controller.signal });
+                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
                 const data = await res.json();
                 const actions = data.stocks.filter(s => /^[A-Z]{4}[3456]$/.test(s.stock));
                 let tickerHtml = '';
@@ -140,14 +137,14 @@
                 actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
 
-                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC', { signal: controller.signal });
+                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC');
                 const dataP = await resP.json();
                 dataP.results.forEach(s => {
                     if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
                     if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
                     if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
                 });
-            } catch(e) { console.warn("Brapi Offline - Usando Fallback"); }
+            } catch(e) { console.warn("Erro Brapi"); }
         }
 
         async function fetchAwesome() {
@@ -174,14 +171,14 @@
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
-                const eventos = data.slice(0, 6); 
+                const eventos = data.filter(ev => ev.importance === '3').slice(0, 6); // Prioriza ALTO impacto (Bacen, Fed, etc)
                 let html = '<div class="card-column">';
                 eventos.forEach((ev, idx) => {
                     if (idx === 3) html += '</div><div class="card-column">';
                     const dt = ev.date.split(' ');
                     const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
                     const hora = dt[1].substring(0, 5);
-                    html += `<div class="info-card"><h3>${dia} - ${hora}</h3><div class="info-val" style="font-size: 1.3rem;">${ev.event}</div><div class="info-sub">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★☆☆ MÉDIO'}</div></div>`;
+                    html += `<div class="info-card"><h3>${dia} - ${hora}</h3><div class="info-val" style="font-size: 1.3rem;">${ev.event}</div><div class="info-sub">Impacto: ★★★ GLOBAL</div></div>`;
                 });
                 container.innerHTML = html + '</div>';
             } catch (e) { document.getElementById('agenda-container').innerHTML = "Sem dados de agenda."; }
@@ -196,13 +193,11 @@
             } catch(e) {}
         }
 
-        function startSystem() {
-            fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-            setInterval(fetchBrapi, 300000);
-            setInterval(fetchAwesome, 60000);
-            setInterval(fetchAgenda, 3600000);
-        }
-        startSystem();
+        // CARREGAMENTO INICIAL INDEPENDENTE
+        fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
+        setInterval(fetchBrapi, 300000);
+        setInterval(fetchAwesome, 60000);
+        setInterval(fetchAgenda, 3600000);
 
         let newsIdx = 0;
         setInterval(() => {
@@ -237,10 +232,12 @@
                 }
                 nxt.style.display = 'flex';
                 setTimeout(() => nxt.style.opacity = 1, 50);
-                setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 20000);
+                
+                // TEMPOS DE EXIBIÇÃO: Notícias 60s, Outros 25s (para dar tempo de ler)
+                setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 25000);
             }, 800);
         }
-        setTimeout(cycle, 60000);
+        setTimeout(cycle, 60000); // Inicia o ciclo após o primeiro minuto de carregamento
     </script>
 </body>
 </html>
