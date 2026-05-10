@@ -111,7 +111,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.1.9</div>
+            <div class="version-tag">v: 1.2.0</div>
         </div>
     </div>
 
@@ -165,17 +165,25 @@
             varEl.style.color = up ? 'var(--neon-green)' : '#ff4444';
         }
 
+        // --- ATUALIZAÇÃO SOLICITADA: RADAR ECONÔMICO ---
         async function fetchAgenda() {
             try {
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
+                
+                // Filtra e ordena por relevância (3 primeiro, depois 2)
                 const imp3 = data.filter(ev => ev.importance === '3');
                 const imp2 = data.filter(ev => ev.importance === '2');
+                
+                // Consolida até 6 itens
                 let eventos = [...imp3, ...imp2].slice(0, 6);
 
                 if (eventos.length === 0) {
-                    container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val" style="color:#888;">Não há agenda de impacto relevante no momento.</div></div>`;
+                    container.innerHTML = `
+                        <div class="info-card" style="grid-column: span 2; border-left-color: #444; text-align: center;">
+                            <div class="info-val" style="color:#888;">Sem agenda relevante no momento</div>
+                        </div>`;
                     return;
                 }
 
@@ -185,10 +193,17 @@
                     const dt = ev.date.split(' ');
                     const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
                     const hora = dt[1].substring(0, 5);
-                    html += `<div class="info-card"><h3>${dia} às ${hora}</h3><div class="info-val" style="font-size: 1.2rem;">${ev.event}</div><div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO'}</div></div>`;
+                    html += `
+                        <div class="info-card">
+                            <h3>${dia} às ${hora}</h3>
+                            <div class="info-val" style="font-size: 1.2rem;">${ev.event}</div>
+                            <div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO'}</div>
+                        </div>`;
                 });
                 container.innerHTML = html + '</div>';
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('agenda-container').innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Sem agenda relevante no momento</div></div>`;
+            }
         }
 
         let newsList = [];
@@ -198,7 +213,6 @@
                 {n: "Valor Econômico", u: "https://valor.globo.com/rss/valor/"},
                 {n: "Investing.com", u: "https://br.investing.com/rss/news_25.rss"}
             ];
-            
             for(let f of feeds){
                 try {
                     const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.u)}`);
@@ -206,15 +220,15 @@
                     if(d.items) d.items.forEach(i => newsList.push({...i, sourceName: f.n}));
                 } catch(e) {}
             }
-            // Embaralha para alternar fontes
             newsList.sort(() => Math.random() - 0.5);
         }
 
+        // CONFIGURAÇÃO DE INTERVALOS
         fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-        setInterval(fetchBrapi, 300000);
-        setInterval(fetchAwesome, 60000);
-        setInterval(fetchAgenda, 3600000);
-        setInterval(fetchNews, 1800000);
+        setInterval(fetchBrapi, 300000);   // 5 min
+        setInterval(fetchAwesome, 60000);  // 1 min
+        setInterval(fetchAgenda, 21600000); // 6 HORAS (Solicitado)
+        setInterval(fetchNews, 1800000);    // 30 min
 
         let newsIdx = 0;
         setInterval(() => {
@@ -223,10 +237,7 @@
                 document.getElementById('news-source').innerText = "FONTE: " + item.sourceName;
                 document.getElementById('news-title').innerText = item.title;
                 const img = document.getElementById('news-img');
-                
-                // Tenta encontrar a melhor imagem no RSS
                 const thumb = item.thumbnail || item.enclosure?.link || (item.content?.match(/src="([^"]+)"/)?.[1]);
-                
                 if(thumb && !thumb.includes('transparent')){
                     img.src = `https://images.weserv.nl/?url=${encodeURIComponent(thumb)}&w=1000&fit=contain`;
                     img.style.display = 'block';
