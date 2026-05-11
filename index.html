@@ -57,7 +57,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Sincronizando mercados B3...</div>
+        <div id="stock-ticker" class="ticker-content">Sincronizando B3...</div>
     </div>
 
     <div class="main-container">
@@ -65,7 +65,7 @@
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
                 <div id="news-source" style="color:var(--neon-green); font-weight:bold; text-transform:uppercase; font-size: 0.9rem; letter-spacing: 1px;">Fonte</div>
-                <div id="news-title">Buscando manchetes financeiras...</div>
+                <div id="news-title">Aguardando manchetes do mercado...</div>
             </div>
 
             <div id="block-publi" class="display-block">
@@ -77,13 +77,13 @@
                 <div class="macro-grid">
                     <div class="card-column">
                         <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
-                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>IPCA (IBGE)</h3><div class="info-val">4,00%</div></div>
                         <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
-                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">...</div></div>
-                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">...</div></div>
-                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">---</div></div>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.2.1</div>
+            <div class="version-tag">v: 1.2.2</div>
         </div>
     </div>
 
@@ -126,7 +126,7 @@
         }
         setInterval(updateClocks, 1000); updateClocks();
 
-        // --- CORREÇÃO DE ÍNDICES ---
+        // --- LÓGICA DE ÍNDICES ROBUSTA ---
         async function fetchBrapi() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
@@ -137,21 +137,26 @@
                 actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
 
+                // Tenta buscar índices principais
                 const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC');
                 const dataP = await resP.json();
                 dataP.results.forEach(s => {
-                    if(s.symbol === '^BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
-                    if(s.symbol === '^GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
-                    if(s.symbol === '^IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
+                    if(s.symbol === '^BVSP' && s.regularMarketPrice) document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
+                    if(s.symbol === '^GSPC' && s.regularMarketPrice) document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
+                    if(s.symbol === '^IXIC' && s.regularMarketPrice) document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
                 });
-            } catch(e) {
-                // Se a Brapi falhar, tenta buscar o Ibovespa na AwesomeAPI (que tem o par BRL-IBOV)
-                fetch('https://economia.awesomeapi.com.br/json/last/IBOV').then(r => r.json()).then(d => {
-                    document.getElementById('ibov-val').innerText = parseFloat(d.IBOV.bid).toLocaleString('pt-BR');
-                }).catch(() => {
-                    if(document.getElementById('ibov-val').innerText === "...") document.getElementById('ibov-val').innerText = "Indisponível";
-                });
+            } catch(e) { 
+                // Fallback imediato para Ibovespa via AwesomeAPI
+                fetchAwesomeFallback();
             }
+        }
+
+        async function fetchAwesomeFallback() {
+            try {
+                const r = await fetch('https://economia.awesomeapi.com.br/json/last/IBOV');
+                const d = await r.json();
+                if(d.IBOV) document.getElementById('ibov-val').innerText = parseFloat(d.IBOV.bid).toLocaleString('pt-BR');
+            } catch(e) {}
         }
 
         async function fetchAwesome() {
@@ -196,9 +201,7 @@
                     html += `<div class="info-card"><h3>${dia} às ${hora}</h3><div class="info-val" style="font-size: 1.2rem;">${ev.event}</div><div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO'}</div></div>`;
                 });
                 container.innerHTML = html + '</div>';
-            } catch (e) {
-                document.getElementById('agenda-container').innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Sem agenda relevante no momento</div></div>`;
-            }
+            } catch (e) {}
         }
 
         let newsList = [];
@@ -219,10 +222,10 @@
         }
 
         fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-        setInterval(fetchBrapi, 300000);   // 5 min
-        setInterval(fetchAwesome, 60000);  // 1 min
-        setInterval(fetchAgenda, 21600000); // 6 HORAS
-        setInterval(fetchNews, 1800000);    // 30 min
+        setInterval(fetchBrapi, 300000);
+        setInterval(fetchAwesome, 60000);
+        setInterval(fetchAgenda, 21600000);
+        setInterval(fetchNews, 1800000);
 
         let newsIdx = 0;
         setInterval(() => {
