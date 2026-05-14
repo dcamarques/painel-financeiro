@@ -57,7 +57,7 @@
     </div>
 
     <div class="ticker-container">
-        <div id="stock-ticker" class="ticker-content">Sincronizando B3...</div>
+        <div id="stock-ticker" class="ticker-content">Sincronizando mercados globais...</div>
     </div>
 
     <div class="main-container">
@@ -65,7 +65,7 @@
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
                 <div id="news-source" style="color:var(--neon-green); font-weight:bold; text-transform:uppercase; font-size: 0.9rem; letter-spacing: 1px;">Fonte</div>
-                <div id="news-title">Aguardando manchetes do mercado...</div>
+                <div id="news-title">Buscando as últimas do mercado...</div>
             </div>
 
             <div id="block-publi" class="display-block">
@@ -77,13 +77,13 @@
                 <div class="macro-grid">
                     <div class="card-column">
                         <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
-                        <div class="info-card"><h3>IPCA (IBGE)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
                         <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
-                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div></div>
-                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div></div>
-                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">...</div></div>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.2.2</div>
+            <div class="version-tag">v: 1.2.1</div>
         </div>
     </div>
 
@@ -126,9 +126,9 @@
         }
         setInterval(updateClocks, 1000); updateClocks();
 
-        // --- LÓGICA DE ÍNDICES ROBUSTA ---
         async function fetchBrapi() {
             try {
+                // Busca a lista para o Ticker
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
                 const data = await res.json();
                 const actions = data.stocks.filter(s => /^[A-Z]{4}[3456]$/.test(s.stock));
@@ -137,26 +137,31 @@
                 actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                 document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
 
-                // Tenta buscar índices principais
-                const resP = await fetch('https://brapi.dev/api/quote/^BVSP,^GSPC,^IXIC');
+                // --- CORREÇÃO DO IBOVESPA ---
+                // Buscamos especificamente pelos índices principais codificados na URL
+                const resP = await fetch('https://brapi.dev/api/quote/%5EBVSP%2C%5EGSPC%2C%5EIXIC');
                 const dataP = await resP.json();
-                dataP.results.forEach(s => {
-                    if(s.symbol === '^BVSP' && s.regularMarketPrice) document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
-                    if(s.symbol === '^GSPC' && s.regularMarketPrice) document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
-                    if(s.symbol === '^IXIC' && s.regularMarketPrice) document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
-                });
-            } catch(e) { 
-                // Fallback imediato para Ibovespa via AwesomeAPI
-                fetchAwesomeFallback();
+                
+                if (dataP.results) {
+                    dataP.results.forEach(s => {
+                        // Verificação flexível do símbolo (com ou sem ^)
+                        if(s.symbol === '^BVSP' || s.symbol === 'BVSP') {
+                            const val = s.regularMarketPrice ? s.regularMarketPrice.toLocaleString('pt-BR') : '---';
+                            document.getElementById('ibov-val').innerText = val;
+                        }
+                        if(s.symbol === '^GSPC' || s.symbol === 'GSPC') {
+                            const val = s.regularMarketPrice ? s.regularMarketPrice.toLocaleString('pt-BR') : '---';
+                            document.getElementById('sp500-val').innerText = val;
+                        }
+                        if(s.symbol === '^IXIC' || s.symbol === 'IXIC') {
+                            const val = s.regularMarketPrice ? s.regularMarketPrice.toLocaleString('pt-BR') : '---';
+                            document.getElementById('nasdaq-val').innerText = val;
+                        }
+                    });
+                }
+            } catch(e) {
+                console.log("Erro na Brapi:", e);
             }
-        }
-
-        async function fetchAwesomeFallback() {
-            try {
-                const r = await fetch('https://economia.awesomeapi.com.br/json/last/IBOV');
-                const d = await r.json();
-                if(d.IBOV) document.getElementById('ibov-val').innerText = parseFloat(d.IBOV.bid).toLocaleString('pt-BR');
-            } catch(e) {}
         }
 
         async function fetchAwesome() {
@@ -183,12 +188,17 @@
                 const res = await fetch('https://economia.awesomeapi.com.br/json/calendario');
                 const data = await res.json();
                 const container = document.getElementById('agenda-container');
+                
                 const imp3 = data.filter(ev => ev.importance === '3');
                 const imp2 = data.filter(ev => ev.importance === '2');
+                
                 let eventos = [...imp3, ...imp2].slice(0, 6);
 
                 if (eventos.length === 0) {
-                    container.innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val" style="color:#888;">Sem agenda relevante no momento</div></div>`;
+                    container.innerHTML = `
+                        <div class="info-card" style="grid-column: span 2; border-left-color: #444; text-align: center;">
+                            <div class="info-val" style="color:#888;">Sem agenda relevante no momento</div>
+                        </div>`;
                     return;
                 }
 
@@ -198,10 +208,17 @@
                     const dt = ev.date.split(' ');
                     const dia = dt[0].split('-').reverse().slice(0, 2).join('/');
                     const hora = dt[1].substring(0, 5);
-                    html += `<div class="info-card"><h3>${dia} às ${hora}</h3><div class="info-val" style="font-size: 1.2rem;">${ev.event}</div><div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO'}</div></div>`;
+                    html += `
+                        <div class="info-card">
+                            <h3>${dia} às ${hora}</h3>
+                            <div class="info-val" style="font-size: 1.2rem;">${ev.event}</div>
+                            <div class="info-sub" style="color: ${ev.importance === '3' ? 'var(--neon-green)' : '#888'}">Impacto: ${ev.importance === '3' ? '★★★ ALTO' : '★★☆ MÉDIO'}</div>
+                        </div>`;
                 });
                 container.innerHTML = html + '</div>';
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('agenda-container').innerHTML = `<div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val">Sem agenda relevante no momento</div></div>`;
+            }
         }
 
         let newsList = [];
