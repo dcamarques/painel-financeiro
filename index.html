@@ -27,14 +27,14 @@
 
         .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 95%; text-align: left; }
         .card-column { display: flex; flex-direction: column; gap: 15px; }
-        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
+        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
         .info-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
-        .info-val { font-size: 1.5rem; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .info-sub { font-size: 0.9rem; font-weight: bold; margin-top: 3px; color: #888; }
+        .info-val { font-size: 1.5rem; font-weight: bold; display: block; white-space: nowrap; }
+        .info-sub { font-size: 0.95rem; font-weight: bold; margin-top: 3px; color: #888; }
 
         /* Estilo para Logos na Planilha */
         .card-with-logo { display: flex; align-items: center; gap: 15px; }
-        .asset-logo { width: 50px; height: 50px; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px; }
+        .asset-logo { width: 60px; height: 60px; object-fit: contain; background: #fff; border-radius: 8px; padding: 5px; flex-shrink: 0; }
 
         #news-title { font-size: 2.1rem; font-weight: bold; line-height: 1.2; max-width: 90%; margin-top: 10px; }
         .news-image { width: auto; max-width: 80%; max-height: 45vh; border-radius: 8px; object-fit: contain; margin-bottom: 10px; border: 2px solid #333; }
@@ -120,50 +120,60 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.3.0</div>
+            <div class="version-tag">v: 1.3.1</div>
         </div>
     </div>
 
     <script>
-        // --- FUNÇÃO PARA LER GOOGLE SHEETS ---
+        // --- FUNÇÃO PARA LER GOOGLE SHEETS COM LIMPEZA DE DADOS ---
         async function fetchOpportunities() {
             try {
                 const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?output=csv';
-                const response = await fetch(url);
+                const response = await fetch(url + '&t=' + new Date().getTime());
                 const csvData = await response.text();
-                const rows = csvData.split('\n').slice(1); // Pula o cabeçalho
+                
+                // Regex para lidar com vírgulas dentro de aspas (evita quebrar o R$ 42,00)
+                const rows = csvData.split(/\r?\n/).slice(1); 
                 
                 const container = document.getElementById('opps-container');
                 let html = '<div class="card-column">';
                 
                 rows.forEach((row, idx) => {
-                    if (idx > 5) return; // Limite de 6 itens na tela
+                    if (idx > 5 || row.trim() === "") return;
                     if (idx === 3) html += '</div><div class="card-column">';
                     
-                    const cols = row.split(',');
-                    if (cols.length < 3) return;
+                    // Divide por vírgula mas ignora as que estão dentro de aspas
+                    const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                    
+                    if (cols.length >= 3) {
+                        const clean = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
+                        const classe = clean(cols[0]);
+                        const ativo = clean(cols[1]);
+                        const taxa = clean(cols[2]);
+                        const destaque = clean(cols[3]);
+                        const logoUrl = clean(cols[4]);
 
-                    const [classe, ativo, taxa, destaque, logoUrl] = cols;
-                    const imgHtml = logoUrl && logoUrl.trim().length > 10 ? `<img src="${logoUrl.trim()}" class="asset-logo">` : '';
+                        const imgHtml = logoUrl.length > 10 ? `<img src="${logoUrl}" class="asset-logo" onerror="this.style.display='none'">` : '';
 
-                    html += `
-                        <div class="info-card">
-                            <h3>${classe}</h3>
-                            <div class="card-with-logo">
-                                ${imgHtml}
-                                <div>
-                                    <div class="info-val">${ativo}</div>
-                                    <div class="info-sub" style="color:var(--neon-green)">${taxa}</div>
-                                    <div class="info-sub" style="font-size:0.75rem">${destaque || ''}</div>
+                        html += `
+                            <div class="info-card">
+                                <h3>${classe}</h3>
+                                <div class="card-with-logo">
+                                    ${imgHtml}
+                                    <div>
+                                        <div class="info-val">${ativo}</div>
+                                        <div class="info-sub" style="color:var(--neon-green)">${taxa}</div>
+                                        <div class="info-sub" style="font-size:0.8rem; opacity:0.8;">${destaque}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>`;
+                            </div>`;
+                    }
                 });
                 container.innerHTML = html + '</div>';
             } catch (e) { console.error("Erro na Planilha:", e); }
         }
 
-        // Funções de Relógio e Mercados
+        // --- RESTANTE DAS FUNÇÕES (IDÊNTICAS À 1.3.0) ---
         function updateClocks() {
             const now = new Date();
             const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
@@ -244,9 +254,8 @@
             newsList.sort(() => Math.random() - 0.5);
         }
 
-        // Intervalos
         fetchOpportunities(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-        setInterval(fetchOpportunities, 300000); // 5 min
+        setInterval(fetchOpportunities, 300000);
         setInterval(fetchBrapi, 300000);
         setInterval(fetchAwesome, 60000);
         setInterval(fetchAgenda, 21600000);
