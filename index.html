@@ -12,7 +12,8 @@
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
         .clock-box { text-align: center; min-width: 85px; }
-        .label { font-size: 0.65rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
+        /* TAMANHO DAS CIDADES AUMENTADO AQUI (de 0.65rem para 0.8rem) */
+        .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
         #br-time { color: var(--neon-green); }
 
@@ -38,8 +39,9 @@
         #news-title { font-size: 2.1rem; font-weight: bold; line-height: 1.2; max-width: 90%; margin-top: 10px; }
         .news-image { width: auto; max-width: 80%; max-height: 45vh; border-radius: 8px; object-fit: contain; margin-bottom: 10px; border: 2px solid #333; }
         
-        .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-left: 2px solid #1a1a1a; padding: 25px 20px 10px 20px; box-sizing: border-box; }
-        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        /* CURSOR POINTER ADICIONADO AQUI PARA INDICAR ÁREA CLICÁVEL */
+        .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-left: 2px solid #1a1a1a; padding: 25px 20px 10px 20px; box-sizing: border-box; cursor: pointer; }
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; pointer-events: none; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 150px; height: 150px; margin-bottom: 15px; }
         .qr-text { font-size: 1rem; font-weight: bold; color: var(--neon-green); text-align: center; line-height: 1.2; }
         .version-tag { font-size: 0.65rem; color: #444; align-self: flex-end; }
@@ -112,14 +114,14 @@
             </div>
         </div>
 
-        <div class="sidebar-qr">
+        <div class="sidebar-qr" onclick="toggleFullScreen()">
             <div class="qr-section">
                 <div class="qr-box">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.4.3</div>
+            <div class="version-tag">v: 1.4.4</div>
         </div>
     </div>
 
@@ -133,6 +135,19 @@
         const URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
 
         // ==========================================
+
+        // --- FUNÇÃO DE TELA CHEIA ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Erro ao tentar modo tela cheia: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
 
         try {
             // --- RELÓGIOS GLOBAIS ---
@@ -269,101 +284,4 @@
             }
 
             // --- CÂMBIO (AWESOME API) ---
-            async function fetchAwesome() {
-                try {
-                    const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL');
-                    const dB = await r.json();
-                    const updateC = (id, cur) => {
-                        document.getElementById(`${id}-val`).innerText = 'R$ ' + parseFloat(cur.bid).toFixed(2);
-                        const pct = parseFloat(cur.pctChange);
-                        const varEl = document.getElementById(`${id}-var`);
-                        varEl.innerText = (pct >= 0 ? '▲ ' : '▼ ') + pct.toFixed(2) + '%';
-                        varEl.style.color = pct >= 0 ? 'var(--neon-green)' : '#ff4444';
-                    };
-                    updateC('usd', dB.USDBRL); updateC('eur', dB.EURBRL); updateC('jpy', dB.JPYBRL); updateC('gbp', dB.GBPBRL);
-                } catch(e) {}
-            }
-
-            // --- RSS NOTÍCIAS ---
-            let newsList = [];
-            async function fetchNews() {
-                const feeds = [
-                    {n: "InfoMoney", u: "https://www.infomoney.com.br/feed/"},
-                    {n: "Valor Econômico", u: "https://valor.globo.com/rss/valor/"}
-                ];
-                newsList = []; 
-                for(let f of feeds){
-                    try {
-                        const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.u)}`);
-                        const d = await r.json();
-                        if(d.items) d.items.forEach(i => newsList.push({...i, sourceName: f.n}));
-                    } catch(e) {}
-                }
-                newsList.sort(() => Math.random() - 0.5);
-            }
-
-            // --- INICIALIZAÇÃO E INTERVALOS ---
-            fetchOpportunities(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-            setInterval(fetchOpportunities, 300000); 
-            setInterval(fetchBrapi, 300000);         
-            setInterval(fetchAwesome, 60000);        
-            setInterval(fetchAgenda, 300000);         
-            setInterval(fetchNews, 1800000);          
-
-            // Rotação Notícias
-            let newsIdx = 0;
-            setInterval(() => {
-                if(newsList.length && document.getElementById('block-news').style.display !== 'none'){
-                    const item = newsList[newsIdx];
-                    document.getElementById('news-source').innerText = "FONTE: " + item.sourceName;
-                    document.getElementById('news-title').innerText = item.title;
-                    const img = document.getElementById('news-img');
-                    const thumb = item.thumbnail || item.enclosure?.link || (item.content?.match(/src="([^"]+)"/)?.[1]);
-                    if(thumb && !thumb.includes('transparent')){
-                        img.src = thumb;
-                        img.style.display = 'block';
-                    } else { img.style.display = 'none'; }
-                    newsIdx = (newsIdx + 1) % newsList.length;
-                }
-            }, 15000);
-
-            // Rotação Telas
-            const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
-            const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
-            let bIdx = 0; let pIdx = 0;
-
-            function cycle() {
-                try {
-                    const cur = document.getElementById(blocks[bIdx]);
-                    cur.style.opacity = 0;
-                    setTimeout(() => {
-                        cur.style.display = 'none';
-                        bIdx = (bIdx + 1) % blocks.length;
-                        const nxt = document.getElementById(blocks[bIdx]);
-                        
-                        // --- CORREÇÃO DO BLOCO DE PUBLICIDADE ---
-                        if(blocks[bIdx] === 'block-publi') {
-                            const imgPubli = document.getElementById('publi-img');
-                            
-                            // Desfaz a "invisibilidade" caso tenha dado erro na rodada anterior
-                            imgPubli.style.display = 'block'; 
-                            
-                            // Carrega a nova imagem
-                            imgPubli.src = publiImages[pIdx] + '?v=' + Date.now();
-                            pIdx = (pIdx + 1) % publiImages.length;
-                        }
-                        
-                        nxt.style.display = 'flex';
-                        setTimeout(() => nxt.style.opacity = 1, 50);
-                        setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 25000);
-                    }, 800);
-                } catch(e) { console.error("Erro ciclo", e); setTimeout(cycle, 10000); }
-            }
-            setTimeout(cycle, 60000);
-
-        } catch(fatalError) {
-            console.error("Erro crítico que travou o script:", fatalError);
-        }
-    </script>
-</body>
-</html>
+            async function fetchAwesome
