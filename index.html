@@ -6,8 +6,13 @@
     <title>Boonus TV - Terminal Financeiro</title>
     <style>
         :root { 
-            /* Paleta Genérica Padrão */
+            /* Paleta Genérica Padrão (Marca) */
             --neon-color: #00ff88; 
+            
+            /* Paleta Financeira Universal (Imutável) */
+            --positive-color: #00ff88; 
+            --negative-color: #ff4444;
+            
             --dark-bg: #050505; 
             --panel-bg: #111; 
         }
@@ -24,7 +29,10 @@
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
-        .up { color: var(--neon-color); transition: color 0.5s; } .down { color: #ff4444; }
+        
+        /* Ajuste: Cores de mercado cravadas no padrão universal */
+        .up { color: var(--positive-color); } 
+        .down { color: var(--negative-color); }
 
         .main-container { flex: 1; display: flex; overflow: hidden; }
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
@@ -145,7 +153,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.7.0</div>
+            <div class="version-tag">v: 1.7.2</div>
         </div>
     </div>
 
@@ -154,20 +162,17 @@
         // CONFIGURAÇÕES BASE E LINKS DE CLIENTES
         // ==========================================
         
-        // Parâmetros extraídos da URL (?cliente=safra ou ?cliente=btg)
         const urlParams = new URLSearchParams(window.location.search);
         const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
 
-        // Inicialização de Variáveis de Infraestrutura conforme o Tenant logado
         let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
         let URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
         let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
-        let URL_CONTADOR = ''; // Telemetria padrão inativa (pode ser inserida se desejar monitorar o genérico)
+        let URL_CONTADOR = ''; 
         let publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
 
-        // Aplicação Cirúrgica de Identidade Visual e Fontes Exclusivas
         if (tenant === 'safra') {
-            document.documentElement.style.setProperty('--neon-color', '#C29B0C'); // Dourado Safra Invest
+            document.documentElement.style.setProperty('--neon-color', '#C29B0C'); 
             document.getElementById('header-logo').src = 'logo-safra.png';
             publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
             
@@ -176,7 +181,7 @@
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=327977986&single=true&output=csv';
             URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbzI8HxET-dGKkV5jcrAYxH7xcG2SjCJdfugrW0_1y4t8_Gil0rKjxjnt8R-oFEV27I6IQ/exec';
         } else if (tenant === 'btg') {
-            document.documentElement.style.setProperty('--neon-color', '#00d2ff'); // Azul Ciano de Alto Contraste (Custo de UX resolvido)
+            document.documentElement.style.setProperty('--neon-color', '#00d2ff'); 
             document.getElementById('header-logo').src = 'logo-btg.png';
             publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
             
@@ -305,7 +310,7 @@
                                         ${imgHtml}
                                         <div style="flex:1">
                                             <div class="info-val">${ativo}</div>
-                                            <div class="info-sub" style="color:var(--theme-color, var(--neon-color)); font-size: 1.4rem;">${taxa}</div>
+                                            <div class="info-sub" style="color:var(--neon-color); font-size: 1.4rem;">${taxa}</div>
                                             <div class="info-sub" style="font-size:0.85rem; opacity:0.9;">${destaque || ''}</div>
                                         </div>
                                     </div>
@@ -377,8 +382,10 @@
                                 document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 const varEl = document.getElementById(varId);
                                 const isUp = variation >= 0;
+                                
+                                // Ajuste: Utilizando cores de mercado fixas
                                 varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
-                                varEl.style.color = isUp ? 'var(--neon-color)' : '#ff4444';
+                                varEl.style.color = isUp ? 'var(--positive-color)' : 'var(--negative-color)';
                             }
                         }
                     });
@@ -407,8 +414,10 @@
                         document.getElementById(`${id}-val`).innerText = 'R$ ' + parseFloat(cur.bid).toFixed(2);
                         const pct = parseFloat(cur.pctChange);
                         const varEl = document.getElementById(`${id}-var`);
+                        
+                        // Ajuste: Utilizando cores de mercado fixas
                         varEl.innerText = (pct >= 0 ? '▲ ' : '▼ ') + pct.toFixed(2) + '%';
-                        varEl.style.color = pct >= 0 ? 'var(--neon-color)' : '#ff4444';
+                        varEl.style.color = pct >= 0 ? 'var(--positive-color)' : 'var(--negative-color)';
                     };
                     updateC('usd', dB.USDBRL); updateC('eur', dB.EURBRL); updateC('jpy', dB.JPYBRL); updateC('gbp', dB.GBPBRL);
                 } catch(e) {}
@@ -432,7 +441,7 @@
                 newsList.sort(() => Math.random() - 0.5);
             }
 
-            // --- INICIALIZAÇÃO, TELEMETRIA E INTERVALOS ---
+            // --- INICIALIZAÇÃO E INTERVALOS ---
             registrarAcesso(); 
             fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
             
