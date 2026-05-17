@@ -46,28 +46,20 @@
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* =========================================================
-           REGRAS EXCLUSIVAS PARA SMARTPHONES (Não afeta a TV)
-           ========================================================= */
+        /* REGRAS MOBILE */
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 15px; padding: 15px 10px; }
             .clocks-container { flex-wrap: wrap; justify-content: center; gap: 10px; }
             .clock-box { min-width: 70px; }
             .time { font-size: 1.3rem; }
             .stock-item { font-size: 1.2rem; margin: 0 15px; }
-            
             .main-container { flex-direction: column; }
-            
-            /* Ajuste dos cards para uma única coluna no celular */
             .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { grid-template-columns: 1fr; gap: 10px; width: 100%; }
             .card-column { gap: 10px; }
             .info-card { min-height: auto; padding: 12px 15px; }
             .info-val { font-size: 1.3rem; }
-            
             #news-title { font-size: 1.4rem; }
             .news-image { max-height: 25vh; }
-            
-            /* Transforma a barra lateral em um rodapé horizontal no celular */
             .sidebar-qr { flex: none; height: auto; flex-direction: row; padding: 10px 15px; border-left: none; border-top: 2px solid #1a1a1a; justify-content: center; gap: 15px; position: relative; }
             .qr-section { flex-direction: row; gap: 15px; text-align: left; align-items: center; }
             .qr-box { width: 70px; height: 70px; margin-bottom: 0; padding: 5px; }
@@ -118,9 +110,9 @@
                         <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
                     </div>
                     <div class="card-column">
-                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">...</div></div>
-                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">...</div></div>
-                        <div class="info-card"><h3>NASDAQ-100</h3><div id="nasdaq-val" class="info-val">...</div></div>
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div><div id="sp500-var" class="info-sub">---</div></div>
+                        <div class="info-card"><h3>NASDAQ</h3><div id="nasdaq-val" class="info-val">---</div><div id="nasdaq-var" class="info-sub">---</div></div>
                     </div>
                 </div>
             </div>
@@ -148,17 +140,18 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.4.6</div>
+            <div class="version-tag">v: 1.5.1</div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // CONFIGURAÇÕES DO ESCRITÓRIO
+        // CONFIGURAÇÕES DO ESCRITÓRIO 
         // ==========================================
         
         const URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
         const URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
+        const URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv'; 
 
         // ==========================================
 
@@ -171,6 +164,22 @@
         }
 
         try {
+            // --- FUNÇÃO BLINDADA PARA LER NÚMEROS DE QUALQUER PLANILHA ---
+            function safeParseFloat(str) {
+                if (!str) return 0;
+                str = str.replace(/[^\d.,-]/g, ''); 
+                const lastComma = str.lastIndexOf(',');
+                const lastDot = str.lastIndexOf('.');
+                
+                if (lastComma > lastDot) {
+                    return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+                } else if (lastDot > lastComma) {
+                    return parseFloat(str.replace(/,/g, ''));
+                } else {
+                    return parseFloat(str);
+                }
+            }
+
             // --- RELÓGIOS GLOBAIS ---
             function updateClocks() {
                 try {
@@ -184,7 +193,7 @@
             }
             setInterval(updateClocks, 1000); updateClocks();
 
-            // --- PARSER DE CSV ROBUSTO ---
+            // --- PARSER DE CSV ---
             function parseCSV(text) {
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
                 return lines.map(line => {
@@ -219,7 +228,6 @@
                     data.forEach((cols, idx) => {
                         if (idx >= 6) return;
                         if (idx === 3) html += '</div><div class="card-column">';
-                        
                         if (cols.length >= 3) {
                             const [classe, ativo, taxa, destaque, logoUrl] = cols;
                             const imgHtml = (logoUrl && logoUrl.length > 10) ? `<img src="${logoUrl}" class="asset-logo" onerror="this.style.display='none'">` : '';
@@ -251,7 +259,6 @@
                     const data = parseCSV(csvText).slice(1);
                     
                     const container = document.getElementById('agenda-container');
-                    
                     if (data.length === 0) {
                         container.innerHTML = `<div class="info-card" style="grid-column: span 2; border-left-color: #444; text-align: center;"><div class="info-val" style="color:#888;">Sem agenda relevante no momento</div></div>`;
                         return;
@@ -261,7 +268,6 @@
                     data.forEach((cols, idx) => {
                         if (idx >= 6) return;
                         if (idx === 3) html += '</div><div class="card-column">';
-                        
                         if (cols.length >= 2) {
                             const [dataHora, indicador, impacto, projecao] = cols;
                             const isAlto = impacto && impacto.toUpperCase().includes('ALTO');
@@ -281,7 +287,41 @@
                 } catch (e) { console.error("Erro Agenda:", e); }
             }
 
-            // --- COTAÇÕES (BRAPI) ---
+            // --- QUADRO 3: ÍNDICES MACRO (GOOGLE FINANCE INTEGRAÇÃO) ---
+            async function fetchMacro() {
+                try {
+                    if (!URL_MACRO || URL_MACRO === '') return; 
+                    
+                    const response = await fetch(URL_MACRO + '&t=' + new Date().getTime());
+                    if (!response.ok) throw new Error("Falha na rede");
+                    const csvText = await response.text();
+                    const data = parseCSV(csvText);
+                    
+                    data.forEach(cols => {
+                        if (cols.length >= 3) {
+                            const indice = cols[0].toUpperCase();
+                            const price = safeParseFloat(cols[1]);
+                            const variation = safeParseFloat(cols[2]);
+                            
+                            let valId = ''; let varId = '';
+                            
+                            if (indice.includes('IBOV')) { valId = 'ibov-val'; varId = 'ibov-var'; }
+                            else if (indice.includes('S&P') || indice.includes('INX')) { valId = 'sp500-val'; varId = 'sp500-var'; }
+                            else if (indice.includes('NASDAQ') || indice.includes('IXIC')) { valId = 'nasdaq-val'; varId = 'nasdaq-var'; }
+                            
+                            if (valId && price > 0) {
+                                document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                const varEl = document.getElementById(varId);
+                                const isUp = variation >= 0;
+                                varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
+                                varEl.style.color = isUp ? 'var(--neon-green)' : '#ff4444';
+                            }
+                        }
+                    });
+                } catch (e) { console.error("Erro Macro:", e); }
+            }
+
+            // --- TICKER DE AÇÕES ---
             async function fetchBrapi() {
                 try {
                     const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
@@ -291,16 +331,6 @@
                     actions.slice(0,10).forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
                     actions.slice(-10).reverse().forEach(s => tickerHtml += `<span class="stock-item">${s.stock} <span class="down">▼ ${s.change.toFixed(2)}%</span></span>`);
                     document.getElementById('stock-ticker').innerHTML = tickerHtml + tickerHtml;
-
-                    const resP = await fetch('https://brapi.dev/api/quote/%5EBVSP%2C%5EGSPC%2C%5EIXIC');
-                    const dataP = await resP.json();
-                    if (dataP.results) {
-                        dataP.results.forEach(s => {
-                            if(s.symbol === '^BVSP' || s.symbol === 'BVSP') document.getElementById('ibov-val').innerText = s.regularMarketPrice.toLocaleString('pt-BR');
-                            if(s.symbol === '^GSPC' || s.symbol === 'GSPC') document.getElementById('sp500-val').innerText = s.regularMarketPrice.toLocaleString();
-                            if(s.symbol === '^IXIC' || s.symbol === 'IXIC') document.getElementById('nasdaq-val').innerText = s.regularMarketPrice.toLocaleString();
-                        });
-                    }
                 } catch(e) {}
             }
 
@@ -339,8 +369,9 @@
             }
 
             // --- INICIALIZAÇÃO E INTERVALOS ---
-            fetchOpportunities(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
+            fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
             setInterval(fetchOpportunities, 300000); 
+            setInterval(fetchMacro, 300000);         
             setInterval(fetchBrapi, 300000);         
             setInterval(fetchAwesome, 60000);        
             setInterval(fetchAgenda, 300000);         
@@ -393,7 +424,7 @@
             setTimeout(cycle, 60000);
 
         } catch(fatalError) {
-            console.error("Erro crítico que travou o script:", fatalError);
+            console.error("Erro crítico:", fatalError);
         }
     </script>
 </body>
