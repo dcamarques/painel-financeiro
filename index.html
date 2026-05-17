@@ -164,7 +164,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.7.3</div>
+            <div class="version-tag">v: 1.7.4</div>
         </div>
     </div>
 
@@ -444,7 +444,7 @@
                 newsList.sort(() => Math.random() - 0.5);
             }
 
-            // --- INICIALIZAÇÃO, TELEMETRIA E INTERVALOS ---
+            // --- INICIALIZAÇÃO E INTERVALOS ---
             registrarAcesso(); 
             fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
             
@@ -473,12 +473,13 @@
             }, 15000);
 
             // ==========================================
-            // MOTOR DE ROTAÇÃO E PAUSA (UX MOBILE)
+            // MOTOR DE ROTAÇÃO E PAUSA (UX MOBILE COM TOGGLE)
             // ==========================================
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
             let bIdx = 0; let pIdx = 0;
             let cycleTimeout;
             let pauseTimeout;
+            let isPaused = false; // Chave de estado
 
             function cycle() {
                 try {
@@ -509,27 +510,42 @@
             // Inicia o primeiro ciclo automático
             cycleTimeout = setTimeout(cycle, 60000);
 
-            // Ação: Pausa ao tocar na área de conteúdo
+            // Ação: Lógica de Toggle (Pausar/Despausar) ao tocar na área
             const contentArea = document.getElementById('interactive-area');
             const pauseIndicator = document.getElementById('pause-indicator');
 
-            function pauseRotation() {
-                // Cancela ciclos em andamento
-                clearTimeout(cycleTimeout);
-                clearTimeout(pauseTimeout);
-                
-                // Exibe o indicador visual
-                pauseIndicator.style.display = 'block';
-                
-                // Retoma a rotação após 2 minutos (120000 ms) de inatividade
-                pauseTimeout = setTimeout(() => {
+            function toggleRotation(e) {
+                if (isPaused) {
+                    // Clicou de novo: Despausar imediatamente
+                    isPaused = false;
                     pauseIndicator.style.display = 'none';
-                    cycle();
-                }, 120000);
+                    clearTimeout(pauseTimeout);
+                    
+                    // Retoma a rotação com um atraso leve de 5 segundos para a transição
+                    clearTimeout(cycleTimeout);
+                    cycleTimeout = setTimeout(cycle, 5000);
+                } else {
+                    // Clicou a primeira vez: Pausar
+                    isPaused = true;
+                    clearTimeout(cycleTimeout);
+                    clearTimeout(pauseTimeout);
+                    pauseIndicator.style.display = 'block';
+                    
+                    // Auto-unpause de segurança após 2 minutos de inatividade
+                    pauseTimeout = setTimeout(() => {
+                        isPaused = false;
+                        pauseIndicator.style.display = 'none';
+                        cycle(); // Move para o próximo slide
+                    }, 120000);
+                }
             }
 
-            contentArea.addEventListener('click', pauseRotation);
-            contentArea.addEventListener('touchstart', pauseRotation);
+            // Impede conflitos de clique com o botão FullScreen da barra lateral
+            contentArea.addEventListener('click', function(e) {
+                if (e.target.closest('.sidebar-qr') === null) {
+                    toggleRotation(e);
+                }
+            });
 
         } catch(fatalError) {
             console.error("Erro crítico:", fatalError);
