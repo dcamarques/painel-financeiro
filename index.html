@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Boonus TV - Terminal Financeiro</title>
+    <meta property="og:title" content="Boonus TV - Terminal Financeiro">
+    <meta property="og:description" content="Acompanhe as oportunidades, índices e o radar econômico global em tempo real.">
+    <meta property="og:image" content="https://tv.boonus.app.br/logo_boonustv_midia.png">
+    <meta property="og:url" content="https://tv.boonus.app.br/">
+    <meta property="og:type" content="website">
+
     <style>
         :root { 
             /* Paleta Genérica Padrão (Marca) */
@@ -30,13 +37,15 @@
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         
-        /* Ajuste: Cores de mercado cravadas no padrão universal */
         .up { color: var(--positive-color); } 
         .down { color: var(--negative-color); }
 
-        .main-container { flex: 1; display: flex; overflow: hidden; }
-        .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); cursor: pointer; }
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
+
+        /* Indicador de Pausa */
+        #pause-indicator { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); color: var(--neon-color); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; z-index: 100; border: 1px solid var(--neon-color); display: none; transition: color 0.5s, border-color 0.5s; letter-spacing: 1px; }
 
         .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 95%; text-align: left; }
         .card-column { display: flex; flex-direction: column; gap: 15px; }
@@ -98,7 +107,9 @@
     </div>
 
     <div class="main-container">
-        <div class="content-area">
+        <div class="content-area" id="interactive-area" title="Toque para pausar a rotação">
+            <div id="pause-indicator">⏸️ PAUSADO</div>
+            
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
                 <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size: 0.9rem; letter-spacing: 1px;">Fonte</div>
@@ -153,7 +164,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.7.2</div>
+            <div class="version-tag">v: 1.7.3</div>
         </div>
     </div>
 
@@ -221,9 +232,7 @@
                             regiaoDetectada = `${geoData.cityName} - ${geoData.regionName}`;
                         }
                     }
-                } catch(geoErr) {
-                    console.warn("Geolocalização ignorada preventivamente por timeout de rede.");
-                }
+                } catch(geoErr) {}
                 
                 fetch(URL_CONTADOR, {
                     method: 'POST',
@@ -231,9 +240,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ dispositivo: tipoDispositivo, regiao: regiaoDetectada })
                 });
-            } catch(e) { 
-                console.warn("Falha silenciosa no registro de telemetria."); 
-            }
+            } catch(e) {}
         }
 
         try {
@@ -260,7 +267,7 @@
                     document.getElementById('ny-time').innerText = f('America/New_York');
                     document.getElementById('ld-time').innerText = f('Europe/London');
                     document.getElementById('tk-time').innerText = f('Asia/Tokyo');
-                } catch(e) { console.error("Erro no relógio", e); }
+                } catch(e) {}
             }
             setInterval(updateClocks, 1000); updateClocks();
 
@@ -318,7 +325,7 @@
                         }
                     });
                     container.innerHTML = html + '</div>';
-                } catch (e) { console.error("Erro Oportunidades:", e); }
+                } catch (e) {}
             }
 
             // --- QUADRO 2: RADAR ECONÔMICO ---
@@ -355,7 +362,7 @@
                         }
                     });
                     container.innerHTML = html + '</div>';
-                } catch (e) { console.error("Erro Agenda:", e); }
+                } catch (e) {}
             }
 
             // --- QUADRO 3: ÍNDICES MACRO (GOOGLE FINANCE) ---
@@ -382,14 +389,12 @@
                                 document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 const varEl = document.getElementById(varId);
                                 const isUp = variation >= 0;
-                                
-                                // Ajuste: Utilizando cores de mercado fixas
                                 varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
                                 varEl.style.color = isUp ? 'var(--positive-color)' : 'var(--negative-color)';
                             }
                         }
                     });
-                } catch (e) { console.error("Erro Macro:", e); }
+                } catch (e) {}
             }
 
             // --- TICKER DE AÇÕES ---
@@ -414,8 +419,6 @@
                         document.getElementById(`${id}-val`).innerText = 'R$ ' + parseFloat(cur.bid).toFixed(2);
                         const pct = parseFloat(cur.pctChange);
                         const varEl = document.getElementById(`${id}-var`);
-                        
-                        // Ajuste: Utilizando cores de mercado fixas
                         varEl.innerText = (pct >= 0 ? '▲ ' : '▼ ') + pct.toFixed(2) + '%';
                         varEl.style.color = pct >= 0 ? 'var(--positive-color)' : 'var(--negative-color)';
                     };
@@ -441,7 +444,7 @@
                 newsList.sort(() => Math.random() - 0.5);
             }
 
-            // --- INICIALIZAÇÃO E INTERVALOS ---
+            // --- INICIALIZAÇÃO, TELEMETRIA E INTERVALOS ---
             registrarAcesso(); 
             fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
             
@@ -469,14 +472,19 @@
                 }
             }, 15000);
 
-            // Rotação Telas
+            // ==========================================
+            // MOTOR DE ROTAÇÃO E PAUSA (UX MOBILE)
+            // ==========================================
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
             let bIdx = 0; let pIdx = 0;
+            let cycleTimeout;
+            let pauseTimeout;
 
             function cycle() {
                 try {
                     const cur = document.getElementById(blocks[bIdx]);
                     cur.style.opacity = 0;
+                    
                     setTimeout(() => {
                         cur.style.display = 'none';
                         bIdx = (bIdx + 1) % blocks.length;
@@ -491,14 +499,40 @@
                         
                         nxt.style.display = 'flex';
                         setTimeout(() => nxt.style.opacity = 1, 50);
-                        setTimeout(cycle, blocks[bIdx] === 'block-news' ? 60000 : 25000);
+                        
+                        const nextTime = blocks[bIdx] === 'block-news' ? 60000 : 25000;
+                        cycleTimeout = setTimeout(cycle, nextTime);
                     }, 800);
-                } catch(e) { console.error("Erro ciclo", e); setTimeout(cycle, 10000); }
+                } catch(e) { cycleTimeout = setTimeout(cycle, 10000); }
             }
-            setTimeout(cycle, 60000);
+            
+            // Inicia o primeiro ciclo automático
+            cycleTimeout = setTimeout(cycle, 60000);
+
+            // Ação: Pausa ao tocar na área de conteúdo
+            const contentArea = document.getElementById('interactive-area');
+            const pauseIndicator = document.getElementById('pause-indicator');
+
+            function pauseRotation() {
+                // Cancela ciclos em andamento
+                clearTimeout(cycleTimeout);
+                clearTimeout(pauseTimeout);
+                
+                // Exibe o indicador visual
+                pauseIndicator.style.display = 'block';
+                
+                // Retoma a rotação após 2 minutos (120000 ms) de inatividade
+                pauseTimeout = setTimeout(() => {
+                    pauseIndicator.style.display = 'none';
+                    cycle();
+                }, 120000);
+            }
+
+            contentArea.addEventListener('click', pauseRotation);
+            contentArea.addEventListener('touchstart', pauseRotation);
 
         } catch(fatalError) {
-            console.error("Erro crítico de renderização detectado:", fatalError);
+            console.error("Erro crítico:", fatalError);
         }
     </script>
 </body>
