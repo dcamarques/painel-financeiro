@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus TV - Terminal Financeiro</title>
     <style>
-        :root { --neon-green: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
+        :root { 
+            /* Paleta Genérica Padrão */
+            --neon-color: #00ff88; 
+            --dark-bg: #050505; 
+            --panel-bg: #111; 
+        }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-green); z-index: 10; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; transition: border-color 0.5s; }
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
         .clock-box { text-align: center; min-width: 85px; }
         .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
-        #br-time { color: var(--neon-green); }
+        #br-time { color: var(--neon-color); transition: color 0.5s; }
 
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
         .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
-        .up { color: var(--neon-green); } .down { color: #ff4444; }
+        .up { color: var(--neon-color); transition: color 0.5s; } .down { color: #ff4444; }
 
         .main-container { flex: 1; display: flex; overflow: hidden; }
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); }
@@ -27,8 +32,8 @@
 
         .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 95%; text-align: left; }
         .card-column { display: flex; flex-direction: column; gap: 15px; }
-        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-green); position: relative; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
-        .info-card h3 { color: var(--neon-green); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
+        .info-card { background: #111; padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); position: relative; min-height: 100px; display: flex; flex-direction: column; justify-content: center; transition: border-color 0.5s; }
+        .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; transition: color 0.5s; }
         .info-val { font-size: 1.5rem; font-weight: bold; display: block; white-space: normal; }
         .info-sub { font-size: 0.95rem; font-weight: bold; margin-top: 3px; color: #888; }
 
@@ -41,7 +46,7 @@
         .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-left: 2px solid #1a1a1a; padding: 25px 20px 10px 20px; box-sizing: border-box; cursor: pointer; }
         .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 150px; height: 150px; margin-bottom: 15px; }
-        .qr-text { font-size: 1rem; font-weight: bold; color: var(--neon-green); text-align: center; line-height: 1.2; }
+        .qr-text { font-size: 1rem; font-weight: bold; color: var(--neon-color); text-align: center; line-height: 1.2; transition: color 0.5s; }
         .version-tag { font-size: 0.65rem; color: #444; align-self: flex-end; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -71,7 +76,7 @@
 <body>
 
     <div class="header">
-        <div class="logo"><img src="logo.png" alt="Boonus Logo" onerror="this.style.display='none'"></div>
+        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
             <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
@@ -88,12 +93,12 @@
         <div class="content-area">
             <div id="block-news" class="display-block" style="display: flex; opacity: 1;">
                 <img id="news-img" class="news-image" src="" style="display:none;">
-                <div id="news-source" style="color:var(--neon-green); font-weight:bold; text-transform:uppercase; font-size: 0.9rem; letter-spacing: 1px;">Fonte</div>
+                <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size: 0.9rem; letter-spacing: 1px;">Fonte</div>
                 <div id="news-title">Buscando as últimas do mercado...</div>
             </div>
 
             <div id="block-opps" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">OPORTUNIDADES DO DIA</h2>
+                <h2 id="title-opps" style="color:var(--neon-color); margin-bottom:20px;">OPORTUNIDADES DO DIA</h2>
                 <div id="opps-container" class="opportunities-grid"></div>
             </div>
 
@@ -102,7 +107,7 @@
             </div>
 
             <div id="block-macro" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
+                <h2 id="title-macro" style="color:var(--neon-color); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
                         <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
@@ -118,12 +123,12 @@
             </div>
 
             <div id="block-agenda" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">RADAR ECONÔMICO</h2>
+                <h2 id="title-agenda" style="color:var(--neon-color); margin-bottom:20px;">RADAR ECONÔMICO</h2>
                 <div id="agenda-container" class="agenda-grid"></div>
             </div>
 
             <div id="block-coins" class="display-block">
-                <h2 style="color:var(--neon-green); margin-bottom:20px;">CÂMBIO GLOBAL (LIVE)</h2>
+                <h2 id="title-coins" style="color:var(--neon-color); margin-bottom:20px;">CÂMBIO GLOBAL (LIVE)</h2>
                 <div class="coins-grid">
                     <div class="info-card"><h3>Dólar</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
                     <div class="info-card"><h3>Euro</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
@@ -138,22 +143,49 @@
                 <div class="qr-box">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
                 </div>
-                <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
+                <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.6.2</div>
+            <div class="version-tag">v: 1.7.0</div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // CONFIGURAÇÕES DO ESCRITÓRIO 
+        // CONFIGURAÇÕES BASE E LINKS DE CLIENTES
         // ==========================================
-        const URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
-        const URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
-        const URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv'; 
         
-        // LINK DO APPS SCRIPT CORPORATIVO INTEGRADO (BOONUS_TELEMETRIA)
-        const URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbzTHoMHmtB2ox4i6tCDmutesfc-ZGC1laVPJdvWSxTnKM7XGDj1lhdFMQG6wLCPRzjM/exec'; 
+        // Parâmetros extraídos da URL (?cliente=safra ou ?cliente=btg)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
+
+        // Inicialização de Variáveis de Infraestrutura conforme o Tenant logado
+        let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
+        let URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
+        let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
+        let URL_CONTADOR = ''; // Telemetria padrão inativa (pode ser inserida se desejar monitorar o genérico)
+        let publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
+
+        // Aplicação Cirúrgica de Identidade Visual e Fontes Exclusivas
+        if (tenant === 'safra') {
+            document.documentElement.style.setProperty('--neon-color', '#C29B0C'); // Dourado Safra Invest
+            document.getElementById('header-logo').src = 'logo-safra.png';
+            publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
+            
+            URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
+            URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=82167012&single=true&output=csv';
+            URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=327977986&single=true&output=csv';
+            URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbzI8HxET-dGKkV5jcrAYxH7xcG2SjCJdfugrW0_1y4t8_Gil0rKjxjnt8R-oFEV27I6IQ/exec';
+        } else if (tenant === 'btg') {
+            document.documentElement.style.setProperty('--neon-color', '#00d2ff'); // Azul Ciano de Alto Contraste (Custo de UX resolvido)
+            document.getElementById('header-logo').src = 'logo-btg.png';
+            publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
+            
+            URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
+            URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=82167012&single=true&output=csv';
+            URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=327977986&single=true&output=csv';
+            URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbwksLJPfO9YyRGHKDCA6TkOtdhc3f7vNjJNNZNWtwv_TXPMWKdnAuBCfIoART3TmscMxw/exec';
+        }
+
         // ==========================================
 
         function toggleFullScreen() {
@@ -185,10 +217,9 @@
                         }
                     }
                 } catch(geoErr) {
-                    console.warn("Geolocalização ignorada para preservar performance de carregamento.");
+                    console.warn("Geolocalização ignorada preventivamente por timeout de rede.");
                 }
                 
-                // Disparo em background blindado por CORS
                 fetch(URL_CONTADOR, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -274,7 +305,7 @@
                                         ${imgHtml}
                                         <div style="flex:1">
                                             <div class="info-val">${ativo}</div>
-                                            <div class="info-sub" style="color:var(--neon-green); font-size: 1.4rem;">${taxa}</div>
+                                            <div class="info-sub" style="color:var(--theme-color, var(--neon-color)); font-size: 1.4rem;">${taxa}</div>
                                             <div class="info-sub" style="font-size:0.85rem; opacity:0.9;">${destaque || ''}</div>
                                         </div>
                                     </div>
@@ -306,7 +337,7 @@
                         if (cols.length >= 2) {
                             const [dataHora, indicador, impacto, projecao] = cols;
                             const isAlto = impacto && impacto.toUpperCase().includes('ALTO');
-                            const impColor = isAlto ? 'var(--neon-green)' : '#888';
+                            const impColor = isAlto ? 'var(--neon-color)' : '#888';
                             const impStars = isAlto ? '★★★ ALTO' : '★★☆ MÉDIO';
 
                             html += `
@@ -347,7 +378,7 @@
                                 const varEl = document.getElementById(varId);
                                 const isUp = variation >= 0;
                                 varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
-                                varEl.style.color = isUp ? 'var(--neon-green)' : '#ff4444';
+                                varEl.style.color = isUp ? 'var(--neon-color)' : '#ff4444';
                             }
                         }
                     });
@@ -377,7 +408,7 @@
                         const pct = parseFloat(cur.pctChange);
                         const varEl = document.getElementById(`${id}-var`);
                         varEl.innerText = (pct >= 0 ? '▲ ' : '▼ ') + pct.toFixed(2) + '%';
-                        varEl.style.color = pct >= 0 ? 'var(--neon-green)' : '#ff4444';
+                        varEl.style.color = pct >= 0 ? 'var(--neon-color)' : '#ff4444';
                     };
                     updateC('usd', dB.USDBRL); updateC('eur', dB.EURBRL); updateC('jpy', dB.JPYBRL); updateC('gbp', dB.GBPBRL);
                 } catch(e) {}
@@ -431,7 +462,6 @@
 
             // Rotação Telas
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
-            const publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
             let bIdx = 0; let pIdx = 0;
 
             function cycle() {
@@ -459,7 +489,7 @@
             setTimeout(cycle, 60000);
 
         } catch(fatalError) {
-            console.error("Erro crítico:", fatalError);
+            console.error("Erro crítico de renderização detectado:", fatalError);
         }
     </script>
 </body>
