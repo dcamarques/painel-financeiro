@@ -12,8 +12,6 @@
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
         .clock-box { text-align: center; min-width: 85px; }
-        
-        /* AJUSTE 1: Fonte ampliada de 0.65rem para 0.8rem */
         .label { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
         #br-time { color: var(--neon-green); }
@@ -40,7 +38,6 @@
         #news-title { font-size: 2.1rem; font-weight: bold; line-height: 1.2; max-width: 90%; margin-top: 10px; }
         .news-image { width: auto; max-width: 80%; max-height: 45vh; border-radius: 8px; object-fit: contain; margin-bottom: 10px; border: 2px solid #333; }
         
-        /* AJUSTE 2: cursor: pointer adicionado para indicar que é clicável */
         .sidebar-qr { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-left: 2px solid #1a1a1a; padding: 25px 20px 10px 20px; box-sizing: border-box; cursor: pointer; }
         .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
         .qr-box { background: white; padding: 10px; border-radius: 10px; width: 150px; height: 150px; margin-bottom: 15px; }
@@ -48,6 +45,35 @@
         .version-tag { font-size: 0.65rem; color: #444; align-self: flex-end; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* =========================================================
+           REGRAS EXCLUSIVAS PARA SMARTPHONES (Não afeta a TV)
+           ========================================================= */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 15px; padding: 15px 10px; }
+            .clocks-container { flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .clock-box { min-width: 70px; }
+            .time { font-size: 1.3rem; }
+            .stock-item { font-size: 1.2rem; margin: 0 15px; }
+            
+            .main-container { flex-direction: column; }
+            
+            /* Ajuste dos cards para uma única coluna no celular */
+            .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { grid-template-columns: 1fr; gap: 10px; width: 100%; }
+            .card-column { gap: 10px; }
+            .info-card { min-height: auto; padding: 12px 15px; }
+            .info-val { font-size: 1.3rem; }
+            
+            #news-title { font-size: 1.4rem; }
+            .news-image { max-height: 25vh; }
+            
+            /* Transforma a barra lateral em um rodapé horizontal no celular */
+            .sidebar-qr { flex: none; height: auto; flex-direction: row; padding: 10px 15px; border-left: none; border-top: 2px solid #1a1a1a; justify-content: center; gap: 15px; position: relative; }
+            .qr-section { flex-direction: row; gap: 15px; text-align: left; align-items: center; }
+            .qr-box { width: 70px; height: 70px; margin-bottom: 0; padding: 5px; }
+            .qr-text { font-size: 0.85rem; text-align: left; }
+            .version-tag { position: absolute; bottom: 5px; right: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -122,22 +148,20 @@
                 </div>
                 <div class="qr-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.4.5</div>
+            <div class="version-tag">v: 1.4.6</div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // CONFIGURAÇÕES DO ESCRITÓRIO (LINKS ATUALIZADOS)
+        // CONFIGURAÇÕES DO ESCRITÓRIO
         // ==========================================
         
         const URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
-        
         const URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
 
         // ==========================================
 
-        // AJUSTE 2: Função JavaScript para Tela Cheia (Segura, fora do Try/Catch principal)
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(e => console.log(e));
@@ -353,14 +377,9 @@
                         bIdx = (bIdx + 1) % blocks.length;
                         const nxt = document.getElementById(blocks[bIdx]);
                         
-                        // --- CORREÇÃO DO BLOCO DE PUBLICIDADE ---
                         if(blocks[bIdx] === 'block-publi') {
                             const imgPubli = document.getElementById('publi-img');
-                            
-                            // Desfaz a "invisibilidade" caso tenha dado erro na rodada anterior
                             imgPubli.style.display = 'block'; 
-                            
-                            // Carrega a nova imagem
                             imgPubli.src = publiImages[pIdx] + '?v=' + Date.now();
                             pIdx = (pIdx + 1) % publiImages.length;
                         }
