@@ -5,21 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Boonus TV - Terminal Financeiro</title>
-    <meta property="og:title" content="Boonus TV - Terminal Financeiro">
-    <meta property="og:description" content="Acompanhe as oportunidades, índices e o radar econômico global em tempo real.">
-    <meta property="og:image" content="https://tv.boonus.app.br/logo_boonustv_midia.png">
-    <meta property="og:url" content="https://tv.boonus.app.br/">
-    <meta property="og:type" content="website">
-
     <style>
         :root { 
-            /* Paleta Genérica Padrão (Marca) */
             --neon-color: #00ff88; 
-            
-            /* Paleta Financeira Universal (Imutável) */
             --positive-color: #00ff88; 
             --negative-color: #ff4444;
-            
             --dark-bg: #050505; 
             --panel-bg: #111; 
         }
@@ -44,7 +34,6 @@
         .content-area { flex: 4; position: relative; display: flex; justify-content: center; align-items: center; background: var(--dark-bg); cursor: pointer; }
         .display-block { position: absolute; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
 
-        /* Indicador de Pausa */
         #pause-indicator { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); color: var(--neon-color); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; z-index: 100; border: 1px solid var(--neon-color); display: none; transition: color 0.5s, border-color 0.5s; letter-spacing: 1px; }
 
         .macro-grid, .coins-grid, .agenda-grid, .opportunities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 95%; text-align: left; }
@@ -68,7 +57,6 @@
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* REGRAS MOBILE */
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 15px; padding: 15px 10px; }
             .clocks-container { flex-wrap: wrap; justify-content: center; gap: 10px; }
@@ -124,6 +112,7 @@
             <div id="block-publi" class="display-block">
                 <img id="publi-img" src="" style="width:100%; height:100%; object-fit: contain; display:none;" onerror="this.style.display='none'">
                 <video id="publi-vid" style="width:100%; height:100%; object-fit: contain; display:none;" autoplay loop muted playsinline></video>
+                <div id="vid-error" style="display:none; color: #ff4444; font-weight:bold; font-size:1.2rem; text-align:center; padding:20px; border: 2px dashed #ff4444; border-radius: 10px; background: rgba(255,0,0,0.1); margin-top: 20px;"></div>
             </div>
 
             <div id="block-macro" class="display-block">
@@ -165,15 +154,11 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.2</div>
+            <div class="version-tag">v: 1.8.3</div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURAÇÕES BASE E LINKS DE CLIENTES
-        // ==========================================
-        
         const urlParams = new URLSearchParams(window.location.search);
         const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
 
@@ -182,38 +167,17 @@
         let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
         let URL_CONTADOR = ''; 
         
-        // --- ATENÇÃO: ARQUIVOS DA VERSÃO GENÉRICA ---
-        // Se for testar em tv.boonus.app.br, o script lê esta lista abaixo.
-        // Aqui já substituí para o publi1.mp4 conforme você solicitou.
         let publiImages = ['publi1.mp4', 'publi2.png', 'publi3.png'];
 
         if (tenant === 'safra') {
             document.documentElement.style.setProperty('--neon-color', '#C29B0C'); 
             document.getElementById('header-logo').src = 'logo-safra.png';
-            
-            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO SAFRA ---
-            // Se você testar no link /?cliente=safra, ele usa a lista abaixo e IGNORA a genérica!
             publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
-            
-            URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
-            URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=82167012&single=true&output=csv';
-            URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=327977986&single=true&output=csv';
-            URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbzI8HxET-dGKkV5jcrAYxH7xcG2SjCJdfugrW0_1y4t8_Gil0rKjxjnt8R-oFEV27I6IQ/exec';
         } else if (tenant === 'btg') {
             document.documentElement.style.setProperty('--neon-color', '#00d2ff'); 
             document.getElementById('header-logo').src = 'logo-btg.png';
-            
-            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO BTG ---
-            // Se você testar no link /?cliente=btg, ele usa a lista abaixo e IGNORA a genérica!
             publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
-            
-            URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
-            URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=82167012&single=true&output=csv';
-            URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=327977986&single=true&output=csv';
-            URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbwksLJPfO9YyRGHKDCA6TkOtdhc3f7vNjJNNZNWtwv_TXPMWKdnAuBCfIoART3TmscMxw/exec';
         }
-
-        // ==========================================
 
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
@@ -223,36 +187,7 @@
             }
         }
 
-        // --- SISTEMA DE TELEMETRIA SILENCIOSA E GEOGRÁFICA ---
-        async function registrarAcesso() {
-            if (!URL_CONTADOR || URL_CONTADOR === '') return;
-            try {
-                const tipoDispositivo = window.innerWidth <= 768 ? 'Mobile (Smartphone)' : 'TV / Desktop';
-                let regiaoDetectada = "Desconhecida";
-                
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000);
-                    
-                    const geoRes = await fetch('https://freeipapi.com/api/json', { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    
-                    if (geoRes.ok) {
-                        const geoData = await geoRes.json();
-                        if (geoData.cityName && geoData.regionName) {
-                            regiaoDetectada = `${geoData.cityName} - ${geoData.regionName}`;
-                        }
-                    }
-                } catch(geoErr) {}
-                
-                fetch(URL_CONTADOR, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dispositivo: tipoDispositivo, regiao: regiaoDetectada })
-                });
-            } catch(e) {}
-        }
+        async function registrarAcesso() {} 
 
         try {
             function safeParseFloat(str) {
@@ -269,7 +204,6 @@
                 }
             }
 
-            // --- RELÓGIOS GLOBAIS ---
             function updateClocks() {
                 try {
                     const now = new Date();
@@ -282,7 +216,6 @@
             }
             setInterval(updateClocks, 1000); updateClocks();
 
-            // --- PARSER DE CSV ---
             function parseCSV(text) {
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
                 return lines.map(line => {
@@ -303,56 +236,36 @@
                 });
             }
 
-            // --- QUADRO 1: OPORTUNIDADES DO DIA ---
             async function fetchOpportunities() {
                 try {
                     const response = await fetch(URL_OPORTUNIDADES + '&t=' + new Date().getTime());
-                    if (!response.ok) throw new Error("Falha na rede");
                     const csvText = await response.text();
                     const data = parseCSV(csvText).slice(1);
-                    
                     const container = document.getElementById('opps-container');
                     let html = '<div class="card-column">';
-                    
                     data.forEach((cols, idx) => {
                         if (idx >= 6) return;
                         if (idx === 3) html += '</div><div class="card-column">';
                         if (cols.length >= 3) {
                             const [classe, ativo, taxa, destaque, logoUrl] = cols;
                             const imgHtml = (logoUrl && logoUrl.length > 10) ? `<img src="${logoUrl}" class="asset-logo" onerror="this.style.display='none'">` : '';
-
-                            html += `
-                                <div class="info-card">
-                                    <h3>${classe}</h3>
-                                    <div class="card-with-logo">
-                                        ${imgHtml}
-                                        <div style="flex:1">
-                                            <div class="info-val">${ativo}</div>
-                                            <div class="info-sub" style="color:var(--neon-color); font-size: 1.4rem;">${taxa}</div>
-                                            <div class="info-sub" style="font-size:0.85rem; opacity:0.9;">${destaque || ''}</div>
-                                        </div>
-                                    </div>
-                                </div>`;
+                            html += `<div class="info-card"><h3>${classe}</h3><div class="card-with-logo">${imgHtml}<div style="flex:1"><div class="info-val">${ativo}</div><div class="info-sub" style="color:var(--neon-color); font-size: 1.4rem;">${taxa}</div><div class="info-sub" style="font-size:0.85rem; opacity:0.9;">${destaque || ''}</div></div></div></div>`;
                         }
                     });
                     container.innerHTML = html + '</div>';
                 } catch (e) {}
             }
 
-            // --- QUADRO 2: RADAR ECONÔMICO ---
             async function fetchAgenda() {
                 try {
                     const response = await fetch(URL_RADAR + '&t=' + new Date().getTime());
-                    if (!response.ok) throw new Error("Falha na rede");
                     const csvText = await response.text();
                     const data = parseCSV(csvText).slice(1);
-                    
                     const container = document.getElementById('agenda-container');
                     if (data.length === 0) {
                         container.innerHTML = `<div class="info-card" style="grid-column: span 2; border-left-color: #444; text-align: center;"><div class="info-val" style="color:#888;">Sem agenda relevante no momento</div></div>`;
                         return;
                     }
-
                     let html = '<div class="card-column">';
                     data.forEach((cols, idx) => {
                         if (idx >= 6) return;
@@ -362,40 +275,28 @@
                             const isAlto = impacto && impacto.toUpperCase().includes('ALTO');
                             const impColor = isAlto ? 'var(--neon-color)' : '#888';
                             const impStars = isAlto ? '★★★ ALTO' : '★★☆ MÉDIO';
-
-                            html += `
-                                <div class="info-card" style="border-left-color: ${impColor}">
-                                    <h3>${dataHora}</h3>
-                                    <div class="info-val" style="font-size: 1.2rem;">${indicador}</div>
-                                    <div class="info-sub" style="color: ${impColor}">${impStars}</div>
-                                    ${projecao ? `<div class="info-sub" style="font-size:0.8rem; opacity:0.8; color:#bbb;">${projecao}</div>` : ''}
-                                </div>`;
+                            html += `<div class="info-card" style="border-left-color: ${impColor}"><h3>${dataHora}</h3><div class="info-val" style="font-size: 1.2rem;">${indicador}</div><div class="info-sub" style="color: ${impColor}">${impStars}</div>${projecao ? `<div class="info-sub" style="font-size:0.8rem; opacity:0.8; color:#bbb;">${projecao}</div>` : ''}</div>`;
                         }
                     });
                     container.innerHTML = html + '</div>';
                 } catch (e) {}
             }
 
-            // --- QUADRO 3: ÍNDICES MACRO (GOOGLE FINANCE) ---
             async function fetchMacro() {
                 try {
                     if (!URL_MACRO || URL_MACRO === '') return; 
                     const response = await fetch(URL_MACRO + '&t=' + new Date().getTime());
-                    if (!response.ok) throw new Error("Falha na rede");
                     const csvText = await response.text();
                     const data = parseCSV(csvText);
-                    
                     data.forEach(cols => {
                         if (cols.length >= 3) {
                             const indice = cols[0].toUpperCase();
                             const price = safeParseFloat(cols[1]);
                             const variation = safeParseFloat(cols[2]);
                             let valId = ''; let varId = '';
-                            
                             if (indice.includes('IBOV')) { valId = 'ibov-val'; varId = 'ibov-var'; }
                             else if (indice.includes('S&P') || indice.includes('INX')) { valId = 'sp500-val'; varId = 'sp500-var'; }
                             else if (indice.includes('NASDAQ') || indice.includes('IXIC')) { valId = 'nasdaq-val'; varId = 'nasdaq-var'; }
-                            
                             if (valId && price > 0) {
                                 document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 const varEl = document.getElementById(varId);
@@ -408,7 +309,6 @@
                 } catch (e) {}
             }
 
-            // --- TICKER DE AÇÕES ---
             async function fetchBrapi() {
                 try {
                     const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
@@ -421,7 +321,6 @@
                 } catch(e) {}
             }
 
-            // --- CÂMBIO ---
             async function fetchAwesome() {
                 try {
                     const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL');
@@ -437,13 +336,9 @@
                 } catch(e) {}
             }
 
-            // --- RSS NOTÍCIAS ---
             let newsList = [];
             async function fetchNews() {
-                const feeds = [
-                    {n: "InfoMoney", u: "https://www.infomoney.com.br/feed/"},
-                    {n: "Valor Econômico", u: "https://valor.globo.com/rss/valor/"}
-                ];
+                const feeds = [{n: "InfoMoney", u: "https://www.infomoney.com.br/feed/"}, {n: "Valor Econômico", u: "https://valor.globo.com/rss/valor/"}];
                 newsList = []; 
                 for(let f of feeds){
                     try {
@@ -455,18 +350,9 @@
                 newsList.sort(() => Math.random() - 0.5);
             }
 
-            // --- INICIALIZAÇÃO E INTERVALOS ---
-            registrarAcesso(); 
             fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
-            
-            setInterval(fetchOpportunities, 300000); 
-            setInterval(fetchMacro, 300000);         
-            setInterval(fetchBrapi, 300000);         
-            setInterval(fetchAwesome, 60000);        
-            setInterval(fetchAgenda, 300000);         
-            setInterval(fetchNews, 1800000);          
+            setInterval(fetchOpportunities, 300000); setInterval(fetchMacro, 300000); setInterval(fetchBrapi, 300000); setInterval(fetchAwesome, 60000); setInterval(fetchAgenda, 300000); setInterval(fetchNews, 1800000);          
 
-            // Rotação Notícias
             let newsIdx = 0;
             setInterval(() => {
                 if(newsList.length && document.getElementById('block-news').style.display !== 'none'){
@@ -476,27 +362,33 @@
                     const img = document.getElementById('news-img');
                     const thumb = item.thumbnail || item.enclosure?.link || (item.content?.match(/src="([^"]+)"/)?.[1]);
                     if(thumb && !thumb.includes('transparent')){
-                        img.src = thumb;
-                        img.style.display = 'block';
+                        img.src = thumb; img.style.display = 'block';
                     } else { img.style.display = 'none'; }
                     newsIdx = (newsIdx + 1) % newsList.length;
                 }
             }, 15000);
 
             // ==========================================
-            // MOTOR DE ROTAÇÃO HÍBRIDO BLINDADO E PAUSA
+            // MOTOR DE ROTAÇÃO COM DIAGNÓSTICO DE VÍDEO
             // ==========================================
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
             let bIdx = 0; let pIdx = 0;
             let cycleTimeout;
             let pauseTimeout;
             let isPaused = false; 
+            
+            const vidErrorBox = document.getElementById('vid-error');
 
-            // Fallback de erro no vídeo: Se o vídeo falhar, pule e evite tela preta infinita
+            // Evento ativado SOMENTE se o navegador bloquear o arquivo do vídeo
             document.getElementById('publi-vid').addEventListener('error', function(e) {
-                console.warn("Vídeo não encontrado ou corrompido. Pulando tela.");
-                clearTimeout(cycleTimeout);
-                cycle(); // Força a rotação imediata
+                let msg = "ERRO DESCONHECIDO NO VÍDEO.";
+                if(this.error) {
+                    if (this.error.code === 4) {
+                        msg = "ERRO 404 (ARQUIVO NÃO ENCONTRADO) OU FORMATO INCOMPATÍVEL.\n\nVerifique se o nome do arquivo no GitHub tem letras maiúsculas ou se o vídeo precisa ser salvo como H.264.";
+                    }
+                }
+                vidErrorBox.innerText = msg;
+                vidErrorBox.style.display = 'block';
             });
 
             function cycle() {
@@ -507,7 +399,6 @@
                     setTimeout(() => {
                         cur.style.display = 'none';
                         
-                        // Reseta o player de vídeo ao sair da tela de anúncios
                         if(blocks[bIdx] === 'block-publi') {
                             document.getElementById('publi-vid').pause();
                         }
@@ -515,17 +406,18 @@
                         bIdx = (bIdx + 1) % blocks.length;
                         const nxt = document.getElementById(blocks[bIdx]);
                         
-                        // MOTOR HÍBRIDO DE INJEÇÃO REVISADO
                         if(blocks[bIdx] === 'block-publi') {
                             const imgPubli = document.getElementById('publi-img');
                             const vidPubli = document.getElementById('publi-vid');
                             const currentMedia = publiImages[pIdx];
                             
+                            // Esconde aviso de erro anterior, se houver
+                            vidErrorBox.style.display = 'none'; 
+                            
                             if(currentMedia.toLowerCase().endsWith('.mp4')) {
                                 imgPubli.style.display = 'none';
                                 vidPubli.style.display = 'block';
                                 
-                                // BLINDAGEM DE SEGUNDA ORDEM: Vídeos não usam cache-busting (?v=)
                                 if (vidPubli.getAttribute('src') !== currentMedia) {
                                     vidPubli.src = currentMedia;
                                     vidPubli.load(); 
@@ -533,10 +425,7 @@
                                 
                                 let playPromise = vidPubli.play();
                                 if (playPromise !== undefined) {
-                                    playPromise.catch(error => {
-                                        console.log("Falha no Autoplay:", error);
-                                        // A tela ainda fica visível, mas a tag de fallback 'error' resolve 404
-                                    });
+                                    playPromise.catch(error => console.log("Aguardando interação do usuário."));
                                 }
                                 
                             } else {
@@ -559,7 +448,6 @@
             
             cycleTimeout = setTimeout(cycle, 60000);
 
-            // Ação: Toggle Pause
             const contentArea = document.getElementById('interactive-area');
             const pauseIndicator = document.getElementById('pause-indicator');
 
