@@ -165,7 +165,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.0</div>
+            <div class="version-tag">v: 1.8.1</div>
         </div>
     </div>
 
@@ -182,7 +182,7 @@
         let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
         let URL_CONTADOR = ''; 
         
-        // Exemplo: Você pode trocar 'publi2.png' por 'publi2.mp4' se o arquivo for em vídeo.
+        // Altere a extensão da mídia que for usar (.png ou .mp4) diretamente nas listas abaixo
         let publiImages = ['publi1.png', 'publi2.png', 'publi3.png'];
 
         if (tenant === 'safra') {
@@ -476,7 +476,7 @@
             }, 15000);
 
             // ==========================================
-            // MOTOR DE ROTAÇÃO HÍBRIDO E PAUSA
+            // MOTOR DE ROTAÇÃO HÍBRIDO BLINDADO E PAUSA
             // ==========================================
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
             let bIdx = 0; let pIdx = 0;
@@ -492,7 +492,7 @@
                     setTimeout(() => {
                         cur.style.display = 'none';
                         
-                        // Garante que o vídeo seja pausado se sair do bloco publi
+                        // Reseta o player de vídeo ao sair da tela de anúncios
                         if(blocks[bIdx] === 'block-publi') {
                             document.getElementById('publi-vid').pause();
                         }
@@ -500,23 +500,27 @@
                         bIdx = (bIdx + 1) % blocks.length;
                         const nxt = document.getElementById(blocks[bIdx]);
                         
-                        // Lógica Híbrida de Injeção de Mídia
+                        // MOTOR HÍBRIDO DE INJEÇÃO REVISADO
                         if(blocks[bIdx] === 'block-publi') {
                             const imgPubli = document.getElementById('publi-img');
                             const vidPubli = document.getElementById('publi-vid');
                             const currentMedia = publiImages[pIdx];
                             
-                            // Detecção de extensão
                             if(currentMedia.toLowerCase().endsWith('.mp4')) {
                                 imgPubli.style.display = 'none';
                                 vidPubli.style.display = 'block';
-                                vidPubli.src = currentMedia + '?v=' + Date.now();
-                                vidPubli.play().catch(e => console.log("Navegador bloqueou autoplay do vídeo."));
+                                
+                                // BLINDAGEM DE SEGUNDA ORDEM: Vídeos não usam cache-busting (?v=) para não corromper HTTP 206
+                                if (vidPubli.getAttribute('src') !== currentMedia) {
+                                    vidPubli.src = currentMedia;
+                                    vidPubli.load(); // Alinha e força o motor do navegador a processar a nova mídia
+                                }
+                                vidPubli.play().catch(e => console.log("Aguardando interação para reproduzir vídeo."));
                             } else {
                                 vidPubli.style.display = 'none';
                                 vidPubli.pause();
                                 imgPubli.style.display = 'block';
-                                imgPubli.src = currentMedia + '?v=' + Date.now();
+                                imgPubli.src = currentMedia + '?v=' + Date.now(); // Imagens continuam limpando cache normalmente
                             }
                             pIdx = (pIdx + 1) % publiImages.length;
                         }
@@ -549,6 +553,7 @@
                     clearTimeout(pauseTimeout);
                     pauseIndicator.style.display = 'block';
                     
+                    // Se estiver no bloco de vídeo e pausar, o vídeo continua tocando em loop na tela congelada
                     pauseTimeout = setTimeout(() => {
                         isPaused = false;
                         pauseIndicator.style.display = 'none';
