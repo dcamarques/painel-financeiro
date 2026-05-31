@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boonus TV - Mesa de Operações</title>
+    <style>
+        :root {
+            --neon-color: #00ff88;
+            --positive-color: #00ff88;
+            --warning-color: #ffcc00;
+            --negative-color: #ff4444;
+            --dark-bg: #050505;
+            --panel-bg: #111;
+        }
+        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Cabeçalho Padrão */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; }
+        .logo img { height: 40px; width: auto; }
+        .clocks-container { display: flex; gap: 15px; }
+        .clock-box { text-align: center; min-width: 85px; }
+        .label { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
+        .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        #br-time { color: var(--neon-color); }
+
+        /* Ticker Superior */
+        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
+        .ticker-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
+        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
+        .up { color: var(--positive-color); } .down { color: var(--negative-color); }
+
+        /* Área de Conteúdo */
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .content-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: flex-start; }
+
+        /* Tabelas e Rankings */
+        h2 { color: var(--neon-color); margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .mesa-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 1.2rem; }
+        .mesa-table th { padding: 12px; background: #1a1a1a; color: var(--neon-color); text-transform: uppercase; font-size: 0.9rem; }
+        .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
+        .mesa-table tr:nth-child(even) { background: #0c0c0c; }
+        
+        /* Semáforo de Performance */
+        .perf-bad { color: var(--negative-color); }
+        .perf-warn { color: var(--warning-color); }
+        .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
+
+        /* Cards de Grade Dinâmica */
+        .grid-performance { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+        .segment-card { background: var(--panel-bg); padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); }
+        .segment-title { font-size: 1.1rem; color: var(--neon-color); font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }
+
+        /* Notícias e Elementos Copiados do Monitor Padrão */
+        #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
+        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); }
+        .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
+        .info-val { font-size: 1.8rem; font-weight: bold; }
+        .info-sub { font-size: 1rem; color: #888; font-weight: bold; }
+
+        /* Botão Sutil de Tela Cheia */
+        .fs-btn { position: absolute; bottom: 15px; right: 25px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #444; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.3s; z-index: 100; }
+        .fs-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: var(--neon-color); }
+
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
+        <div class="clocks-container">
+            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">Tokyo</div><div id="tk-time" class="time">--:--:--</div></div>
+        </div>
+    </div>
+
+    <div class="ticker-container">
+        <div id="stock-ticker" class="ticker-content">Sincronizando radar de mercado interno...</div>
+    </div>
+
+    <div class="main-container">
+        <div class="content-area">
+            
+            <div id="block-performance" class="display-block" style="display: flex; opacity: 1;">
+                <h2 id="perf-title">Performance Consolidada do Escritório</h2>
+                <div id="perf-grid-container" class="grid-performance"></div>
+            </div>
+
+            <div id="block-ranking" class="display-block">
+                <h2 id="ranking-title">Ranking de Performance por Item</h2>
+                <table class="mesa-table">
+                    <thead>
+                        <tr>
+                            <th>Gerente de Relacionamento</th>
+                            <th>Realizado Hoje</th>
+                            <th>Meta Mês</th>
+                            <th>Realizado Mês</th>
+                            <th>Atingimento (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="block-macro" class="display-block">
+                <h2>Indicadores Macro &amp; Índices Globais</h2>
+                <div class="macro-grid">
+                    <div class="info-card"><h3>SELIC</h3><div class="info-val">14,50%</div></div>
+                    <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>IPCA (PROJ.)</h3><div class="info-val">4,00%</div></div>
+                    <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div><div id="sp500-var" class="info-sub">---</div></div>
+                </div>
+            </div>
+
+            <div id="block-coins" class="display-block">
+                <h2>Câmbio Global em Tempo Real</h2>
+                <div class="coins-grid">
+                    <div class="info-card"><h3>Dólar (USD/BRL)</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Euro (EUR/BRL)</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
+                </div>
+            </div>
+
+            <div id="block-opps" class="display-block">
+                <h2>Foco Comercial - Oportunidades de Alocação</h2>
+                <div id="opps-container" class="opportunities-grid"></div>
+            </div>
+
+            <div id="block-news" class="display-block">
+                <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; margin-bottom:10px;">Radar de Notícias</div>
+                <div id="news-title">Carregando painel de informações globais...</div>
+            </div>
+
+            <div id="block-podium" class="display-block">
+                <h2>Destaques de Produção (Hoje)</h2>
+                <div id="podium-container" style="width:100%; display:flex; flex-direction:column; gap:15px;"></div>
+            </div>
+
+        </div>
+        <button class="fs-btn" onclick="toggleFullScreen()">TELA CHEIA</button>
+    </div>
+
+    <script>
+        // Configuração de Identidade e Tenants
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
+
+        if (tenant === 'safra') {
+            document.documentElement.style.setProperty('--neon-color', '#C29B0C');
+            document.getElementById('header-logo').src = 'logo-safra.png';
+        } else if (tenant === 'btg') {
+            document.documentElement.style.setProperty('--neon-color', '#00d2ff');
+            document.getElementById('header-logo').src = 'logo-btg.png';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => console.log(e));
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        // Relógios Globais
+        function updateClocks() {
+            const now = new Date();
+            const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
+            document.getElementById('br-time').innerText = f('America/Sao_Paulo');
+            document.getElementById('ny-time').innerText = f('America/New_York');
+            document.getElementById('ld-time').innerText = f('Europe/London');
+            document.getElementById('tk-time').innerText = f('Asia/Tokyo');
+        }
+        setInterval(updateClocks, 1000); updateClocks();
+
+        // =================================================================
+        // ESTRUTURA DE DADOS MOCK (MANUAL NESTA FASE)
+        // Substitui a malha relacional descrita pelo Gerente de Escritório
+        // =================================================================
+        
+        const mockMetas = [
+            { gerente: "Daniel Silva", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2000000 },
+            { gerente: "Mariana Costa", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2500000 },
+            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Novas Contas PJ", meta: 10 },
+            { gerente: "Mariana Costa", segmento: "CONTAS", item: "Novas Contas PJ", meta: 12 },
+            { gerente: "Daniel Silva", segmento: "PRODUTOS", item: "Estruturados (COE/Collar)", meta: 500000 },
+            { gerente: "Mariana Costa", segmento: "PRODUTOS", item: "Estruturados (COE/Collar)", meta: 600000 }
+        ];
+
+        const mockProducao = [
+            { gerente: "Daniel Silva", item: "Captação Líquida", realizado: 1800000, data: "2026-05-30" },
+            { gerente: "Mariana Costa", item: "Captação Líquida", realizado: 2600000, data: "2026-05-30" },
+            { gerente: "Daniel Silva", item: "Novas Contas PJ", realizado: 2, data: "2026-05-30" },
+            { gerente: "Daniel Silva", item: "Estruturados (COE/Collar)", realizado: 150000, data: "2026-05-30" }
+        ];
+
+        // Processamento dos Indicadores de Performance Interna
+        function carregarDadosMesa() {
+            // 1. Renderizar Bloco Consolidado (Placard Geral)
+            const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
+            const gridContainer = document.getElementById('perf-grid-container');
+            let gridHtml = '';
+
+            segmentos.forEach(seg => {
+                let totalMeta = 0;
+                let totalRealizado = 0;
+                
+                mockMetas.filter(m => m.segmento === seg).forEach(m => totalMeta += m.meta);
+                mockProducao.filter(p => {
+                    let metaOrigem = mockMetas.find(m => m.item === p.item && m.gerente === p.gerente);
+                    return metaOrigem && metaOrigem.segmento === seg;
+                }).forEach(p => totalRealizado += p.realizado);
+
+                let pct = totalMeta > 0 ? (totalRealizado / totalMeta) * 100 : 0;
+                let classeCor = pct >= 100 ? 'perf-good' : (pct >= 80 ? 'perf-warn' : 'perf-bad');
+                
+                gridHtml += `
+                    <div class="segment-card">
+                        <div class="segment-title">${seg}</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; margin-bottom: 5px;">
+                            ${seg === 'INVESTIMENTOS' || seg === 'PRODUTOS' || seg === 'MARGEM' ? 'R$ ' + totalRealizado.toLocaleString('pt-BR') : totalRealizado}
+                        </div>
+                        <div style="font-size: 0.9rem; opacity: 0.6;">Meta Global: ${totalMeta.toLocaleString('pt-BR')}</div>
+                        <div class="${classeCor}" style="font-size: 1.4rem; font-weight: bold; margin-top: 10px;">${pct.toFixed(1)}% Atingido</div>
+                    </div>`;
+            });
+            gridContainer.innerHTML = gridHtml;
+
+            // 2. Renderizar Bloco de Ranking Dinâmico por Item Comercial (Gamificação por % do maior pro menor)
+            const itemFoco = "Captação Líquida";
+            document.getElementById('ranking-title').innerText = `Mesa de Performance: ${itemFoco}`;
+            
+            let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
+                let prodHoje = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco && p.data === "2026-05-30");
+                let realizadoHoje = prodHoje.reduce((acc, curr) => acc + curr.realizado, 0); // Simplificação de escopo de teste do dia
+                let realizadoMes = realizadoHoje; // Cenário unificado para demonstração ágil
+                let pct = (realizadoMes / meta.meta) * 100;
+                return { gerente: meta.gerente, hoje: realizadoHoje, meta: meta.meta, realizado: realizadoMes, pct: pct };
+            });
+
+            // Ordenação decrescente de performance (Regra de Gamificação da Mesa)
+            rankingData.sort((a, b) => b.pct - a.pct);
+
+            let tableHtml = '';
+            rankingData.forEach(row => {
+                let classeCor = row.pct >= 100 ? 'perf-good' : (row.pct >= 80 ? 'perf-warn' : 'perf-bad');
+                tableHtml += `
+                    <tr>
+                        <td>${row.gerente}</td>
+                        <td>${row.hoje > 50 ? 'R$ ' + row.hoje.toLocaleString('pt-BR') : row.hoje}</td>
+                        <td>${row.meta > 50 ? 'R$ ' + row.meta.toLocaleString('pt-BR') : row.meta}</td>
+                        <td>${row.realizado > 50 ? 'R$ ' + row.realizado.toLocaleString('pt-BR') : row.realizado}</td>
+                        <td class="${classeCor}">${row.pct.toFixed(1)}%</td>
+                    </tr>`;
+            });
+            document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há itens cadastrados no momento</td></tr>';
+
+            // 3. Renderizar Pódio de Destaques Rápidos do Dia (Flash de Produção)
+            const podiumContainer = document.getElementById('podium-container');
+            let podiumHtml = '';
+            let producoesHoje = mockProducao.filter(p => p.data === "2026-05-30");
+
+            if(producoesHoje.length === 0) {
+                podiumHtml = `<div class="info-card" style="text-align:center; width:100%;"><div class="info-val" style="color:#666;">O mercado não dorme. Quem fará a primeira boleta de hoje?</div></div>`;
+            } else {
+                producoesHoje.forEach(p => {
+                    podiumHtml += `
+                        <div class="info-card" style="border-left-color: var(--positive-color)">
+                            <h3>CONTRATO FECHADO HOJE</h3>
+                            <div class="info-val" style="font-size: 1.4rem; color: var(--positive-color);">${p.gerente}</div>
+                            <div class="info-sub" style="color: #fff;">Lançou: ${p.item} | Realizado: +${p.realizado > 50 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado}</div>
+                        </div>`;
+                });
+            }
+            podiumContainer.innerHTML = podiumHtml;
+        }
+
+        // =================================================================
+        // INTEGRAÇÃO DE MERCADO EXTERNO (APIs NATIVAS REVISADAS)
+        // =================================================================
+        async function fetchMercados() {
+            try {
+                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
+                const data = await res.json();
+                let html = '';
+                data.stocks.slice(0, 10).forEach(s => html += `<span class="stock-item">${s.stock} <span class="up">▲ ${s.change.toFixed(2)}%</span></span>`);
+                document.getElementById('stock-ticker').innerHTML = html + html;
+            } catch(e) {}
+        }
+        async function fetchCambio() {
+            try {
+                const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
+                const d = await r.json();
+                document.getElementById('usd-val').innerText = 'R$ ' + parseFloat(d.USDBRL.bid).toFixed(2);
+                document.getElementById('usd-var').innerText = parseFloat(d.USDBRL.pctChange).toFixed(2) + '%';
+                document.getElementById('eur-val').innerText = 'R$ ' + parseFloat(d.EURBRL.bid).toFixed(2);
+                document.getElementById('eur-var').innerText = parseFloat(d.EURBRL.pctChange).toFixed(2) + '%';
+            } catch(e) {}
+        }
+        let newsList = [];
+        async function fetchNoticias() {
+            try {
+                const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/`);
+                const d = await r.json();
+                if(d.items) newsList = d.items;
+            } catch(e) {}
+        }
+
+        // Inicialização de Dados
+        carregarDadosMesa(); fetchMercados(); fetchCambio(); fetchNoticias();
+        setInterval(carregarDadosMesa, 60000); // Atualiza os blocos internos a cada minuto
+
+        // Rotação de Notícias Interna
+        let newsIdx = 0;
+        setInterval(() => {
+            if(newsList.length && document.getElementById('block-news').style.display !== 'none') {
+                document.getElementById('news-title').innerText = newsList[newsIdx].title;
+                newsIdx = (newsIdx + 1) % newsList.length;
+            }
+        }, 15000);
+
+        // =================================================================
+        // MOTOR DO CARROSSEL DE MESA (15 SEGUNDOS POR BLOCO)
+        // =================================================================
+        const blocks = ['block-performance', 'block-ranking', 'block-macro', 'block-coins', 'block-opps', 'block-news', 'block-podium'];
+        let bIdx = 0;
+
+        function carrosselMesa() {
+            const cur = document.getElementById(blocks[bIdx]);
+            cur.style.opacity = 0;
+            
+            setTimeout(() => {
+                cur.style.display = 'none';
+                bIdx = (bIdx + 1) % blocks.length;
+                
+                const nxt = document.getElementById(blocks[bIdx]);
+                nxt.style.display = 'flex';
+                setTimeout(() => nxt.style.opacity = 1, 50);
+                
+                // Dispara o carrossel a cada 15 segundos conforme planejado
+                setTimeout(carrosselMesa, 15000);
+            }, 800);
+        }
+        
+        // Inicia o motor do carrossel após o tempo inicial de exibição
+        setTimeout(carrosselMesa, 15000);
+    </script>
+</body>
+</html>
