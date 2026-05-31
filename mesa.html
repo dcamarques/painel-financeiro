@@ -1,3 +1,12 @@
+<!-- =========================================================
+     Boonus TV - Mesa de Operações (mesa.html)
+     Versão: 1.1.6
+     Descrição: 
+     - Restauração Integral dos Relógios Globais
+     - Restauração da Responsividade Mobile/Tablet
+     - Ticker: Velocidade reduzida (240s)
+     - Semáforo de Performance (%): Apenas cor da fonte
+========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -8,13 +17,16 @@
         :root {
             --neon-color: #00ff88;
             --positive-color: #00ff88;
-            --warning-color: #d68900; /* Laranja/Dourado ajustado para match com a foto */
+            --warning-color: #d68900; 
             --negative-color: #ff0000;
             --dark-bg: #050505;
             --panel-bg: #111;
         }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
+        /* Debug Layer Oculto */
+        #err-log { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:red; z-index:9999; display:none; padding: 50px; font-size: 1.5rem; font-family: monospace; }
+
         /* Cabeçalho */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; }
         .logo img { height: 40px; width: auto; }
@@ -24,9 +36,9 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-color); }
 
-        /* Ticker Superior - Velocidade ajustada de 60s para 90s */
+        /* Ticker Superior */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
-        .ticker-content { display: inline-flex; animation: marquee 90s linear infinite; white-space: nowrap; }
+        .ticker-content { display: inline-flex; animation: marquee 240s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--positive-color); } .down { color: var(--negative-color); }
 
@@ -46,16 +58,15 @@
         .mesa-perf-table thead tr:first-child th[colspan="3"] { border-bottom: 2px solid var(--neon-color); }
         .mesa-perf-table tbody tr:nth-child(even) { background: #0c0c0c; }
         
-        /* Semáforo de Fundo para Performance (%) */
-        .bg-bad { background-color: var(--negative-color); color: white; }
-        .bg-warn { background-color: var(--warning-color); color: white; } 
-        .bg-good { background-color: #008800; color: white; }
+        /* Semáforo de Fundo para Performance (%) - Apenas Fonte */
+        .perf-bad { color: var(--negative-color); font-weight: bold; } 
+        .perf-warn { color: var(--warning-color); font-weight: bold; } 
+        .perf-good { color: var(--positive-color); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.2); }
 
         .mesa-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: left; font-size: 1.2rem; margin-top: 20px;}
         .mesa-table th { padding: 12px; background: #1a1a1a; color: var(--neon-color); text-transform: uppercase; font-size: 0.9rem; }
         .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
         .mesa-table tr:nth-child(even) { background: #0c0c0c; }
-        .perf-bad { color: var(--negative-color); } .perf-warn { color: var(--warning-color); } .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
 
         /* Notícias e Grids Padrão */
         #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
@@ -77,4 +88,435 @@
         /* Ferramentas Subliminares */
         .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; z-index: 100; transition: background 0.3s; }
         .fs-dot:hover { background: rgba(255,255,255,0.3); }
-        .version-sutil { position: absolute;
+        .version-sutil { position: absolute; bottom: 12px; right: 40px; font-size: 0.65rem; color: rgba(255,255,255,0.08); user-select: none; z-index: 100; font-family: monospace; }
+
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Responsividade Restabelecida (Mobile/Tablet) */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 15px; padding: 15px 10px; }
+            .clocks-container { flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .clock-box { min-width: 70px; }
+            .time { font-size: 1.3rem; }
+            .stock-item { font-size: 1.2rem; margin: 0 15px; }
+            h2 { font-size: 1.2rem; text-align: center; }
+            h3.segment-subtitle { font-size: 1.2rem; text-align: center; }
+            .mesa-perf-table, .mesa-table { font-size: 1rem; }
+            .mesa-perf-table th, .mesa-perf-table td { padding: 8px 5px; }
+            .macro-grid, .coins-grid, .opportunities-grid { grid-template-columns: 1fr; gap: 10px; }
+            .info-card { padding: 15px; }
+            #news-title { font-size: 1.5rem; }
+            .podium-gerente-box { padding: 20px; }
+            .podium-item-row { font-size: 1.2rem; flex-direction: column; align-items: center; gap: 10px; }
+            .podium-empty-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Camada de Proteção contra Tela Preta -->
+    <div id="err-log"></div>
+
+    <div class="header">
+        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
+        <div class="clocks-container">
+            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">London</div><div id="ld-time" class="time">--:--:--</div></div>
+            <div class="clock-box"><div class="label">Tokyo</div><div id="tk-time" class="time">--:--:--</div></div>
+        </div>
+    </div>
+
+    <div class="ticker-container">
+        <div id="stock-ticker" class="ticker-content">Sincronizando radar de mercado interno...</div>
+    </div>
+
+    <div class="main-container">
+        <div class="content-area">
+            
+            <!-- BLOCOS DE PERFORMANCE -->
+            <div id="block-perf-CONTAS" class="display-block" style="display: flex; opacity: 1;"></div>
+            <div id="block-perf-INVESTIMENTOS" class="display-block"></div>
+            <div id="block-perf-PRODUTOS" class="display-block"></div>
+            <div id="block-perf-MARGEM" class="display-block"></div>
+
+            <!-- Bloco Ranking -->
+            <div id="block-ranking" class="display-block">
+                <h2>Ranking de Performance por Gerente</h2>
+                <h3 class="segment-subtitle">FOCO: <span>Captação Líquida</span></h3>
+                <table class="mesa-table">
+                    <thead>
+                        <tr>
+                            <th>Gerente de Relacionamento</th>
+                            <th>Realizado Hoje</th>
+                            <th>Meta Mês</th>
+                            <th>Realizado Mês</th>
+                            <th>Atingimento (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Bloco Macro -->
+            <div id="block-macro" class="display-block">
+                <h2>Indicadores Macro &amp; Índices Globais</h2>
+                <div class="macro-grid">
+                    <div class="info-card"><h3>SELIC</h3><div class="info-val">14,50%</div></div>
+                    <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>IPCA (PROJ.)</h3><div class="info-val">4,00%</div></div>
+                    <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div><div id="sp500-var" class="info-sub">---</div></div>
+                </div>
+            </div>
+
+            <!-- Bloco Câmbio -->
+            <div id="block-coins" class="display-block">
+                <h2>Câmbio Global em Tempo Real</h2>
+                <div class="coins-grid">
+                    <div class="info-card"><h3>Dólar (USD/BRL)</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Euro (EUR/BRL)</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
+                </div>
+            </div>
+
+            <!-- Bloco Oportunidades -->
+            <div id="block-opps" class="display-block">
+                <h2>Foco Comercial - Oportunidades de Alocação</h2>
+                <div id="opps-container" class="opportunities-grid">
+                    <div class="info-card" style="grid-column: span 2; text-align: center;">
+                        <div class="info-val" style="color:#666; font-size: 1.2rem;">Carregando oportunidades da matriz...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco Notícias -->
+            <div id="block-news" class="display-block" style="justify-content: center;">
+                <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; margin-bottom:10px;">Radar de Notícias</div>
+                <div id="news-title">Carregando painel de informações globais...</div>
+            </div>
+
+            <!-- Bloco Pódio Dinâmico -->
+            <div id="block-podium" class="display-block">
+                <div id="podium-wrapper" style="position: relative; width: 100%; height: 100%;">
+                    <!-- Telas dos gerentes injetadas aqui -->
+                </div>
+            </div>
+
+        </div>
+
+        <div class="version-sutil">v1.1.6</div>
+        <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
+    </div>
+
+    <script>
+        // Captura de Erros Críticos (Evita a Tela Preta Silenciosa)
+        window.onerror = function(msg, url, line) {
+            const errBox = document.getElementById('err-log');
+            errBox.style.display = 'block';
+            errBox.innerText = "SISTEMA INTERROMPIDO.\nErro detectado na linha " + line + ":\n" + msg + "\n\nPor favor, informe ao suporte técnico.";
+            return false;
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
+
+        if (tenant === 'safra') {
+            document.documentElement.style.setProperty('--neon-color', '#C29B0C');
+            document.getElementById('header-logo').src = 'logo-safra.png';
+        } else if (tenant === 'btg') {
+            document.documentElement.style.setProperty('--neon-color', '#00d2ff');
+            document.getElementById('header-logo').src = 'logo-btg.png';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => console.log(e));
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
+            document.getElementById('br-time').innerText = f('America/Sao_Paulo');
+            document.getElementById('ny-time').innerText = f('America/New_York');
+            document.getElementById('ld-time').innerText = f('Europe/London');
+            document.getElementById('tk-time').innerText = f('Asia/Tokyo');
+        }
+        setInterval(updateClocks, 1000); updateClocks();
+
+        // =================================================================
+        // DADOS MOCKADOS E RENDERIZAÇÃO
+        // =================================================================
+        const todayDate = new Date().toISOString().split('T')[0];
+        const currentMonthStr = todayDate.substring(0, 7); 
+
+        const mockMetas = [
+            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
+            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
+            { gerente: "Daniel Silva", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2000000 },
+            { gerente: "Mariana Costa", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2500000 },
+            { gerente: "Daniel Silva", segmento: "PRODUTOS", item: "Estruturados", meta: 500000 },
+            { gerente: "Mariana Costa", segmento: "MARGEM", item: "ROA Acumulado", meta: 80000 }
+        ];
+
+        const mockProducao = [
+            { gerente: "Daniel Silva", item: "Contas Abertas", realizado: 3, data: todayDate }, 
+            { gerente: "Daniel Silva", item: "Contas Viabilizadas", realizado: 0, data: todayDate },
+            { gerente: "Daniel Silva", item: "Captação Líquida", realizado: 1800000, data: todayDate },
+            { gerente: "Mariana Costa", item: "Captação Líquida", realizado: 2600000, data: todayDate },
+            { gerente: "Mariana Costa", item: "ROA Acumulado", realizado: 82000, data: todayDate }
+        ];
+
+        function carregarDadosMesa() {
+            const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
+
+            // 1. TELAS DE SEGMENTOS
+            segmentos.forEach(seg => {
+                const metasSeg = mockMetas.filter(m => m.segmento === seg);
+                const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
+                let trs = '';
+                
+                if (itensUnicos.length === 0) {
+                    trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
+                } else {
+                    itensUnicos.forEach(item => {
+                        let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
+                        let prodItem = mockProducao.filter(p => p.item === item);
+                        let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                        let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                        let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
+                        
+                        // REGRA DE SEMÁFORO (Apenas Fonte)
+                        let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
+                        
+                        let format = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
+
+                        trs += `
+                        <tr>
+                            <td style="text-align:left;">${item}</td>
+                            <td>${format(realizadoHoje)}</td>
+                            <td>${format(totalMeta)}</td>
+                            <td>${format(realizadoMes)}</td>
+                            <td class="${txtClass}">${pct.toFixed(1).replace('.', ',')}%</td>
+                        </tr>`;
+                    });
+                }
+
+                const containerBlock = document.getElementById(`block-perf-${seg}`);
+                if(containerBlock) {
+                    containerBlock.innerHTML = `
+                        <h2>Performance Consolidada do Escritório</h2>
+                        <h3 class="segment-subtitle">SEGMENTO: <span>${seg}</span></h3>
+                        <table class="mesa-perf-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="text-align: left;">Item</th>
+                                    <th rowspan="2">Dia</th>
+                                    <th colspan="3">Mês</th>
+                                </tr>
+                                <tr><th>Meta</th><th>Real</th><th>%</th></tr>
+                            </thead>
+                            <tbody>${trs}</tbody>
+                        </table>
+                    `;
+                }
+            });
+
+            // 2. RANKING DE GERENTES
+            const itemFoco = "Captação Líquida";
+            let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
+                let prodGerente = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
+                let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                let pct = (mes / meta.meta) * 100;
+                return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
+            });
+
+            rankingData.sort((a, b) => b.pct - a.pct);
+
+            let tableHtml = '';
+            rankingData.forEach(row => {
+                let colorClass = row.pct >= 100 ? 'perf-good' : (row.pct >= 50 ? 'perf-warn' : 'perf-bad');
+                let fmt = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
+                tableHtml += `
+                    <tr>
+                        <td>${row.gerente}</td>
+                        <td>${fmt(row.hoje)}</td>
+                        <td>${fmt(row.meta)}</td>
+                        <td>${fmt(row.mes)}</td>
+                        <td class="${colorClass}">${row.pct.toFixed(1).replace('.', ',')}%</td>
+                    </tr>`;
+            });
+            document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas.</td></tr>';
+
+            // 3. PÓDIO DINÂMICO
+            const podiumWrapper = document.getElementById('podium-wrapper');
+            let producoesHoje = mockProducao.filter(p => p.data === todayDate);
+            
+            let gerentesHoje = {};
+            producoesHoje.forEach(p => {
+                if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
+                gerentesHoje[p.gerente].push(p);
+            });
+
+            let keys = Object.keys(gerentesHoje);
+            let podiumHtml = '';
+
+            podiumWrapper.setAttribute('data-manager-count', keys.length);
+
+            if(keys.length === 0) {
+                podiumHtml = `
+                    <div class="podium-slide active">
+                        <div class="podium-empty-box">
+                            <div style="font-size: 2.2rem; font-weight: bold; color: var(--negative-color); margin-bottom: 20px; text-transform: uppercase;">O mercado não perdoa os lentos.</div>
+                            <div style="font-size: 1.4rem; color: #aaa;">A tela de destaques está vazia.<br><br><span style="color: #fff; font-weight: bold;">Quem será o primeiro a cravar o nome aqui hoje?</span></div>
+                        </div>
+                    </div>`;
+            } else {
+                keys.forEach((gerente, idx) => {
+                    let activeClass = idx === 0 ? 'active' : '';
+                    let linhasProducao = gerentesHoje[gerente].map(p => {
+                        let valFormatado = p.realizado > 100 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado;
+                        return `
+                            <div class="podium-item-row">
+                                <span>${p.item}</span>
+                                <span class="podium-item-val">+${valFormatado}</span>
+                            </div>`;
+                    }).join('');
+
+                    podiumHtml += `
+                        <div class="podium-slide ${activeClass}">
+                            <h2>DESTAQUES DO DIA</h2>
+                            <h3 class="segment-subtitle" style="text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-transform: uppercase;"><span>${gerente}</span></h3>
+                            <div class="podium-gerente-box">
+                                ${linhasProducao}
+                            </div>
+                        </div>`;
+                });
+            }
+            podiumWrapper.innerHTML = podiumHtml;
+        }
+
+        // =================================================================
+        // TICKER INTELIGENTE E INTEGRAÇÕES
+        // =================================================================
+        async function fetchMercados() {
+            try {
+                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=volume&sortOrder=desc&limit=100');
+                const data = await res.json();
+                
+                const ativosLimpos = data.stocks.filter(s => /^[A-Z]{4}(3|4|5|6|11)$/.test(s.stock));
+                ativosLimpos.sort((a, b) => a.stock.localeCompare(b.stock));
+                
+                let html = '';
+                ativosLimpos.slice(0, 40).forEach(s => {
+                    const isUp = s.change >= 0;
+                    const arrow = isUp ? '▲' : '▼';
+                    const colorClass = isUp ? 'up' : 'down';
+                    html += `<span class="stock-item">${s.stock} <span class="${colorClass}">${arrow} ${Math.abs(s.change).toFixed(2)}%</span></span>`;
+                });
+                
+                document.getElementById('stock-ticker').innerHTML = html + html;
+            } catch(e) {}
+        }
+        
+        async function fetchCambio() {
+            try {
+                const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
+                const d = await r.json();
+                document.getElementById('usd-val').innerText = 'R$ ' + parseFloat(d.USDBRL.bid).toFixed(2);
+                document.getElementById('usd-var').innerText = parseFloat(d.USDBRL.pctChange).toFixed(2) + '%';
+                document.getElementById('eur-val').innerText = 'R$ ' + parseFloat(d.EURBRL.bid).toFixed(2);
+                document.getElementById('eur-var').innerText = parseFloat(d.EURBRL.pctChange).toFixed(2) + '%';
+            } catch(e) {}
+        }
+        
+        let newsList = [];
+        async function fetchNoticias() {
+            try {
+                const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/`);
+                const d = await r.json();
+                if(d.items) newsList = d.items;
+            } catch(e) {}
+        }
+
+        carregarDadosMesa(); fetchMercados(); fetchCambio(); fetchNoticias();
+        setInterval(carregarDadosMesa, 60000); 
+
+        let newsIdx = 0;
+        setInterval(() => {
+            if(newsList.length && document.getElementById('block-news').style.display !== 'none') {
+                document.getElementById('news-title').innerText = newsList[newsIdx].title;
+                newsIdx = (newsIdx + 1) % newsList.length;
+            }
+        }, 15000);
+
+        // =================================================================
+        // MOTOR DE CARROSSEL HÍBRIDO (Sub-Rotação)
+        // =================================================================
+        const blocks = [
+            'block-perf-CONTAS', 
+            'block-perf-INVESTIMENTOS', 
+            'block-perf-PRODUTOS', 
+            'block-perf-MARGEM', 
+            'block-ranking', 
+            'block-macro', 
+            'block-coins', 
+            'block-opps', 
+            'block-news', 
+            'block-podium'
+        ];
+        
+        let bIdx = 0;
+        let mainCycleTimeout;
+        let subPodiumInterval;
+
+        function carrosselMesa() {
+            const cur = document.getElementById(blocks[bIdx]);
+            if(cur) cur.style.opacity = 0;
+            
+            setTimeout(() => {
+                if(cur) cur.style.display = 'none';
+                
+                bIdx = (bIdx + 1) % blocks.length;
+                const nxt = document.getElementById(blocks[bIdx]);
+                let nextTime = 15000; 
+                
+                if(nxt) {
+                    nxt.style.display = 'flex';
+                    setTimeout(() => nxt.style.opacity = 1, 50);
+                    
+                    if (blocks[bIdx] === 'block-podium') {
+                        const wrapper = document.getElementById('podium-wrapper');
+                        const count = parseInt(wrapper.getAttribute('data-manager-count')) || 0;
+                        
+                        if (count > 1) {
+                            nextTime = count * 10000; 
+                            
+                            const slides = wrapper.querySelectorAll('.podium-slide');
+                            let cSlide = 0;
+                            
+                            if(subPodiumInterval) clearInterval(subPodiumInterval);
+                            
+                            subPodiumInterval = setInterval(() => {
+                                slides[cSlide].classList.remove('active');
+                                cSlide++;
+                                if (cSlide < slides.length) {
+                                    slides[cSlide].classList.add('active');
+                                } else {
+                                    clearInterval(subPodiumInterval);
+                                }
+                            }, 10000);
+                            
+                        } else if (count === 1) {
+                            nextTime = 10000; 
+                        }
+                    }
+                }
+                
+                mainCycleTimeout = setTimeout(carrosselMesa, nextTime);
+            }, 800);
+        }
+        
+        mainCycleTimeout = setTimeout(carrosselMesa, 15000);
+    </script>
+</body>
+</html>
