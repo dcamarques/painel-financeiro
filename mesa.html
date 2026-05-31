@@ -1,11 +1,11 @@
 <!-- =========================================================
      Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.6
+     Versão: 1.1.7
      Descrição: 
-     - Restauração Integral dos Relógios Globais
-     - Restauração da Responsividade Mobile/Tablet
-     - Ticker: Velocidade reduzida (240s)
-     - Semáforo de Performance (%): Apenas cor da fonte
+     - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
+     - Imagens ativas na sessão de Notícias
+     - Motor Blindado (Try/Catch Global) contra Tela Preta
+     - Ticker 240s + Semáforo Font-Only
 ========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -24,10 +24,8 @@
         }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Debug Layer Oculto */
         #err-log { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:red; z-index:9999; display:none; padding: 50px; font-size: 1.5rem; font-family: monospace; }
 
-        /* Cabeçalho */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; }
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
@@ -36,18 +34,15 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-color); }
 
-        /* Ticker Superior */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
         .ticker-content { display: inline-flex; animation: marquee 240s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--positive-color); } .down { color: var(--negative-color); }
 
-        /* Área de Conteúdo Central */
         .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
         .content-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: center; }
+        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; }
 
-        /* TABELAS DE SEGMENTOS E RANKING */
         h2 { color: var(--neon-color); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; max-width: 1000px; text-align: left;}
         h3.segment-subtitle { color: var(--neon-color); margin: 0 0 30px 0; width: 100%; max-width: 1000px; text-align: left; font-size: 1.5rem; }
         h3.segment-subtitle span { color: white; }
@@ -58,7 +53,6 @@
         .mesa-perf-table thead tr:first-child th[colspan="3"] { border-bottom: 2px solid var(--neon-color); }
         .mesa-perf-table tbody tr:nth-child(even) { background: #0c0c0c; }
         
-        /* Semáforo de Fundo para Performance (%) - Apenas Fonte */
         .perf-bad { color: var(--negative-color); font-weight: bold; } 
         .perf-warn { color: var(--warning-color); font-weight: bold; } 
         .perf-good { color: var(--positive-color); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.2); }
@@ -68,15 +62,16 @@
         .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
         .mesa-table tr:nth-child(even) { background: #0c0c0c; }
 
-        /* Notícias e Grids Padrão */
-        #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
-        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
-        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; text-align: left; box-sizing: border-box; }
+        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; text-align: left; }
+        .card-column { display: flex; flex-direction: column; gap: 15px; }
+        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; }
         .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
         .info-val { font-size: 1.8rem; font-weight: bold; }
         .info-sub { font-size: 1rem; color: #888; font-weight: bold; }
 
-        /* Sub-Carrossel Podium */
+        .news-image { max-width: 80%; max-height: 40vh; border-radius: 8px; object-fit: contain; margin-bottom: 20px; border: 2px solid #333; display: none; }
+        #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; max-width: 90%; }
+
         .podium-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; pointer-events: none;}
         .podium-slide.active { opacity: 1; z-index: 2; pointer-events: auto;}
         
@@ -85,14 +80,12 @@
         .podium-item-row { font-size: 1.6rem; color: #fff; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; width: 100%; display: flex; justify-content: space-between; }
         .podium-item-val { color: var(--neon-color); font-weight: bold; font-size: 1.8rem; }
 
-        /* Ferramentas Subliminares */
         .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; z-index: 100; transition: background 0.3s; }
         .fs-dot:hover { background: rgba(255,255,255,0.3); }
         .version-sutil { position: absolute; bottom: 12px; right: 40px; font-size: 0.65rem; color: rgba(255,255,255,0.08); user-select: none; z-index: 100; font-family: monospace; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Responsividade Restabelecida (Mobile/Tablet) */
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 15px; padding: 15px 10px; }
             .clocks-container { flex-wrap: wrap; justify-content: center; gap: 10px; }
@@ -104,17 +97,16 @@
             .mesa-perf-table, .mesa-table { font-size: 1rem; }
             .mesa-perf-table th, .mesa-perf-table td { padding: 8px 5px; }
             .macro-grid, .coins-grid, .opportunities-grid { grid-template-columns: 1fr; gap: 10px; }
-            .info-card { padding: 15px; }
+            .info-card { padding: 15px; min-height: auto; }
             #news-title { font-size: 1.5rem; }
+            .news-image { max-height: 25vh; }
             .podium-gerente-box { padding: 20px; }
             .podium-item-row { font-size: 1.2rem; flex-direction: column; align-items: center; gap: 10px; }
-            .podium-empty-box { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Camada de Proteção contra Tela Preta -->
     <div id="err-log"></div>
 
     <div class="header">
@@ -134,13 +126,11 @@
     <div class="main-container">
         <div class="content-area">
             
-            <!-- BLOCOS DE PERFORMANCE -->
             <div id="block-perf-CONTAS" class="display-block" style="display: flex; opacity: 1;"></div>
             <div id="block-perf-INVESTIMENTOS" class="display-block"></div>
             <div id="block-perf-PRODUTOS" class="display-block"></div>
             <div id="block-perf-MARGEM" class="display-block"></div>
 
-            <!-- Bloco Ranking -->
             <div id="block-ranking" class="display-block">
                 <h2>Ranking de Performance por Gerente</h2>
                 <h3 class="segment-subtitle">FOCO: <span>Captação Líquida</span></h3>
@@ -158,61 +148,62 @@
                 </table>
             </div>
 
-            <!-- Bloco Macro -->
+            <!-- MACRO PARIDADE -->
             <div id="block-macro" class="display-block">
-                <h2>Indicadores Macro &amp; Índices Globais</h2>
+                <h2 style="margin-bottom:20px;">Indicadores Macro &amp; Índices Globais</h2>
                 <div class="macro-grid">
-                    <div class="info-card"><h3>SELIC</h3><div class="info-val">14,50%</div></div>
-                    <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>IPCA (PROJ.)</h3><div class="info-val">4,00%</div></div>
-                    <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div><div id="sp500-var" class="info-sub">---</div></div>
-                </div>
-            </div>
-
-            <!-- Bloco Câmbio -->
-            <div id="block-coins" class="display-block">
-                <h2>Câmbio Global em Tempo Real</h2>
-                <div class="coins-grid">
-                    <div class="info-card"><h3>Dólar (USD/BRL)</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
-                    <div class="info-card"><h3>Euro (EUR/BRL)</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
-                </div>
-            </div>
-
-            <!-- Bloco Oportunidades -->
-            <div id="block-opps" class="display-block">
-                <h2>Foco Comercial - Oportunidades de Alocação</h2>
-                <div id="opps-container" class="opportunities-grid">
-                    <div class="info-card" style="grid-column: span 2; text-align: center;">
-                        <div class="info-val" style="color:#666; font-size: 1.2rem;">Carregando oportunidades da matriz...</div>
+                    <div class="card-column">
+                        <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,50%</div></div>
+                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,00%</div></div>
+                        <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">5,25%</div></div>
+                    </div>
+                    <div class="card-column">
+                        <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
+                        <div class="info-card"><h3>S&amp;P 500</h3><div id="sp500-val" class="info-val">---</div><div id="sp500-var" class="info-sub">---</div></div>
+                        <div class="info-card"><h3>NASDAQ</h3><div id="nasdaq-val" class="info-val">---</div><div id="nasdaq-var" class="info-sub">---</div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Bloco Notícias -->
+            <!-- CÂMBIO PARIDADE -->
+            <div id="block-coins" class="display-block">
+                <h2 style="margin-bottom:20px;">Câmbio Global em Tempo Real</h2>
+                <div class="coins-grid">
+                    <div class="info-card"><h3>Dólar (USD/BRL)</h3><div id="usd-val" class="info-val">R$ ---</div><div id="usd-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Euro (EUR/BRL)</h3><div id="eur-val" class="info-val">R$ ---</div><div id="eur-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Iene (JPY/BRL)</h3><div id="jpy-val" class="info-val">R$ ---</div><div id="jpy-var" class="info-sub">---</div></div>
+                    <div class="info-card"><h3>Libra (GBP/BRL)</h3><div id="gbp-val" class="info-val">R$ ---</div><div id="gbp-var" class="info-sub">---</div></div>
+                </div>
+            </div>
+
+            <!-- OPPS PARIDADE -->
+            <div id="block-opps" class="display-block">
+                <h2 style="margin-bottom:20px;">Foco Comercial - Oportunidades de Alocação</h2>
+                <div id="opps-container" class="opportunities-grid">
+                    <div class="info-card" style="grid-column: span 2; text-align: center;"><div class="info-val" style="color:#666;">Carregando oportunidades da matriz...</div></div>
+                </div>
+            </div>
+
+            <!-- NOTÍCIAS + IMAGEM -->
             <div id="block-news" class="display-block" style="justify-content: center;">
-                <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; margin-bottom:10px;">Radar de Notícias</div>
+                <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px; margin-bottom:10px;">Radar de Notícias</div>
+                <img id="news-img" class="news-image" src="" alt="Imagem da Notícia">
                 <div id="news-title">Carregando painel de informações globais...</div>
             </div>
 
-            <!-- Bloco Pódio Dinâmico -->
             <div id="block-podium" class="display-block">
-                <div id="podium-wrapper" style="position: relative; width: 100%; height: 100%;">
-                    <!-- Telas dos gerentes injetadas aqui -->
-                </div>
+                <div id="podium-wrapper" style="position: relative; width: 100%; height: 100%;"></div>
             </div>
 
         </div>
 
-        <div class="version-sutil">v1.1.6</div>
+        <div class="version-sutil">v1.1.7</div>
         <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
     <script>
-        // Captura de Erros Críticos (Evita a Tela Preta Silenciosa)
         window.onerror = function(msg, url, line) {
-            const errBox = document.getElementById('err-log');
-            errBox.style.display = 'block';
-            errBox.innerText = "SISTEMA INTERROMPIDO.\nErro detectado na linha " + line + ":\n" + msg + "\n\nPor favor, informe ao suporte técnico.";
+            console.error("Erro Silencioso Capturado:", msg, "Linha:", line);
             return false;
         };
 
@@ -233,17 +224,19 @@
         }
 
         function updateClocks() {
-            const now = new Date();
-            const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
-            document.getElementById('br-time').innerText = f('America/Sao_Paulo');
-            document.getElementById('ny-time').innerText = f('America/New_York');
-            document.getElementById('ld-time').innerText = f('Europe/London');
-            document.getElementById('tk-time').innerText = f('Asia/Tokyo');
+            try {
+                const now = new Date();
+                const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
+                document.getElementById('br-time').innerText = f('America/Sao_Paulo');
+                document.getElementById('ny-time').innerText = f('America/New_York');
+                document.getElementById('ld-time').innerText = f('Europe/London');
+                document.getElementById('tk-time').innerText = f('Asia/Tokyo');
+            } catch(e){}
         }
         setInterval(updateClocks, 1000); updateClocks();
 
         // =================================================================
-        // DADOS MOCKADOS E RENDERIZAÇÃO
+        // DADOS INTERNOS (MESA)
         // =================================================================
         const todayDate = new Date().toISOString().split('T')[0];
         const currentMonthStr = todayDate.substring(0, 7); 
@@ -266,167 +259,196 @@
         ];
 
         function carregarDadosMesa() {
-            const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
+            try {
+                const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
 
-            // 1. TELAS DE SEGMENTOS
-            segmentos.forEach(seg => {
-                const metasSeg = mockMetas.filter(m => m.segmento === seg);
-                const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
-                let trs = '';
-                
-                if (itensUnicos.length === 0) {
-                    trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
+                segmentos.forEach(seg => {
+                    const metasSeg = mockMetas.filter(m => m.segmento === seg);
+                    const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
+                    let trs = '';
+                    
+                    if (itensUnicos.length === 0) {
+                        trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
+                    } else {
+                        itensUnicos.forEach(item => {
+                            let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
+                            let prodItem = mockProducao.filter(p => p.item === item);
+                            let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                            let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                            let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
+                            
+                            let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
+                            let format = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
+
+                            trs += `<tr><td style="text-align:left;">${item}</td><td>${format(realizadoHoje)}</td><td>${format(totalMeta)}</td><td>${format(realizadoMes)}</td><td class="${txtClass}">${pct.toFixed(1).replace('.', ',')}%</td></tr>`;
+                        });
+                    }
+
+                    const containerBlock = document.getElementById(`block-perf-${seg}`);
+                    if(containerBlock) {
+                        containerBlock.innerHTML = `<h2>Performance Consolidada do Escritório</h2><h3 class="segment-subtitle">SEGMENTO: <span>${seg}</span></h3><table class="mesa-perf-table"><thead><tr><th rowspan="2" style="text-align: left;">Item</th><th rowspan="2">Dia</th><th colspan="3">Mês</th></tr><tr><th>Meta</th><th>Real</th><th>%</th></tr></thead><tbody>${trs}</tbody></table>`;
+                    }
+                });
+
+                const itemFoco = "Captação Líquida";
+                let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
+                    let prodGerente = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
+                    let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                    let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                    let pct = (mes / meta.meta) * 100;
+                    return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
+                });
+
+                rankingData.sort((a, b) => b.pct - a.pct);
+                let tableHtml = '';
+                rankingData.forEach(row => {
+                    let colorClass = row.pct >= 100 ? 'perf-good' : (row.pct >= 50 ? 'perf-warn' : 'perf-bad');
+                    let fmt = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
+                    tableHtml += `<tr><td>${row.gerente}</td><td>${fmt(row.hoje)}</td><td>${fmt(row.meta)}</td><td>${fmt(row.mes)}</td><td class="${colorClass}">${row.pct.toFixed(1).replace('.', ',')}%</td></tr>`;
+                });
+                document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas.</td></tr>';
+
+                const podiumWrapper = document.getElementById('podium-wrapper');
+                let producoesHoje = mockProducao.filter(p => p.data === todayDate);
+                let gerentesHoje = {};
+                producoesHoje.forEach(p => {
+                    if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
+                    gerentesHoje[p.gerente].push(p);
+                });
+
+                let keys = Object.keys(gerentesHoje);
+                let podiumHtml = '';
+                podiumWrapper.setAttribute('data-manager-count', keys.length);
+
+                if(keys.length === 0) {
+                    podiumHtml = `<div class="podium-slide active"><div class="podium-empty-box"><div style="font-size: 2.2rem; font-weight: bold; color: var(--negative-color); margin-bottom: 20px; text-transform: uppercase;">O mercado não perdoa os lentos.</div><div style="font-size: 1.4rem; color: #aaa;">A tela de destaques está vazia.<br><br><span style="color: #fff; font-weight: bold;">Quem será o primeiro a cravar o nome aqui hoje?</span></div></div></div>`;
                 } else {
-                    itensUnicos.forEach(item => {
-                        let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
-                        let prodItem = mockProducao.filter(p => p.item === item);
-                        let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                        let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
-                        let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
-                        
-                        // REGRA DE SEMÁFORO (Apenas Fonte)
-                        let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
-                        
-                        let format = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
+                    keys.forEach((gerente, idx) => {
+                        let activeClass = idx === 0 ? 'active' : '';
+                        let linhasProducao = gerentesHoje[gerente].map(p => {
+                            let valFormatado = p.realizado > 100 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado;
+                            return `<div class="podium-item-row"><span>${p.item}</span><span class="podium-item-val">+${valFormatado}</span></div>`;
+                        }).join('');
 
-                        trs += `
-                        <tr>
-                            <td style="text-align:left;">${item}</td>
-                            <td>${format(realizadoHoje)}</td>
-                            <td>${format(totalMeta)}</td>
-                            <td>${format(realizadoMes)}</td>
-                            <td class="${txtClass}">${pct.toFixed(1).replace('.', ',')}%</td>
-                        </tr>`;
+                        podiumHtml += `<div class="podium-slide ${activeClass}"><h2>DESTAQUES DO DIA</h2><h3 class="segment-subtitle" style="text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-transform: uppercase;"><span>${gerente}</span></h3><div class="podium-gerente-box">${linhasProducao}</div></div>`;
                     });
                 }
-
-                const containerBlock = document.getElementById(`block-perf-${seg}`);
-                if(containerBlock) {
-                    containerBlock.innerHTML = `
-                        <h2>Performance Consolidada do Escritório</h2>
-                        <h3 class="segment-subtitle">SEGMENTO: <span>${seg}</span></h3>
-                        <table class="mesa-perf-table">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" style="text-align: left;">Item</th>
-                                    <th rowspan="2">Dia</th>
-                                    <th colspan="3">Mês</th>
-                                </tr>
-                                <tr><th>Meta</th><th>Real</th><th>%</th></tr>
-                            </thead>
-                            <tbody>${trs}</tbody>
-                        </table>
-                    `;
-                }
-            });
-
-            // 2. RANKING DE GERENTES
-            const itemFoco = "Captação Líquida";
-            let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
-                let prodGerente = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
-                let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
-                let pct = (mes / meta.meta) * 100;
-                return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
-            });
-
-            rankingData.sort((a, b) => b.pct - a.pct);
-
-            let tableHtml = '';
-            rankingData.forEach(row => {
-                let colorClass = row.pct >= 100 ? 'perf-good' : (row.pct >= 50 ? 'perf-warn' : 'perf-bad');
-                let fmt = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
-                tableHtml += `
-                    <tr>
-                        <td>${row.gerente}</td>
-                        <td>${fmt(row.hoje)}</td>
-                        <td>${fmt(row.meta)}</td>
-                        <td>${fmt(row.mes)}</td>
-                        <td class="${colorClass}">${row.pct.toFixed(1).replace('.', ',')}%</td>
-                    </tr>`;
-            });
-            document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas.</td></tr>';
-
-            // 3. PÓDIO DINÂMICO
-            const podiumWrapper = document.getElementById('podium-wrapper');
-            let producoesHoje = mockProducao.filter(p => p.data === todayDate);
-            
-            let gerentesHoje = {};
-            producoesHoje.forEach(p => {
-                if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
-                gerentesHoje[p.gerente].push(p);
-            });
-
-            let keys = Object.keys(gerentesHoje);
-            let podiumHtml = '';
-
-            podiumWrapper.setAttribute('data-manager-count', keys.length);
-
-            if(keys.length === 0) {
-                podiumHtml = `
-                    <div class="podium-slide active">
-                        <div class="podium-empty-box">
-                            <div style="font-size: 2.2rem; font-weight: bold; color: var(--negative-color); margin-bottom: 20px; text-transform: uppercase;">O mercado não perdoa os lentos.</div>
-                            <div style="font-size: 1.4rem; color: #aaa;">A tela de destaques está vazia.<br><br><span style="color: #fff; font-weight: bold;">Quem será o primeiro a cravar o nome aqui hoje?</span></div>
-                        </div>
-                    </div>`;
-            } else {
-                keys.forEach((gerente, idx) => {
-                    let activeClass = idx === 0 ? 'active' : '';
-                    let linhasProducao = gerentesHoje[gerente].map(p => {
-                        let valFormatado = p.realizado > 100 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado;
-                        return `
-                            <div class="podium-item-row">
-                                <span>${p.item}</span>
-                                <span class="podium-item-val">+${valFormatado}</span>
-                            </div>`;
-                    }).join('');
-
-                    podiumHtml += `
-                        <div class="podium-slide ${activeClass}">
-                            <h2>DESTAQUES DO DIA</h2>
-                            <h3 class="segment-subtitle" style="text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-transform: uppercase;"><span>${gerente}</span></h3>
-                            <div class="podium-gerente-box">
-                                ${linhasProducao}
-                            </div>
-                        </div>`;
-                });
-            }
-            podiumWrapper.innerHTML = podiumHtml;
+                podiumWrapper.innerHTML = podiumHtml;
+            } catch(e) { console.error("Erro interno Mesa:", e); }
         }
 
         // =================================================================
-        // TICKER INTELIGENTE E INTEGRAÇÕES
+        // DADOS EXTERNOS (PARIDADE INDEX.HTML)
         // =================================================================
+        
+        let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
+        let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
+
+        function safeParseFloat(str) {
+            if (!str) return 0;
+            str = str.replace(/[^\d.,-]/g, ''); 
+            const lastComma = str.lastIndexOf(',');
+            const lastDot = str.lastIndexOf('.');
+            if (lastComma > lastDot) return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+            else if (lastDot > lastComma) return parseFloat(str.replace(/,/g, ''));
+            else return parseFloat(str);
+        }
+
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+            return lines.map(line => {
+                const cols = []; let current = ''; let inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { cols.push(current); current = ''; } 
+                    else { current += char; }
+                }
+                cols.push(current);
+                return cols.map(val => val ? val.replace(/^"|"$/g, '').trim() : '');
+            });
+        }
+
+        async function fetchMacro() {
+            try {
+                const response = await fetch(URL_MACRO + '&t=' + new Date().getTime());
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+                data.forEach(cols => {
+                    if (cols.length >= 3) {
+                        const indice = cols[0].toUpperCase();
+                        const price = safeParseFloat(cols[1]);
+                        const variation = safeParseFloat(cols[2]);
+                        let valId = ''; let varId = '';
+                        if (indice.includes('IBOV')) { valId = 'ibov-val'; varId = 'ibov-var'; }
+                        else if (indice.includes('S&P') || indice.includes('INX')) { valId = 'sp500-val'; varId = 'sp500-var'; }
+                        else if (indice.includes('NASDAQ') || indice.includes('IXIC')) { valId = 'nasdaq-val'; varId = 'nasdaq-var'; }
+                        if (valId && price > 0) {
+                            document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            const varEl = document.getElementById(varId);
+                            const isUp = variation >= 0;
+                            varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
+                            varEl.style.color = isUp ? 'var(--positive-color)' : 'var(--negative-color)';
+                        }
+                    }
+                });
+            } catch (e) { console.error("Erro Macro:", e); }
+        }
+
+        async function fetchOpportunities() {
+            try {
+                const response = await fetch(URL_OPORTUNIDADES + '&t=' + new Date().getTime());
+                const csvText = await response.text();
+                const data = parseCSV(csvText).slice(1);
+                const container = document.getElementById('opps-container');
+                let html = '<div class="card-column">';
+                data.forEach((cols, idx) => {
+                    if (idx >= 6) return;
+                    if (idx === 3) html += '</div><div class="card-column">';
+                    if (cols.length >= 3) {
+                        const [classe, ativo, taxa, destaque, logoUrl] = cols;
+                        const imgHtml = (logoUrl && logoUrl.length > 10) ? `<img src="${logoUrl}" style="width: 60px; height: 60px; object-fit: contain; background: #fff; border-radius: 8px; padding: 5px; flex-shrink: 0;" onerror="this.style.display='none'">` : '';
+                        html += `<div class="info-card"><h3>${classe}</h3><div style="display:flex; align-items:center; gap:15px;">${imgHtml}<div style="flex:1"><div class="info-val">${ativo}</div><div class="info-sub" style="color:var(--neon-color); font-size: 1.4rem;">${taxa}</div><div class="info-sub" style="font-size:0.85rem; opacity:0.9;">${destaque || ''}</div></div></div></div>`;
+                    }
+                });
+                container.innerHTML = html + '</div>';
+            } catch (e) { console.error("Erro Opps:", e); }
+        }
+
         async function fetchMercados() {
             try {
                 const res = await fetch('https://brapi.dev/api/quote/list?sortBy=volume&sortOrder=desc&limit=100');
                 const data = await res.json();
-                
                 const ativosLimpos = data.stocks.filter(s => /^[A-Z]{4}(3|4|5|6|11)$/.test(s.stock));
                 ativosLimpos.sort((a, b) => a.stock.localeCompare(b.stock));
                 
                 let html = '';
                 ativosLimpos.slice(0, 40).forEach(s => {
-                    const isUp = s.change >= 0;
-                    const arrow = isUp ? '▲' : '▼';
-                    const colorClass = isUp ? 'up' : 'down';
-                    html += `<span class="stock-item">${s.stock} <span class="${colorClass}">${arrow} ${Math.abs(s.change).toFixed(2)}%</span></span>`;
+                    if(s.change !== undefined && s.change !== null) {
+                        const isUp = s.change >= 0;
+                        const arrow = isUp ? '▲' : '▼';
+                        const colorClass = isUp ? 'up' : 'down';
+                        html += `<span class="stock-item">${s.stock} <span class="${colorClass}">${arrow} ${Math.abs(s.change).toFixed(2)}%</span></span>`;
+                    }
                 });
-                
                 document.getElementById('stock-ticker').innerHTML = html + html;
-            } catch(e) {}
+            } catch(e) { console.error("Erro Ticker:", e); }
         }
         
         async function fetchCambio() {
             try {
-                const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
+                const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL');
                 const d = await r.json();
-                document.getElementById('usd-val').innerText = 'R$ ' + parseFloat(d.USDBRL.bid).toFixed(2);
-                document.getElementById('usd-var').innerText = parseFloat(d.USDBRL.pctChange).toFixed(2) + '%';
-                document.getElementById('eur-val').innerText = 'R$ ' + parseFloat(d.EURBRL.bid).toFixed(2);
-                document.getElementById('eur-var').innerText = parseFloat(d.EURBRL.pctChange).toFixed(2) + '%';
-            } catch(e) {}
+                const updateC = (id, cur) => {
+                    if(cur) {
+                        document.getElementById(`${id}-val`).innerText = 'R$ ' + parseFloat(cur.bid).toFixed(2);
+                        const pct = parseFloat(cur.pctChange);
+                        const varEl = document.getElementById(`${id}-var`);
+                        varEl.innerText = (pct >= 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(2) + '%';
+                        varEl.style.color = pct >= 0 ? 'var(--positive-color)' : 'var(--negative-color)';
+                    }
+                };
+                updateC('usd', d.USDBRL); updateC('eur', d.EURBRL); updateC('jpy', d.JPYBRL); updateC('gbp', d.GBPBRL);
+            } catch(e) { console.error("Erro Cambio:", e); }
         }
         
         let newsList = [];
@@ -435,22 +457,39 @@
                 const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/`);
                 const d = await r.json();
                 if(d.items) newsList = d.items;
-            } catch(e) {}
+            } catch(e) { console.error("Erro Noticias:", e); }
         }
 
-        carregarDadosMesa(); fetchMercados(); fetchCambio(); fetchNoticias();
+        carregarDadosMesa(); fetchMercados(); fetchCambio(); fetchNoticias(); fetchMacro(); fetchOpportunities();
         setInterval(carregarDadosMesa, 60000); 
+        setInterval(fetchMercados, 300000);
+        setInterval(fetchCambio, 60000);
+        setInterval(fetchMacro, 300000);
+        setInterval(fetchOpportunities, 300000);
+        setInterval(fetchNoticias, 1800000);
 
         let newsIdx = 0;
         setInterval(() => {
             if(newsList.length && document.getElementById('block-news').style.display !== 'none') {
-                document.getElementById('news-title').innerText = newsList[newsIdx].title;
+                const item = newsList[newsIdx];
+                document.getElementById('news-title').innerText = item.title;
+                
+                const img = document.getElementById('news-img');
+                const thumb = item.thumbnail || item.enclosure?.link || (item.content?.match(/src="([^"]+)"/)?.[1]);
+                
+                if(thumb && !thumb.includes('transparent')){
+                    img.src = thumb; 
+                    img.style.display = 'block';
+                } else { 
+                    img.style.display = 'none'; 
+                }
+                
                 newsIdx = (newsIdx + 1) % newsList.length;
             }
         }, 15000);
 
         // =================================================================
-        // MOTOR DE CARROSSEL HÍBRIDO (Sub-Rotação)
+        // MOTOR DE CARROSSEL
         // =================================================================
         const blocks = [
             'block-perf-CONTAS', 
@@ -470,50 +509,52 @@
         let subPodiumInterval;
 
         function carrosselMesa() {
-            const cur = document.getElementById(blocks[bIdx]);
-            if(cur) cur.style.opacity = 0;
-            
-            setTimeout(() => {
-                if(cur) cur.style.display = 'none';
+            try {
+                const cur = document.getElementById(blocks[bIdx]);
+                if(cur) cur.style.opacity = 0;
                 
-                bIdx = (bIdx + 1) % blocks.length;
-                const nxt = document.getElementById(blocks[bIdx]);
-                let nextTime = 15000; 
-                
-                if(nxt) {
-                    nxt.style.display = 'flex';
-                    setTimeout(() => nxt.style.opacity = 1, 50);
+                setTimeout(() => {
+                    if(cur) cur.style.display = 'none';
                     
-                    if (blocks[bIdx] === 'block-podium') {
-                        const wrapper = document.getElementById('podium-wrapper');
-                        const count = parseInt(wrapper.getAttribute('data-manager-count')) || 0;
+                    bIdx = (bIdx + 1) % blocks.length;
+                    const nxt = document.getElementById(blocks[bIdx]);
+                    let nextTime = 15000; 
+                    
+                    if(nxt) {
+                        nxt.style.display = 'flex';
+                        setTimeout(() => nxt.style.opacity = 1, 50);
                         
-                        if (count > 1) {
-                            nextTime = count * 10000; 
+                        if (blocks[bIdx] === 'block-podium') {
+                            const wrapper = document.getElementById('podium-wrapper');
+                            const count = parseInt(wrapper.getAttribute('data-manager-count')) || 0;
                             
-                            const slides = wrapper.querySelectorAll('.podium-slide');
-                            let cSlide = 0;
-                            
-                            if(subPodiumInterval) clearInterval(subPodiumInterval);
-                            
-                            subPodiumInterval = setInterval(() => {
-                                slides[cSlide].classList.remove('active');
-                                cSlide++;
-                                if (cSlide < slides.length) {
-                                    slides[cSlide].classList.add('active');
-                                } else {
-                                    clearInterval(subPodiumInterval);
-                                }
-                            }, 10000);
-                            
-                        } else if (count === 1) {
-                            nextTime = 10000; 
+                            if (count > 1) {
+                                nextTime = count * 10000; 
+                                const slides = wrapper.querySelectorAll('.podium-slide');
+                                let cSlide = 0;
+                                
+                                if(subPodiumInterval) clearInterval(subPodiumInterval);
+                                
+                                subPodiumInterval = setInterval(() => {
+                                    if(slides[cSlide]) slides[cSlide].classList.remove('active');
+                                    cSlide++;
+                                    if (cSlide < slides.length) {
+                                        if(slides[cSlide]) slides[cSlide].classList.add('active');
+                                    } else {
+                                        clearInterval(subPodiumInterval);
+                                    }
+                                }, 10000);
+                            } else if (count === 1) {
+                                nextTime = 10000; 
+                            }
                         }
                     }
-                }
-                
-                mainCycleTimeout = setTimeout(carrosselMesa, nextTime);
-            }, 800);
+                    mainCycleTimeout = setTimeout(carrosselMesa, nextTime);
+                }, 800);
+            } catch (error) {
+                console.error("Erro no Carrossel:", error);
+                mainCycleTimeout = setTimeout(carrosselMesa, 15000); // Tenta de novo se falhar
+            }
         }
         
         mainCycleTimeout = setTimeout(carrosselMesa, 15000);
