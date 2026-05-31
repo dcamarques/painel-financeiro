@@ -5,73 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus TV - Mesa de Operações</title>
     <style>
-        :root {
-            --neon-color: #00ff88;
-            --positive-color: #00ff88;
-            --warning-color: #d68900; /* Laranja/Dourado ajustado para match com a foto */
-            --negative-color: #ff0000;
-            --dark-bg: #050505;
-            --panel-bg: #111;
-        }
-        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Cabeçalho */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; }
-        .logo img { height: 40px; width: auto; }
-        .clocks-container { display: flex; gap: 15px; }
-        .clock-box { text-align: center; min-width: 85px; }
-        .label { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
-        .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
-        #br-time { color: var(--neon-color); }
+        :root { --neon-color: #00ff88; --dark-bg: #050505; --panel-bg: #111; }
+        body { background: var(--dark-bg); color: white; font-family: sans-serif; overflow: hidden; margin: 0; height: 100vh; }
+        #debug-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; color: red; z-index: 9999; display: none; padding: 20px; font-family: monospace; }
+        /* Mantemos o layout anterior... */
+    </style>
+</head>
+<body>
+    <div id="debug-layer">
+        <h2>ERRO CRÍTICO NO CARREGAMENTO:</h2>
+        <pre id="error-details"></pre>
+        <p>Aperte F12 para ver o Console.</p>
+    </div>
 
-        /* Ticker Superior (Esteira) - Velocidade reduzida de 60s para 120s */
-        .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
-        .ticker-content { display: inline-flex; animation: marquee 120s linear infinite; white-space: nowrap; }
-        .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
-        .up { color: var(--positive-color); } .down { color: var(--negative-color); }
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('debug-layer').style.display = 'block';
+            document.getElementById('error-details').innerText = `Mensagem: ${message}\nLinha: ${lineno}\nErro: ${error}`;
+        };
 
-        /* Área de Conteúdo Central */
-        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
-        .content-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: center; }
-
-        /* TABELAS DE SEGMENTOS E RANKING */
-        h2 { color: var(--neon-color); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; max-width: 1000px; text-align: left;}
-        h3.segment-subtitle { color: var(--neon-color); margin: 0 0 30px 0; width: 100%; max-width: 1000px; text-align: left; font-size: 1.5rem; }
-        h3.segment-subtitle span { color: white; }
-        
-        .mesa-perf-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: center; font-size: 1.4rem; font-weight: bold; }
-        .mesa-perf-table th { color: var(--neon-color); padding: 12px; }
-        .mesa-perf-table td { padding: 12px; }
-        .mesa-perf-table thead tr:first-child th[colspan="3"] { border-bottom: 2px solid var(--neon-color); }
-        .mesa-perf-table tbody tr:nth-child(even) { background: #0c0c0c; }
-        
-        /* Semáforo de Cores (Apenas Texto) */
-        .perf-bad { color: var(--negative-color); } 
-        .perf-warn { color: var(--warning-color); } 
-        .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
-
-        .mesa-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: left; font-size: 1.2rem; margin-top: 20px;}
-        .mesa-table th { padding: 12px; background: #1a1a1a; color: var(--neon-color); text-transform: uppercase; font-size: 0.9rem; }
-        .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
-        .mesa-table tr:nth-child(even) { background: #0c0c0c; }
-
-        /* Notícias e Grids Padrão */
-        #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
-        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
-        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; text-align: left; box-sizing: border-box; }
-        .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
-        .info-val { font-size: 1.8rem; font-weight: bold; }
-        .info-sub { font-size: 1rem; color: #888; font-weight: bold; }
-
-        /* Sub-Carrossel Podium */
-        .podium-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; pointer-events: none;}
-        .podium-slide.active { opacity: 1; z-index: 2; pointer-events: auto;}
-        
-        .podium-empty-box { background: rgba(255, 0, 0, 0.05); border: 2px dashed #ff0000; border-radius: 15px; padding: 40px; text-align: center; max-width: 800px; }
-        .podium-gerente-box { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; background: #111; padding: 40px; border-radius: 12px; border-left: 8px solid var(--neon-color); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .podium-item-row { font-size: 1.6rem; color: #fff; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; width: 100%; display: flex; justify-content: space-between; }
-        .podium-item-val { color: var(--neon-color); font-weight: bold; font-size: 1.8rem; }
-
-        /* Ferramentas Subliminares */
-        .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05
+        // [Cole aqui o MESMO script da Versão 1.1.4 que já estávamos usando]
+        // ...
+    </script>
+</body>
+</html>
