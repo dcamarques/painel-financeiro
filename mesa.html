@@ -1,3 +1,11 @@
+<!-- =========================================================
+     Boonus TV - Mesa de Operações (mesa.html)
+     Versão: 1.1.1
+     Descrição: Módulo interno de gestão à vista para escritórios.
+     - Rotação fragmentada por segmentos (Contas, Investimentos, etc.)
+     - Tabela de Itens detalhada com fundo de performance (Semáforo).
+     - Rotação: 15 segundos por tela.
+========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -15,7 +23,7 @@
         }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Cabeçalho Padrão */
+        /* Cabeçalho */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: var(--panel-bg); border-bottom: 4px solid var(--neon-color); z-index: 10; }
         .logo img { height: 40px; width: auto; }
         .clocks-container { display: flex; gap: 15px; }
@@ -30,45 +38,55 @@
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--positive-color); } .down { color: var(--negative-color); }
 
-        /* Área de Conteúdo */
+        /* Área de Conteúdo Central */
         .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
         .content-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: flex-start; }
+        .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: center; }
 
-        /* Tabelas e Rankings */
-        h2 { color: var(--neon-color); margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .mesa-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 1.2rem; }
+        /* TABELAS DE SEGMENTOS E RANKING (Baseado no Layout Solicitado) */
+        h2 { color: var(--neon-color); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; max-width: 1000px; text-align: left;}
+        h3.segment-subtitle { color: var(--neon-color); margin: 0 0 30px 0; width: 100%; max-width: 1000px; text-align: left; font-size: 1.5rem; }
+        h3.segment-subtitle span { color: white; }
+        
+        .mesa-perf-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: center; font-size: 1.4rem; font-weight: bold; }
+        .mesa-perf-table th { color: var(--neon-color); padding: 12px; }
+        .mesa-perf-table td { padding: 12px; }
+        .mesa-perf-table thead tr:first-child th[colspan="3"] { border-bottom: 2px solid var(--neon-color); }
+        .mesa-perf-table tbody tr:nth-child(even) { background: #0c0c0c; }
+        
+        /* Semáforo de Fundo para Performance (%) */
+        .bg-bad { background-color: #ff0000; color: white; }
+        .bg-warn { background-color: #c79a00; color: white; } /* Tom dourado escuro para dar contraste ao branco */
+        .bg-good { background-color: #00aa00; color: white; }
+
+        /* Tabelas Complementares */
+        .mesa-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: left; font-size: 1.2rem; margin-top: 20px;}
         .mesa-table th { padding: 12px; background: #1a1a1a; color: var(--neon-color); text-transform: uppercase; font-size: 0.9rem; }
         .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
         .mesa-table tr:nth-child(even) { background: #0c0c0c; }
-        
-        /* Semáforo de Performance */
-        .perf-bad { color: var(--negative-color); }
-        .perf-warn { color: var(--warning-color); }
-        .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
+        .perf-bad { color: var(--negative-color); } .perf-warn { color: var(--warning-color); } .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
 
-        /* Cards de Grade Dinâmica */
-        .grid-performance { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
-        .segment-card { background: var(--panel-bg); padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); }
-        .segment-title { font-size: 1.1rem; color: var(--neon-color); font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }
-
-        /* Notícias e Elementos Copiados do Monitor Padrão */
+        /* Notícias e Grids Padrão */
         #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
-        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
-        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); }
+        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
+        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; text-align: left; box-sizing: border-box; }
         .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
         .info-val { font-size: 1.8rem; font-weight: bold; }
         .info-sub { font-size: 1rem; color: #888; font-weight: bold; }
 
-        /* Botão Sutil de Tela Cheia */
-        .fs-btn { position: absolute; bottom: 15px; right: 25px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #444; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.3s; z-index: 100; }
-        .fs-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: var(--neon-color); }
+        /* Botão Tela Cheia (Micro Bolinha Sutil) */
+        .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; z-index: 100; transition: background 0.3s; }
+        .fs-dot:hover { background: rgba(255,255,255,0.3); }
+
+        /* Versão Sutil Canto Inferior Direito */
+        .version-sutil { position: absolute; bottom: 12px; right: 40px; font-size: 0.65rem; color: rgba(255,255,255,0.08); user-select: none; z-index: 100; font-family: monospace; }
 
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     </style>
 </head>
 <body>
 
+    <!-- Cabeçalho -->
     <div class="header">
         <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
         <div class="clocks-container">
@@ -79,6 +97,7 @@
         </div>
     </div>
 
+    <!-- Ticker Radar -->
     <div class="ticker-container">
         <div id="stock-ticker" class="ticker-content">Sincronizando radar de mercado interno...</div>
     </div>
@@ -86,13 +105,16 @@
     <div class="main-container">
         <div class="content-area">
             
-            <div id="block-performance" class="display-block" style="display: flex; opacity: 1;">
-                <h2 id="perf-title">Performance Consolidada do Escritório</h2>
-                <div id="perf-grid-container" class="grid-performance"></div>
-            </div>
+            <!-- BLOCOS DE PERFORMANCE POR SEGMENTO (Gerados dinamicamente no JS) -->
+            <div id="block-perf-CONTAS" class="display-block" style="display: flex; opacity: 1;"></div>
+            <div id="block-perf-INVESTIMENTOS" class="display-block"></div>
+            <div id="block-perf-PRODUTOS" class="display-block"></div>
+            <div id="block-perf-MARGEM" class="display-block"></div>
 
+            <!-- Bloco Complementar: Ranking Dinâmico por Item -->
             <div id="block-ranking" class="display-block">
-                <h2 id="ranking-title">Ranking de Performance por Item</h2>
+                <h2>Ranking de Performance por Gerente</h2>
+                <h3 class="segment-subtitle">FOCO: <span>Captação Líquida</span></h3>
                 <table class="mesa-table">
                     <thead>
                         <tr>
@@ -107,6 +129,7 @@
                 </table>
             </div>
 
+            <!-- Bloco Macro -->
             <div id="block-macro" class="display-block">
                 <h2>Indicadores Macro &amp; Índices Globais</h2>
                 <div class="macro-grid">
@@ -117,6 +140,7 @@
                 </div>
             </div>
 
+            <!-- Bloco Câmbio -->
             <div id="block-coins" class="display-block">
                 <h2>Câmbio Global em Tempo Real</h2>
                 <div class="coins-grid">
@@ -125,27 +149,32 @@
                 </div>
             </div>
 
+            <!-- Bloco Oportunidades -->
             <div id="block-opps" class="display-block">
                 <h2>Foco Comercial - Oportunidades de Alocação</h2>
                 <div id="opps-container" class="opportunities-grid"></div>
             </div>
 
-            <div id="block-news" class="display-block">
+            <!-- Bloco Notícias -->
+            <div id="block-news" class="display-block" style="justify-content: center;">
                 <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; margin-bottom:10px;">Radar de Notícias</div>
                 <div id="news-title">Carregando painel de informações globais...</div>
             </div>
 
+            <!-- Bloco Pódio de Produção Diária -->
             <div id="block-podium" class="display-block">
                 <h2>Destaques de Produção (Hoje)</h2>
-                <div id="podium-container" style="width:100%; display:flex; flex-direction:column; gap:15px;"></div>
+                <div id="podium-container" style="width:100%; max-width: 1000px; display:flex; flex-direction:column; gap:15px; margin-top:20px;"></div>
             </div>
 
         </div>
-        <button class="fs-btn" onclick="toggleFullScreen()">TELA CHEIA</button>
+
+        <!-- Ferramentas Subliminares -->
+        <div class="version-sutil">v1.1.1</div>
+        <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
     <script>
-        // Configuração de Identidade e Tenants
         const urlParams = new URLSearchParams(window.location.search);
         const tenant = urlParams.get('cliente') ? urlParams.get('cliente').toLowerCase() : 'generic';
 
@@ -162,7 +191,6 @@
             else if (document.exitFullscreen) document.exitFullscreen();
         }
 
-        // Relógios Globais
         function updateClocks() {
             const now = new Date();
             const f = (tz) => now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz});
@@ -174,101 +202,139 @@
         setInterval(updateClocks, 1000); updateClocks();
 
         // =================================================================
-        // ESTRUTURA DE DADOS MOCK (MANUAL NESTA FASE)
-        // Substitui a malha relacional descrita pelo Gerente de Escritório
+        // DADOS MOCKADOS E RENDERIZAÇÃO DE MESAS SEGMENTADAS
         // =================================================================
         
+        // Gerador de data atual para garantir que o "Hoje" do Mock funcione nos testes
+        const todayDate = new Date().toISOString().split('T')[0];
+        const currentMonthStr = todayDate.substring(0, 7); // Ex: "2026-05"
+
         const mockMetas = [
+            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
+            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
             { gerente: "Daniel Silva", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2000000 },
             { gerente: "Mariana Costa", segmento: "INVESTIMENTOS", item: "Captação Líquida", meta: 2500000 },
-            { gerente: "Daniel Silva", segmento: "CONTAS", item: "Novas Contas PJ", meta: 10 },
-            { gerente: "Mariana Costa", segmento: "CONTAS", item: "Novas Contas PJ", meta: 12 },
-            { gerente: "Daniel Silva", segmento: "PRODUTOS", item: "Estruturados (COE/Collar)", meta: 500000 },
-            { gerente: "Mariana Costa", segmento: "PRODUTOS", item: "Estruturados (COE/Collar)", meta: 600000 }
+            { gerente: "Daniel Silva", segmento: "PRODUTOS", item: "Estruturados", meta: 500000 },
+            { gerente: "Mariana Costa", segmento: "MARGEM", item: "ROA Acumulado", meta: 80000 }
         ];
 
         const mockProducao = [
-            { gerente: "Daniel Silva", item: "Captação Líquida", realizado: 1800000, data: "2026-05-30" },
-            { gerente: "Mariana Costa", item: "Captação Líquida", realizado: 2600000, data: "2026-05-30" },
-            { gerente: "Daniel Silva", item: "Novas Contas PJ", realizado: 2, data: "2026-05-30" },
-            { gerente: "Daniel Silva", item: "Estruturados (COE/Collar)", realizado: 150000, data: "2026-05-30" }
+            { gerente: "Daniel Silva", item: "Contas Abertas", realizado: 1, data: todayDate },
+            { gerente: "Daniel Silva", item: "Contas Abertas", realizado: 2, data: currentMonthStr + "-15" }, // Outro dia do mês
+            { gerente: "Daniel Silva", item: "Captação Líquida", realizado: 1800000, data: todayDate },
+            { gerente: "Mariana Costa", item: "Captação Líquida", realizado: 2600000, data: todayDate },
+            { gerente: "Mariana Costa", item: "ROA Acumulado", realizado: 82000, data: todayDate }
         ];
 
-        // Processamento dos Indicadores de Performance Interna
         function carregarDadosMesa() {
-            // 1. Renderizar Bloco Consolidado (Placard Geral)
             const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
-            const gridContainer = document.getElementById('perf-grid-container');
-            let gridHtml = '';
 
+            // 1. GERAÇÃO DINÂMICA DAS TELAS DE SEGMENTOS (Layout Idêntico à Foto)
             segmentos.forEach(seg => {
-                let totalMeta = 0;
-                let totalRealizado = 0;
+                const metasSeg = mockMetas.filter(m => m.segmento === seg);
+                // Mapeia os Itens únicos deste segmento
+                const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
                 
-                mockMetas.filter(m => m.segmento === seg).forEach(m => totalMeta += m.meta);
-                mockProducao.filter(p => {
-                    let metaOrigem = mockMetas.find(m => m.item === p.item && m.gerente === p.gerente);
-                    return metaOrigem && metaOrigem.segmento === seg;
-                }).forEach(p => totalRealizado += p.realizado);
+                let trs = '';
+                
+                if (itensUnicos.length === 0) {
+                    trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
+                } else {
+                    itensUnicos.forEach(item => {
+                        // Consolida Metas do Escritório para este item
+                        let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
+                        
+                        // Consolida Produção
+                        let prodItem = mockProducao.filter(p => p.item === item);
+                        let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                        let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                        
+                        let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
+                        
+                        // Semáforo Estrito para Célula Inteira
+                        let bgClass = pct >= 100 ? 'bg-good' : (pct >= 80 ? 'bg-warn' : 'bg-bad');
+                        
+                        // Formatação visual flexível (se for valor alto, bota R$)
+                        let format = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
 
-                let pct = totalMeta > 0 ? (totalRealizado / totalMeta) * 100 : 0;
-                let classeCor = pct >= 100 ? 'perf-good' : (pct >= 80 ? 'perf-warn' : 'perf-bad');
-                
-                gridHtml += `
-                    <div class="segment-card">
-                        <div class="segment-title">${seg}</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; margin-bottom: 5px;">
-                            ${seg === 'INVESTIMENTOS' || seg === 'PRODUTOS' || seg === 'MARGEM' ? 'R$ ' + totalRealizado.toLocaleString('pt-BR') : totalRealizado}
-                        </div>
-                        <div style="font-size: 0.9rem; opacity: 0.6;">Meta Global: ${totalMeta.toLocaleString('pt-BR')}</div>
-                        <div class="${classeCor}" style="font-size: 1.4rem; font-weight: bold; margin-top: 10px;">${pct.toFixed(1)}% Atingido</div>
-                    </div>`;
+                        trs += `
+                        <tr>
+                            <td style="text-align:left;">${item}</td>
+                            <td>${format(realizadoHoje)}</td>
+                            <td>${format(totalMeta)}</td>
+                            <td>${format(realizadoMes)}</td>
+                            <td class="${bgClass}">${pct.toFixed(1).replace('.', ',')}%</td>
+                        </tr>`;
+                    });
+                }
+
+                const containerBlock = document.getElementById(`block-perf-${seg}`);
+                if(containerBlock) {
+                    containerBlock.innerHTML = `
+                        <h2>Performance Consolidada do Escritório</h2>
+                        <h3 class="segment-subtitle">SEGMENTO: <span>${seg}</span></h3>
+                        <table class="mesa-perf-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="text-align: left;">Item</th>
+                                    <th rowspan="2">Dia</th>
+                                    <th colspan="3">Mês</th>
+                                </tr>
+                                <tr>
+                                    <th>Meta</th>
+                                    <th>Real</th>
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trs}
+                            </tbody>
+                        </table>
+                    `;
+                }
             });
-            gridContainer.innerHTML = gridHtml;
 
-            // 2. Renderizar Bloco de Ranking Dinâmico por Item Comercial (Gamificação por % do maior pro menor)
+            // 2. TELA DE RANKING POR GERENTE (Gamificação)
             const itemFoco = "Captação Líquida";
-            document.getElementById('ranking-title').innerText = `Mesa de Performance: ${itemFoco}`;
-            
             let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
-                let prodHoje = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco && p.data === "2026-05-30");
-                let realizadoHoje = prodHoje.reduce((acc, curr) => acc + curr.realizado, 0); // Simplificação de escopo de teste do dia
-                let realizadoMes = realizadoHoje; // Cenário unificado para demonstração ágil
-                let pct = (realizadoMes / meta.meta) * 100;
-                return { gerente: meta.gerente, hoje: realizadoHoje, meta: meta.meta, realizado: realizadoMes, pct: pct };
+                let prodGerente = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
+                let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
+                let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                let pct = (mes / meta.meta) * 100;
+                return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
             });
 
-            // Ordenação decrescente de performance (Regra de Gamificação da Mesa)
             rankingData.sort((a, b) => b.pct - a.pct);
 
             let tableHtml = '';
             rankingData.forEach(row => {
-                let classeCor = row.pct >= 100 ? 'perf-good' : (row.pct >= 80 ? 'perf-warn' : 'perf-bad');
+                let colorClass = row.pct >= 100 ? 'perf-good' : (row.pct >= 80 ? 'perf-warn' : 'perf-bad');
+                let fmt = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
                 tableHtml += `
                     <tr>
                         <td>${row.gerente}</td>
-                        <td>${row.hoje > 50 ? 'R$ ' + row.hoje.toLocaleString('pt-BR') : row.hoje}</td>
-                        <td>${row.meta > 50 ? 'R$ ' + row.meta.toLocaleString('pt-BR') : row.meta}</td>
-                        <td>${row.realizado > 50 ? 'R$ ' + row.realizado.toLocaleString('pt-BR') : row.realizado}</td>
-                        <td class="${classeCor}">${row.pct.toFixed(1)}%</td>
+                        <td>${fmt(row.hoje)}</td>
+                        <td>${fmt(row.meta)}</td>
+                        <td>${fmt(row.mes)}</td>
+                        <td class="${colorClass}">${row.pct.toFixed(1).replace('.', ',')}%</td>
                     </tr>`;
             });
-            document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há itens cadastrados no momento</td></tr>';
+            document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas.</td></tr>';
 
-            // 3. Renderizar Pódio de Destaques Rápidos do Dia (Flash de Produção)
+            // 3. TELA DE PÓDIO DO DIA
             const podiumContainer = document.getElementById('podium-container');
             let podiumHtml = '';
-            let producoesHoje = mockProducao.filter(p => p.data === "2026-05-30");
+            let producoesHoje = mockProducao.filter(p => p.data === todayDate);
 
             if(producoesHoje.length === 0) {
-                podiumHtml = `<div class="info-card" style="text-align:center; width:100%;"><div class="info-val" style="color:#666;">O mercado não dorme. Quem fará a primeira boleta de hoje?</div></div>`;
+                podiumHtml = `<div class="info-card" style="text-align:center;"><div class="info-val" style="color:#666;">O mercado não dorme. Quem fará o primeiro negócio de hoje?</div></div>`;
             } else {
                 producoesHoje.forEach(p => {
                     podiumHtml += `
                         <div class="info-card" style="border-left-color: var(--positive-color)">
-                            <h3>CONTRATO FECHADO HOJE</h3>
+                            <h3>REGISTRO DE PRODUÇÃO</h3>
                             <div class="info-val" style="font-size: 1.4rem; color: var(--positive-color);">${p.gerente}</div>
-                            <div class="info-sub" style="color: #fff;">Lançou: ${p.item} | Realizado: +${p.realizado > 50 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado}</div>
+                            <div class="info-sub" style="color: #fff;">Item: ${p.item} | Realizado: +${p.realizado > 1000 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado}</div>
                         </div>`;
                 });
             }
@@ -276,7 +342,7 @@
         }
 
         // =================================================================
-        // INTEGRAÇÃO DE MERCADO EXTERNO (APIs NATIVAS REVISADAS)
+        // INTEGRAÇÕES EXTERNAS (TICKER E COMPLEMENTOS)
         // =================================================================
         async function fetchMercados() {
             try {
@@ -306,11 +372,9 @@
             } catch(e) {}
         }
 
-        // Inicialização de Dados
         carregarDadosMesa(); fetchMercados(); fetchCambio(); fetchNoticias();
-        setInterval(carregarDadosMesa, 60000); // Atualiza os blocos internos a cada minuto
+        setInterval(carregarDadosMesa, 60000); 
 
-        // Rotação de Notícias Interna
         let newsIdx = 0;
         setInterval(() => {
             if(newsList.length && document.getElementById('block-news').style.display !== 'none') {
@@ -320,29 +384,46 @@
         }, 15000);
 
         // =================================================================
-        // MOTOR DO CARROSSEL DE MESA (15 SEGUNDOS POR BLOCO)
+        // MOTOR DE CARROSSEL AVANÇADO (Telas Injetadas Dinamicamente)
         // =================================================================
-        const blocks = ['block-performance', 'block-ranking', 'block-macro', 'block-coins', 'block-opps', 'block-news', 'block-podium'];
+        
+        // A Ordem exata de exibição, passando por cada segmento independentemente
+        const blocks = [
+            'block-perf-CONTAS', 
+            'block-perf-INVESTIMENTOS', 
+            'block-perf-PRODUTOS', 
+            'block-perf-MARGEM', 
+            'block-ranking', 
+            'block-macro', 
+            'block-coins', 
+            'block-opps', 
+            'block-news', 
+            'block-podium'
+        ];
+        
         let bIdx = 0;
 
         function carrosselMesa() {
             const cur = document.getElementById(blocks[bIdx]);
-            cur.style.opacity = 0;
+            if(cur) cur.style.opacity = 0;
             
             setTimeout(() => {
-                cur.style.display = 'none';
+                if(cur) cur.style.display = 'none';
+                
                 bIdx = (bIdx + 1) % blocks.length;
-                
                 const nxt = document.getElementById(blocks[bIdx]);
-                nxt.style.display = 'flex';
-                setTimeout(() => nxt.style.opacity = 1, 50);
                 
-                // Dispara o carrossel a cada 15 segundos conforme planejado
+                if(nxt) {
+                    nxt.style.display = 'flex';
+                    setTimeout(() => nxt.style.opacity = 1, 50);
+                }
+                
+                // Rotação exata de 15 segundos para cada bloco da mesa
                 setTimeout(carrosselMesa, 15000);
             }, 800);
         }
         
-        // Inicia o motor do carrossel após o tempo inicial de exibição
+        // Disparo inicial do motor
         setTimeout(carrosselMesa, 15000);
     </script>
 </body>
