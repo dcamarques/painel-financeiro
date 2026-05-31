@@ -1,8 +1,3 @@
-<!-- =========================================================
-     Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.5 - REPARO INTEGRAL
-     Descrição: Ticker 240s, Semáforo de fonte, Lógica completa.
-========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -13,7 +8,7 @@
         :root {
             --neon-color: #00ff88;
             --positive-color: #00ff88;
-            --warning-color: #d68900; 
+            --warning-color: #d68900; /* Laranja/Dourado ajustado para match com a foto */
             --negative-color: #ff0000;
             --dark-bg: #050505;
             --panel-bg: #111;
@@ -29,127 +24,57 @@
         .time { font-size: 1.6rem; font-weight: bold; font-variant-numeric: tabular-nums; }
         #br-time { color: var(--neon-color); }
 
-        /* Ticker Superior - 240s (Lento e Suave) */
+        /* Ticker Superior - Velocidade ajustada de 60s para 90s */
         .ticker-container { width: 100%; overflow: hidden; background: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #333; min-height: 35px; }
-        .ticker-content { display: inline-flex; animation: marquee 240s linear infinite; white-space: nowrap; }
+        .ticker-content { display: inline-flex; animation: marquee 90s linear infinite; white-space: nowrap; }
         .stock-item { display: inline-flex; align-items: center; margin: 0 25px; font-size: 1.5rem; font-weight: 600; }
         .up { color: var(--positive-color); } .down { color: var(--negative-color); }
 
-        /* Áreas de Conteúdo */
+        /* Área de Conteúdo Central */
         .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
         .content-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .display-block { position: absolute; width: 95%; height: 90%; display: none; opacity: 0; transition: opacity 0.8s; flex-direction: column; justify-content: flex-start; align-items: center; }
 
-        /* Tabelas e Semáforo de Fonte */
+        /* TABELAS DE SEGMENTOS E RANKING */
         h2 { color: var(--neon-color); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; max-width: 1000px; text-align: left;}
         h3.segment-subtitle { color: var(--neon-color); margin: 0 0 30px 0; width: 100%; max-width: 1000px; text-align: left; font-size: 1.5rem; }
+        h3.segment-subtitle span { color: white; }
         
         .mesa-perf-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: center; font-size: 1.4rem; font-weight: bold; }
         .mesa-perf-table th { color: var(--neon-color); padding: 12px; }
         .mesa-perf-table td { padding: 12px; }
+        .mesa-perf-table thead tr:first-child th[colspan="3"] { border-bottom: 2px solid var(--neon-color); }
         .mesa-perf-table tbody tr:nth-child(even) { background: #0c0c0c; }
         
-        /* Regra de cores aplicada apenas na fonte */
-        .perf-bad { color: var(--negative-color); font-weight: bold; } 
-        .perf-warn { color: var(--warning-color); font-weight: bold; } 
-        .perf-good { color: var(--positive-color); font-weight: bold; }
+        /* Semáforo de Fundo para Performance (%) */
+        .bg-bad { background-color: var(--negative-color); color: white; }
+        .bg-warn { background-color: var(--warning-color); color: white; } 
+        .bg-good { background-color: #008800; color: white; }
 
         .mesa-table { width: 100%; max-width: 1000px; border-collapse: collapse; text-align: left; font-size: 1.2rem; margin-top: 20px;}
         .mesa-table th { padding: 12px; background: #1a1a1a; color: var(--neon-color); text-transform: uppercase; font-size: 0.9rem; }
         .mesa-table td { padding: 15px 12px; border-bottom: 1px solid #222; font-weight: 600; }
+        .mesa-table tr:nth-child(even) { background: #0c0c0c; }
+        .perf-bad { color: var(--negative-color); } .perf-warn { color: var(--warning-color); } .perf-good { color: var(--positive-color); text-shadow: 0 0 10px rgba(0,255,136,0.2); }
 
-        /* Demais Estilos */
-        .macro-grid, .coins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
-        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; box-sizing: border-box; }
+        /* Notícias e Grids Padrão */
+        #news-title { font-size: 2.3rem; font-weight: bold; line-height: 1.3; text-align: center; max-width: 90%; }
+        .macro-grid, .coins-grid, .opportunities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
+        .info-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid var(--neon-color); width: 100%; text-align: left; box-sizing: border-box; }
+        .info-card h3 { color: var(--neon-color); margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; }
         .info-val { font-size: 1.8rem; font-weight: bold; }
+        .info-sub { font-size: 1rem; color: #888; font-weight: bold; }
+
+        /* Sub-Carrossel Podium */
+        .podium-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; pointer-events: none;}
+        .podium-slide.active { opacity: 1; z-index: 2; pointer-events: auto;}
         
-        .podium-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.6s; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .podium-slide.active { opacity: 1; z-index: 2; }
-        
-        .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; }
-        .version-sutil { position: absolute; bottom: 12px; right: 40px; font-size: 0.65rem; color: rgba(255,255,255,0.08); font-family: monospace; }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    </style>
-</head>
-<body>
+        .podium-empty-box { background: rgba(255, 0, 0, 0.05); border: 2px dashed #ff0000; border-radius: 15px; padding: 40px; text-align: center; max-width: 800px; }
+        .podium-gerente-box { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; background: #111; padding: 40px; border-radius: 12px; border-left: 8px solid var(--neon-color); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .podium-item-row { font-size: 1.6rem; color: #fff; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; width: 100%; display: flex; justify-content: space-between; }
+        .podium-item-val { color: var(--neon-color); font-weight: bold; font-size: 1.8rem; }
 
-    <div class="header">
-        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
-        <div class="clocks-container">
-            <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
-            <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
-        </div>
-    </div>
-
-    <div class="ticker-container"><div id="stock-ticker" class="ticker-content">...</div></div>
-
-    <div class="main-container">
-        <div class="content-area">
-            <div id="block-perf-CONTAS" class="display-block" style="display: flex; opacity: 1;"></div>
-            <div id="block-perf-INVESTIMENTOS" class="display-block"></div>
-            <div id="block-perf-PRODUTOS" class="display-block"></div>
-            <div id="block-perf-MARGEM" class="display-block"></div>
-            <div id="block-ranking" class="display-block">
-                <h2>Ranking de Performance</h2>
-                <table class="mesa-table"><tbody id="ranking-table-body"></tbody></table>
-            </div>
-            <div id="block-macro" class="display-block"><h2>Mercado</h2><div class="macro-grid" id="macro-grid"></div></div>
-            <div id="block-news" class="display-block"><h2>Notícias</h2><div id="news-title">---</div></div>
-            <div id="block-podium" class="display-block"><div id="podium-wrapper" style="width:100%; height:100%;"></div></div>
-        </div>
-        <div class="version-sutil">v1.1.5</div>
-        <div class="fs-dot" onclick="toggleFullScreen()"></div>
-    </div>
-
-    <script>
-        // Funções Core
-        function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-        
-        async function fetchMercados() {
-            try {
-                const res = await fetch('https://brapi.dev/api/quote/list?sortBy=volume&sortOrder=desc&limit=100');
-                const data = await res.json();
-                const ativosLimpos = data.stocks.filter(s => /^[A-Z]{4}(3|4|5|6|11)$/.test(s.stock));
-                ativosLimpos.sort((a, b) => a.stock.localeCompare(b.stock));
-                
-                let html = '';
-                ativosLimpos.slice(0, 40).forEach(s => {
-                    const colorClass = s.change >= 0 ? 'up' : 'down';
-                    html += `<span class="stock-item">${s.stock} <span class="${colorClass}">${s.change >= 0 ? '▲' : '▼'} ${Math.abs(s.change).toFixed(2)}%</span></span>`;
-                });
-                document.getElementById('stock-ticker').innerHTML = html + html;
-            } catch(e) { console.error(e); }
-        }
-
-        function carregarDados() {
-            // Lógica de Semáforo:
-            // < 50% (Vermelho), >= 50% e < 100% (Laranja), >= 100% (Verde)
-            const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
-            segmentos.forEach(seg => {
-                // ... lógica de renderização igual a anterior, usando:
-                // let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
-                // ... (O código funcional de renderização vai aqui)
-            });
-        }
-
-        // Motor de Carrossel
-        const blocks = ['block-perf-CONTAS', 'block-perf-INVESTIMENTOS', 'block-perf-PRODUTOS', 'block-perf-MARGEM', 'block-ranking', 'block-macro', 'block-news', 'block-podium'];
-        let bIdx = 0;
-        function carrosselMesa() {
-            const cur = document.getElementById(blocks[bIdx]);
-            if(cur) cur.style.opacity = 0;
-            setTimeout(() => {
-                if(cur) cur.style.display = 'none';
-                bIdx = (bIdx + 1) % blocks.length;
-                const nxt = document.getElementById(blocks[bIdx]);
-                if(nxt) { nxt.style.display = 'flex'; setTimeout(() => nxt.style.opacity = 1, 50); }
-                setTimeout(carrosselMesa, 15000);
-            }, 800);
-        }
-        
-        fetchMercados();
-        setInterval(fetchMercados, 300000); // Atualiza ações a cada 5 min
-        setTimeout(carrosselMesa, 15000);
-    </script>
-</body>
-</html>
+        /* Ferramentas Subliminares */
+        .fs-dot { position: absolute; bottom: 15px; right: 20px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; z-index: 100; transition: background 0.3s; }
+        .fs-dot:hover { background: rgba(255,255,255,0.3); }
+        .version-sutil { position: absolute;
