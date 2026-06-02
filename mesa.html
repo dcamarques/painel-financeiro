@@ -1,11 +1,12 @@
 <!-- =========================================================
      Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.7
+     Versão: 1.1.8
      Descrição: 
      - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
      - Imagens ativas na sessão de Notícias
      - Motor Blindado (Try/Catch Global) contra Tela Preta
      - Ticker 240s + Semáforo Font-Only
+     - Injeção do Motor de API Async para conexão nativa com AppSheet
 ========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -197,7 +198,7 @@
 
         </div>
 
-        <div class="version-sutil">v1.1.7</div>
+        <div class="version-sutil">v1.1.8</div>
         <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
@@ -236,11 +237,16 @@
         setInterval(updateClocks, 1000); updateClocks();
 
         // =================================================================
-        // DADOS INTERNOS (MESA)
+        // DADOS INTERNOS (MESA APPSHEET)
         // =================================================================
+        
+        // Aqui nós colaremos o link oficial assim que criarmos no Google Apps Script
+        const urlApiAppSheet = 'COLE_AQUI_A_URL_DO_APP_DA_WEB_CRIADA_NO_APPS_SCRIPT';
+
         const todayDate = new Date().toISOString().split('T')[0];
         const currentMonthStr = todayDate.substring(0, 7); 
 
+        // Dados de segurança (Mock) para manter a tela rodando antes da integração final
         const mockMetas = [
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
@@ -258,12 +264,28 @@
             { gerente: "Mariana Costa", item: "ROA Acumulado", realizado: 82000, data: todayDate }
         ];
 
-        function carregarDadosMesa() {
+        async function carregarDadosMesa() {
             try {
+                let metasSource = mockMetas;
+                let producaoSource = mockProducao;
+
+                // Motor de Busca Real: Só dispara se o link do Google Script estiver preenchido
+                if (urlApiAppSheet.startsWith('http')) {
+                    try {
+                        const response = await fetch(urlApiAppSheet + '?t=' + new Date().getTime());
+                        const apiData = await response.json();
+                        if(apiData && apiData.metas) metasSource = apiData.metas;
+                        if(apiData && apiData.producao) producaoSource = apiData.producao;
+                        console.log("Mesa de Operações conectada ao AppSheet com sucesso!");
+                    } catch(err) {
+                        console.error("Aviso: Falha ao ler a API do AppSheet. Mantendo dados locais por segurança.", err);
+                    }
+                }
+
                 const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
 
                 segmentos.forEach(seg => {
-                    const metasSeg = mockMetas.filter(m => m.segmento === seg);
+                    const metasSeg = metasSource.filter(m => m.segmento === seg);
                     const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
                     let trs = '';
                     
@@ -272,7 +294,7 @@
                     } else {
                         itensUnicos.forEach(item => {
                             let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
-                            let prodItem = mockProducao.filter(p => p.item === item);
+                            let prodItem = producaoSource.filter(p => p.item === item);
                             let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
                             let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
                             let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
@@ -291,8 +313,8 @@
                 });
 
                 const itemFoco = "Captação Líquida";
-                let rankingData = mockMetas.filter(m => m.item === itemFoco).map(meta => {
-                    let prodGerente = mockProducao.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
+                let rankingData = metasSource.filter(m => m.item === itemFoco).map(meta => {
+                    let prodGerente = producaoSource.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
                     let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
                     let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
                     let pct = (mes / meta.meta) * 100;
@@ -306,10 +328,10 @@
                     let fmt = (val) => val > 1000 ? 'R$ ' + val.toLocaleString('pt-BR') : val;
                     tableHtml += `<tr><td>${row.gerente}</td><td>${fmt(row.hoje)}</td><td>${fmt(row.meta)}</td><td>${fmt(row.mes)}</td><td class="${colorClass}">${row.pct.toFixed(1).replace('.', ',')}%</td></tr>`;
                 });
-                document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas.</td></tr>';
+                document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas para o foco atual.</td></tr>';
 
                 const podiumWrapper = document.getElementById('podium-wrapper');
-                let producoesHoje = mockProducao.filter(p => p.data === todayDate);
+                let producoesHoje = producaoSource.filter(p => p.data === todayDate);
                 let gerentesHoje = {};
                 producoesHoje.forEach(p => {
                     if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
