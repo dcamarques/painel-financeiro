@@ -1,13 +1,3 @@
-<!-- =========================================================
-     Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.8
-     Descrição: 
-     - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
-     - Imagens ativas na sessão de Notícias
-     - Motor Blindado (Try/Catch Global) contra Tela Preta
-     - Ticker 240s + Semáforo Font-Only
-     - Injeção do Motor de API Async para conexão nativa com AppSheet
-========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -149,7 +139,6 @@
                 </table>
             </div>
 
-            <!-- MACRO PARIDADE -->
             <div id="block-macro" class="display-block">
                 <h2 style="margin-bottom:20px;">Indicadores Macro &amp; Índices Globais</h2>
                 <div class="macro-grid">
@@ -166,7 +155,6 @@
                 </div>
             </div>
 
-            <!-- CÂMBIO PARIDADE -->
             <div id="block-coins" class="display-block">
                 <h2 style="margin-bottom:20px;">Câmbio Global em Tempo Real</h2>
                 <div class="coins-grid">
@@ -177,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- OPPS PARIDADE -->
             <div id="block-opps" class="display-block">
                 <h2 style="margin-bottom:20px;">Foco Comercial - Oportunidades de Alocação</h2>
                 <div id="opps-container" class="opportunities-grid">
@@ -185,7 +172,6 @@
                 </div>
             </div>
 
-            <!-- NOTÍCIAS + IMAGEM -->
             <div id="block-news" class="display-block" style="justify-content: center;">
                 <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px; margin-bottom:10px;">Radar de Notícias</div>
                 <img id="news-img" class="news-image" src="" alt="Imagem da Notícia">
@@ -241,7 +227,7 @@
         // =================================================================
         
         // Aqui nós colaremos o link oficial assim que criarmos no Google Apps Script
-        const urlApiAppSheet = 'COLE_AQUI_A_URL_DO_APP_DA_WEB_CRIADA_NO_APPS_SCRIPT';
+        const urlApiAppSheet = 'https://script.google.com/macros/s/AKfycbw1gf-QpJU1gVKyoRJK1QWkKUzJuwXXZMkIkwC3Ko40MxQcTuXL8r_OrBFlRJY5afwIFg/exec';
 
         const todayDate = new Date().toISOString().split('T')[0];
         const currentMonthStr = todayDate.substring(0, 7); 
