@@ -1,6 +1,6 @@
 <!-- =========================================================
      Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.11
+     Versão: 1.1.12
      Descrição: 
      - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
      - Imagens ativas na sessão de Notícias
@@ -8,8 +8,8 @@
      - Ticker 240s + Semáforo Font-Only
      - Injeção do Motor de API Async para conexão nativa com AppSheet
      - Blindagem Universal de Texto (toUpperCase) nos Filtros de Dados
-     - Ajuste de Copywriter no Pódio e Simetria do Grid Macro
      - Motor Normalizador de Datas BR/ISO e Fuso Horário Local
+     - Fix: Preservação de Estado do Pódio durante o Data Fetch (Multi-Gerente)
 ========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -197,7 +197,7 @@
 
         </div>
 
-        <div class="version-sutil">v1.1.11</div>
+        <div class="version-sutil">v1.1.12</div>
         <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
@@ -249,22 +249,19 @@
         const todayDate = `${tY}-${tM}-${tD}`;
         const currentMonthStr = `${tY}-${tM}`;
 
-        // Normalizador de Datas: Lida com AppSheet (ISO ou DD/MM/YYYY)
         function stdDate(dVal) {
             if(!dVal) return "";
             let s = String(dVal).trim();
-            if(s.includes('T')) s = s.split('T')[0]; // Isola apenas a data do padrão ISO
+            if(s.includes('T')) s = s.split('T')[0]; 
             if(s.includes('/')) {
                 let p = s.split('/');
                 if(p.length === 3 && p[2].length === 4) {
-                    // Se for DD/MM/YYYY converte para o padrão do sistema
                     return `${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`;
                 }
             }
             return s;
         }
 
-        // Mock Dados Locais (Fallback)
         const mockMetas = [
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
@@ -312,7 +309,6 @@
                             let totalMeta = metasSeg.filter(m => m.item && m.item.toUpperCase() === item.toUpperCase()).reduce((a, b) => a + Number(b.meta), 0);
                             let prodItem = producaoSource.filter(p => p.item && p.item.toUpperCase() === item.toUpperCase());
                             
-                            // Aplicação do stdDate na filtragem
                             let realizadoHoje = prodItem.filter(p => stdDate(p.data) === todayDate).reduce((a, b) => a + Number(b.realizado), 0);
                             let realizadoMes = prodItem.filter(p => stdDate(p.data).startsWith(currentMonthStr)).reduce((a, b) => a + Number(b.realizado), 0);
                             let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
@@ -350,12 +346,19 @@
 
                 const podiumWrapper = document.getElementById('podium-wrapper');
                 
-                // Aplicação do stdDate e Trava para Valores Maiores que Zero no Pódio
+                // MUDANÇA: Captura quem está na tela antes de reescrever o HTML para evitar piscar e travar
+                let activeManager = null;
+                const activeSlideH3 = podiumWrapper.querySelector('.podium-slide.active h3 span');
+                if (activeSlideH3) {
+                    activeManager = activeSlideH3.innerText.trim();
+                }
+
                 let producoesHoje = producaoSource.filter(p => stdDate(p.data) === todayDate && Number(p.realizado) > 0);
                 let gerentesHoje = {};
                 producoesHoje.forEach(p => {
-                    if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
-                    gerentesHoje[p.gerente].push(p);
+                    let gName = (p.gerente || "Sem Nome").trim(); // MUDANÇA: Trim de segurança contra espaços invisíveis
+                    if(!gerentesHoje[gName]) gerentesHoje[gName] = [];
+                    gerentesHoje[gName].push(p);
                 });
 
                 let keys = Object.keys(gerentesHoje);
@@ -365,15 +368,31 @@
                 if(keys.length === 0) {
                     podiumHtml = `<div class="podium-slide active"><div class="podium-empty-box"><div style="font-size: 2.2rem; font-weight: bold; color: var(--neon-color); margin-bottom: 20px; text-transform: uppercase;">MERCADO ABERTO!</div><div style="font-size: 1.4rem; color: #aaa;">A tela de destaques está vazia.<br><br><span style="color: #fff; font-weight: bold;">Quem será o primeiro a cravar o nome aqui hoje?</span></div></div></div>`;
                 } else {
+                    let achouAtivoAnterior = false;
                     keys.forEach((gerente, idx) => {
-                        let activeClass = idx === 0 ? 'active' : '';
+                        let isThisActive = false;
+                        
+                        // Lógica para preservar o slide que já estava na tela
+                        if (activeManager && gerente.toUpperCase() === activeManager.toUpperCase()) {
+                            isThisActive = true;
+                            achouAtivoAnterior = true;
+                        } else if (!activeManager && idx === 0) {
+                            isThisActive = true;
+                        }
+
+                        let activeClass = isThisActive ? 'active' : '';
                         let linhasProducao = gerentesHoje[gerente].map(p => {
                             let valFormatado = p.realizado > 100 ? 'R$ ' + p.realizado.toLocaleString('pt-BR') : p.realizado;
                             return `<div class="podium-item-row"><span>${p.item}</span><span class="podium-item-val">+${valFormatado}</span></div>`;
                         }).join('');
 
-                        podiumHtml += `<div class="podium-slide ${activeClass}"><h2>DESTAQUES DO DIA</h2><h3 class="segment-subtitle" style="text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-transform: uppercase;"><span>${gerente}</span></h3><div class="podium-gerente-box">${linhasProducao}</div></div>`;
+                        podiumHtml += `<div class="podium-slide ${activeClass}"><h2 style="text-align: center;">DESTAQUES DO DIA</h2><h3 class="segment-subtitle" style="text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-transform: uppercase;"><span>${gerente}</span></h3><div class="podium-gerente-box">${linhasProducao}</div></div>`;
                     });
+                    
+                    // Se o cara que estava na tela não existe mais, garante que o primeiro receba a classe active
+                    if (activeManager && !achouAtivoAnterior) {
+                        podiumHtml = podiumHtml.replace('class="podium-slide "', 'class="podium-slide active"');
+                    }
                 }
                 podiumWrapper.innerHTML = podiumHtml;
             } catch(e) { console.error("Erro interno Mesa:", e); }
@@ -572,16 +591,22 @@
                             
                             if (count > 1) {
                                 nextTime = count * 10000; 
-                                const slides = wrapper.querySelectorAll('.podium-slide');
-                                let cSlide = 0;
                                 
                                 if(subPodiumInterval) clearInterval(subPodiumInterval);
                                 
                                 subPodiumInterval = setInterval(() => {
-                                    if(slides[cSlide]) slides[cSlide].classList.remove('active');
-                                    cSlide++;
-                                    if (cSlide < slides.length) {
-                                        if(slides[cSlide]) slides[cSlide].classList.add('active');
+                                    // MUDANÇA: Busca os slides do zero a cada tick para escapar do bug do DOM desanexado
+                                    const currentSlides = document.getElementById('podium-wrapper').querySelectorAll('.podium-slide');
+                                    if(currentSlides.length === 0) return;
+                                    
+                                    let activeIdx = 0;
+                                    currentSlides.forEach((s, i) => { if(s.classList.contains('active')) activeIdx = i; });
+                                    
+                                    if (currentSlides[activeIdx]) currentSlides[activeIdx].classList.remove('active');
+                                    
+                                    let nextIdx = activeIdx + 1;
+                                    if (nextIdx < currentSlides.length) {
+                                        currentSlides[nextIdx].classList.add('active');
                                     } else {
                                         clearInterval(subPodiumInterval);
                                     }
@@ -595,7 +620,7 @@
                 }, 800);
             } catch (error) {
                 console.error("Erro no Carrossel:", error);
-                mainCycleTimeout = setTimeout(carrosselMesa, 15000); // Tenta de novo se falhar
+                mainCycleTimeout = setTimeout(carrosselMesa, 15000); 
             }
         }
         
