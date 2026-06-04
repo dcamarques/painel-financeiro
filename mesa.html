@@ -1,3 +1,14 @@
+<!-- =========================================================
+     Boonus TV - Mesa de Operações (mesa.html)
+     Versão: 1.1.9
+     Descrição: 
+     - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
+     - Imagens ativas na sessão de Notícias
+     - Motor Blindado (Try/Catch Global) contra Tela Preta
+     - Ticker 240s + Semáforo Font-Only
+     - Injeção do Motor de API Async para conexão nativa com AppSheet
+     - Blindagem Universal de Texto (toUpperCase) nos Filtros de Dados
+========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -139,6 +150,7 @@
                 </table>
             </div>
 
+            <!-- MACRO PARIDADE -->
             <div id="block-macro" class="display-block">
                 <h2 style="margin-bottom:20px;">Indicadores Macro &amp; Índices Globais</h2>
                 <div class="macro-grid">
@@ -155,6 +167,7 @@
                 </div>
             </div>
 
+            <!-- CÂMBIO PARIDADE -->
             <div id="block-coins" class="display-block">
                 <h2 style="margin-bottom:20px;">Câmbio Global em Tempo Real</h2>
                 <div class="coins-grid">
@@ -165,6 +178,7 @@
                 </div>
             </div>
 
+            <!-- OPPS PARIDADE -->
             <div id="block-opps" class="display-block">
                 <h2 style="margin-bottom:20px;">Foco Comercial - Oportunidades de Alocação</h2>
                 <div id="opps-container" class="opportunities-grid">
@@ -172,6 +186,7 @@
                 </div>
             </div>
 
+            <!-- NOTÍCIAS + IMAGEM -->
             <div id="block-news" class="display-block" style="justify-content: center;">
                 <div id="news-source" style="color:var(--neon-color); font-weight:bold; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px; margin-bottom:10px;">Radar de Notícias</div>
                 <img id="news-img" class="news-image" src="" alt="Imagem da Notícia">
@@ -184,7 +199,7 @@
 
         </div>
 
-        <div class="version-sutil">v1.1.8</div>
+        <div class="version-sutil">v1.1.9</div>
         <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
@@ -226,13 +241,13 @@
         // DADOS INTERNOS (MESA APPSHEET)
         // =================================================================
         
-        // Aqui nós colaremos o link oficial assim que criarmos no Google Apps Script
+        // Conexão oficial validada
         const urlApiAppSheet = 'https://script.google.com/macros/s/AKfycbw1gf-QpJU1gVKyoRJK1QWkKUzJuwXXZMkIkwC3Ko40MxQcTuXL8r_OrBFlRJY5afwIFg/exec';
 
         const todayDate = new Date().toISOString().split('T')[0];
         const currentMonthStr = todayDate.substring(0, 7); 
 
-        // Dados de segurança (Mock) para manter a tela rodando antes da integração final
+        // Mock Dados Locais
         const mockMetas = [
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
@@ -255,23 +270,22 @@
                 let metasSource = mockMetas;
                 let producaoSource = mockProducao;
 
-                // Motor de Busca Real: Só dispara se o link do Google Script estiver preenchido
                 if (urlApiAppSheet.startsWith('http')) {
                     try {
                         const response = await fetch(urlApiAppSheet + '?t=' + new Date().getTime());
                         const apiData = await response.json();
                         if(apiData && apiData.metas) metasSource = apiData.metas;
                         if(apiData && apiData.producao) producaoSource = apiData.producao;
-                        console.log("Mesa de Operações conectada ao AppSheet com sucesso!");
                     } catch(err) {
-                        console.error("Aviso: Falha ao ler a API do AppSheet. Mantendo dados locais por segurança.", err);
+                        console.error("Falha ao ler a API do AppSheet.", err);
                     }
                 }
 
                 const segmentos = ["CONTAS", "INVESTIMENTOS", "PRODUTOS", "MARGEM"];
 
                 segmentos.forEach(seg => {
-                    const metasSeg = metasSource.filter(m => m.segmento === seg);
+                    // MUDANÇA AQUI: Filtro case-insensitive para o segmento
+                    const metasSeg = metasSource.filter(m => m.segmento && m.segmento.toUpperCase() === seg.toUpperCase());
                     const itensUnicos = Array.from(new Set(metasSeg.map(m => m.item)));
                     let trs = '';
                     
@@ -279,10 +293,14 @@
                         trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
                     } else {
                         itensUnicos.forEach(item => {
-                            let totalMeta = metasSeg.filter(m => m.item === item).reduce((a, b) => a + b.meta, 0);
-                            let prodItem = producaoSource.filter(p => p.item === item);
+                            // Filtro case-insensitive para o item nas Metas
+                            let totalMeta = metasSeg.filter(m => m.item && m.item.toUpperCase() === item.toUpperCase()).reduce((a, b) => a + b.meta, 0);
+                            
+                            // Filtro case-insensitive para o item na Produção
+                            let prodItem = producaoSource.filter(p => p.item && p.item.toUpperCase() === item.toUpperCase());
+                            
                             let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                            let realizadoMes = prodItem.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                            let realizadoMes = prodItem.filter(p => p.data && p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
                             let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
                             
                             let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
@@ -299,11 +317,11 @@
                 });
 
                 const itemFoco = "Captação Líquida";
-                let rankingData = metasSource.filter(m => m.item === itemFoco).map(meta => {
-                    let prodGerente = producaoSource.filter(p => p.gerente === meta.gerente && p.item === itemFoco);
+                let rankingData = metasSource.filter(m => m.item && m.item.toUpperCase() === itemFoco.toUpperCase()).map(meta => {
+                    let prodGerente = producaoSource.filter(p => p.gerente === meta.gerente && p.item && p.item.toUpperCase() === itemFoco.toUpperCase());
                     let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                    let mes = prodGerente.filter(p => p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
-                    let pct = (mes / meta.meta) * 100;
+                    let mes = prodGerente.filter(p => p.data && p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                    let pct = meta.meta > 0 ? (mes / meta.meta) * 100 : 0;
                     return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
                 });
 
