@@ -1,6 +1,6 @@
 <!-- =========================================================
      Boonus TV - Mesa de Operações (mesa.html)
-     Versão: 1.1.10
+     Versão: 1.1.11
      Descrição: 
      - Restauração Paridade APIs index.html (Macro, Câmbio, Opps)
      - Imagens ativas na sessão de Notícias
@@ -9,6 +9,7 @@
      - Injeção do Motor de API Async para conexão nativa com AppSheet
      - Blindagem Universal de Texto (toUpperCase) nos Filtros de Dados
      - Ajuste de Copywriter no Pódio e Simetria do Grid Macro
+     - Motor Normalizador de Datas BR/ISO e Fuso Horário Local
 ========================================================== -->
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -151,7 +152,7 @@
                 </table>
             </div>
 
-            <!-- MACRO PARIDADE - Ajustado para Grid Fluido (Simetria Perfeita) -->
+            <!-- MACRO PARIDADE - Grid Fluido (Simetria Perfeita) -->
             <div id="block-macro" class="display-block">
                 <h2 style="margin-bottom:20px;">Indicadores Macro &amp; Índices Globais</h2>
                 <div class="macro-grid">
@@ -196,7 +197,7 @@
 
         </div>
 
-        <div class="version-sutil">v1.1.10</div>
+        <div class="version-sutil">v1.1.11</div>
         <div class="fs-dot" onclick="toggleFullScreen()" title="Tela Cheia"></div>
     </div>
 
@@ -235,16 +236,35 @@
         setInterval(updateClocks, 1000); updateClocks();
 
         // =================================================================
-        // DADOS INTERNOS (MESA APPSHEET)
+        // DADOS INTERNOS (MESA APPSHEET) E NORMALIZAÇÃO DE DATAS
         // =================================================================
         
-        // Conexão oficial validada
         const urlApiAppSheet = 'https://script.google.com/macros/s/AKfycbw1gf-QpJU1gVKyoRJK1QWkKUzJuwXXZMkIkwC3Ko40MxQcTuXL8r_OrBFlRJY5afwIFg/exec';
 
-        const todayDate = new Date().toISOString().split('T')[0];
-        const currentMonthStr = todayDate.substring(0, 7); 
+        // Data Local do Brasil
+        const localNow = new Date();
+        const tY = localNow.getFullYear();
+        const tM = String(localNow.getMonth() + 1).padStart(2, '0');
+        const tD = String(localNow.getDate()).padStart(2, '0');
+        const todayDate = `${tY}-${tM}-${tD}`;
+        const currentMonthStr = `${tY}-${tM}`;
 
-        // Mock Dados Locais
+        // Normalizador de Datas: Lida com AppSheet (ISO ou DD/MM/YYYY)
+        function stdDate(dVal) {
+            if(!dVal) return "";
+            let s = String(dVal).trim();
+            if(s.includes('T')) s = s.split('T')[0]; // Isola apenas a data do padrão ISO
+            if(s.includes('/')) {
+                let p = s.split('/');
+                if(p.length === 3 && p[2].length === 4) {
+                    // Se for DD/MM/YYYY converte para o padrão do sistema
+                    return `${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`;
+                }
+            }
+            return s;
+        }
+
+        // Mock Dados Locais (Fallback)
         const mockMetas = [
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Abertas", meta: 4 },
             { gerente: "Daniel Silva", segmento: "CONTAS", item: "Contas Viabilizadas", meta: 2 },
@@ -289,11 +309,12 @@
                         trs = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888;">Nenhum item monitorado neste segmento</td></tr>`;
                     } else {
                         itensUnicos.forEach(item => {
-                            let totalMeta = metasSeg.filter(m => m.item && m.item.toUpperCase() === item.toUpperCase()).reduce((a, b) => a + b.meta, 0);
+                            let totalMeta = metasSeg.filter(m => m.item && m.item.toUpperCase() === item.toUpperCase()).reduce((a, b) => a + Number(b.meta), 0);
                             let prodItem = producaoSource.filter(p => p.item && p.item.toUpperCase() === item.toUpperCase());
                             
-                            let realizadoHoje = prodItem.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                            let realizadoMes = prodItem.filter(p => p.data && p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                            // Aplicação do stdDate na filtragem
+                            let realizadoHoje = prodItem.filter(p => stdDate(p.data) === todayDate).reduce((a, b) => a + Number(b.realizado), 0);
+                            let realizadoMes = prodItem.filter(p => stdDate(p.data).startsWith(currentMonthStr)).reduce((a, b) => a + Number(b.realizado), 0);
                             let pct = totalMeta > 0 ? (realizadoMes / totalMeta) * 100 : 0;
                             
                             let txtClass = pct >= 100 ? 'perf-good' : (pct >= 50 ? 'perf-warn' : 'perf-bad');
@@ -312,8 +333,8 @@
                 const itemFoco = "Captação Líquida";
                 let rankingData = metasSource.filter(m => m.item && m.item.toUpperCase() === itemFoco.toUpperCase()).map(meta => {
                     let prodGerente = producaoSource.filter(p => p.gerente === meta.gerente && p.item && p.item.toUpperCase() === itemFoco.toUpperCase());
-                    let hoje = prodGerente.filter(p => p.data === todayDate).reduce((a, b) => a + b.realizado, 0);
-                    let mes = prodGerente.filter(p => p.data && p.data.startsWith(currentMonthStr)).reduce((a, b) => a + b.realizado, 0);
+                    let hoje = prodGerente.filter(p => stdDate(p.data) === todayDate).reduce((a, b) => a + Number(b.realizado), 0);
+                    let mes = prodGerente.filter(p => stdDate(p.data).startsWith(currentMonthStr)).reduce((a, b) => a + Number(b.realizado), 0);
                     let pct = meta.meta > 0 ? (mes / meta.meta) * 100 : 0;
                     return { gerente: meta.gerente, hoje, meta: meta.meta, mes, pct };
                 });
@@ -328,7 +349,9 @@
                 document.getElementById('ranking-table-body').innerHTML = tableHtml || '<tr><td colspan="5">Não há metas para o foco atual.</td></tr>';
 
                 const podiumWrapper = document.getElementById('podium-wrapper');
-                let producoesHoje = producaoSource.filter(p => p.data === todayDate);
+                
+                // Aplicação do stdDate e Trava para Valores Maiores que Zero no Pódio
+                let producoesHoje = producaoSource.filter(p => stdDate(p.data) === todayDate && Number(p.realizado) > 0);
                 let gerentesHoje = {};
                 producoesHoje.forEach(p => {
                     if(!gerentesHoje[p.gerente]) gerentesHoje[p.gerente] = [];
