@@ -130,9 +130,10 @@
                 <h2 id="title-macro" style="color:var(--neon-color); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
-                        <div class="info-card"><h3>SELIC (META)</h3><div class="info-val">14,25%</div></div>
-                        <div class="info-card"><h3>IPCA (PROJ. 2026)</h3><div class="info-val">4,72%</div></div>
-                        <div class="info-card"><h3>CDI ACUM.</h3><div class="info-val">14,40%</div></div>
+                        <!-- IDs Adicionados para atualização automática -->
+                        <div class="info-card"><h3>SELIC (META)</h3><div id="selic-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>IPCA</h3><div id="ipca-val" class="info-val">---</div></div>
+                        <div class="info-card"><h3>CDI ACUM.</h3><div id="cdi-val" class="info-val">---</div></div>
                     </div>
                     <div class="card-column">
                         <div class="info-card"><h3>IBOVESPA</h3><div id="ibov-val" class="info-val">---</div><div id="ibov-var" class="info-sub">---</div></div>
@@ -165,7 +166,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.3</div>
+            <div class="version-tag">v: 1.8.4</div>
         </div>
     </div>
 
@@ -179,7 +180,8 @@
 
         let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
         let URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
-        let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=327977986&single=true&output=csv';
+        // URL da Matriz atualizada conforme solicitação
+        let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAOhT8trYO2BkjzBBZQsBdfuJSo5xA-3OljtFd9JkucbnDtC7J9komg3Glc0HlxUExTVqjapGeM3dY/pub?gid=327977986&single=true&output=csv';
         let URL_CONTADOR = ''; 
         
         // --- ATENÇÃO: ARQUIVOS DA VERSÃO GENÉRICA ---
@@ -372,7 +374,7 @@
                 } catch (e) {}
             }
 
-            // --- QUADRO 3: ÍNDICES MACRO (GOOGLE FINANCE) ---
+            // --- QUADRO 3: ÍNDICES MACRO ---
             async function fetchMacro() {
                 try {
                     if (!URL_MACRO || URL_MACRO === '') return; 
@@ -382,22 +384,34 @@
                     const data = parseCSV(csvText);
                     
                     data.forEach(cols => {
-                        if (cols.length >= 3) {
-                            const indice = cols[0].toUpperCase();
+                        if (cols.length >= 2) {
+                            const indice = cols[0].toUpperCase().trim();
                             const price = safeParseFloat(cols[1]);
-                            const variation = safeParseFloat(cols[2]);
-                            let valId = ''; let varId = '';
+                            let variation = 0;
+                            if(cols.length >= 3) variation = safeParseFloat(cols[2]);
                             
+                            let valId = ''; let varId = ''; let isPercentOnly = false;
+                            
+                            // Mapeamento dinâmico
                             if (indice.includes('IBOV')) { valId = 'ibov-val'; varId = 'ibov-var'; }
                             else if (indice.includes('S&P') || indice.includes('INX')) { valId = 'sp500-val'; varId = 'sp500-var'; }
                             else if (indice.includes('NASDAQ') || indice.includes('IXIC')) { valId = 'nasdaq-val'; varId = 'nasdaq-var'; }
+                            else if (indice.includes('SELIC')) { valId = 'selic-val'; isPercentOnly = true; }
+                            else if (indice.includes('IPCA')) { valId = 'ipca-val'; isPercentOnly = true; }
+                            else if (indice.includes('CDI')) { valId = 'cdi-val'; isPercentOnly = true; }
                             
-                            if (valId && price > 0) {
-                                document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                const varEl = document.getElementById(varId);
-                                const isUp = variation >= 0;
-                                varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
-                                varEl.style.color = isUp ? 'var(--positive-color)' : 'var(--negative-color)';
+                            if (valId && !isNaN(price) && price > 0) {
+                                if (isPercentOnly) {
+                                    document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+                                } else {
+                                    document.getElementById(valId).innerText = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                    const varEl = document.getElementById(varId);
+                                    if(varEl) {
+                                        const isUp = variation >= 0;
+                                        varEl.innerText = (isUp ? '▲ ' : '▼ ') + Math.abs(variation).toFixed(2) + '%';
+                                        varEl.style.color = isUp ? 'var(--positive-color)' : 'var(--negative-color)';
+                                    }
+                                }
                             }
                         }
                     });
