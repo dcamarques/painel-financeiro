@@ -165,7 +165,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.2</div>
+            <div class="version-tag">v: 1.8.3</div>
         </div>
     </div>
 
@@ -183,8 +183,6 @@
         let URL_CONTADOR = ''; 
         
         // --- ATENÇÃO: ARQUIVOS DA VERSÃO GENÉRICA ---
-        // Se for testar em tv.boonus.app.br, o script lê esta lista abaixo.
-        // Aqui já substituí para o publi1.mp4 conforme você solicitou.
         let publiImages = ['publi1.mp4', 'publi2.png', 'publi3.png'];
 
         if (tenant === 'safra') {
@@ -192,7 +190,6 @@
             document.getElementById('header-logo').src = 'logo-safra.png';
             
             // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO SAFRA ---
-            // Se você testar no link /?cliente=safra, ele usa a lista abaixo e IGNORA a genérica!
             publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
             
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
@@ -204,7 +201,6 @@
             document.getElementById('header-logo').src = 'logo-btg.png';
             
             // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO BTG ---
-            // Se você testar no link /?cliente=btg, ele usa a lista abaixo e IGNORA a genérica!
             publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
             
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
@@ -587,6 +583,33 @@
             contentArea.addEventListener('click', function(e) {
                 if (e.target.closest('.sidebar-qr') === null) {
                     toggleRotation(e);
+                }
+            });
+
+            // ==========================================
+            // MOTOR WAKE LOCK (TELA SEMPRE LIGADA)
+            // ==========================================
+            let wakeLock = null;
+            async function requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                    }
+                } catch (err) {}
+            }
+            
+            // Tenta ativar logo na abertura
+            requestWakeLock();
+            
+            // Reativa por clique (caso o navegador exija interação prévia)
+            document.addEventListener('click', function() { 
+                if (!wakeLock) requestWakeLock(); 
+            }, { once: true });
+            
+            // Reativa caso o usuário minimize a janela e volte
+            document.addEventListener('visibilitychange', function() { 
+                if (wakeLock !== null && document.visibilityState === 'visible') {
+                    requestWakeLock(); 
                 }
             });
 
