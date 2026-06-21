@@ -166,7 +166,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.4</div>
+            <div class="version-tag">v: 1.8.6</div>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
 
         let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
         let URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
-        // URL da Matriz atualizada conforme solicitação
+        // URL da Matriz padrão
         let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAOhT8trYO2BkjzBBZQsBdfuJSo5xA-3OljtFd9JkucbnDtC7J9komg3Glc0HlxUExTVqjapGeM3dY/pub?gid=327977986&single=true&output=csv';
         let URL_CONTADOR = ''; 
         
@@ -209,6 +209,19 @@
             URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=82167012&single=true&output=csv';
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=327977986&single=true&output=csv';
             URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbwksLJPfO9YyRGHKDCA6TkOtdhc3f7vNjJNNZNWtwv_TXPMWKdnAuBCfIoART3TmscMxw/exec';
+        } else if (tenant === 'darioporto') {
+            // --- AMBIENTE EXCLUSIVO: GRUPO DARIO & PORTO ---
+            document.documentElement.style.setProperty('--neon-color', '#FFFFFF'); // Você pode alterar essa cor hexadecimal da identidade visual deles depois
+            document.getElementById('header-logo').src = 'logo-darioporto.png';
+            
+            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO DARIO & PORTO ---
+            publiImages = ['dp-publi1.png', 'dp-publi2.png', 'dp-publi3.png'];
+            
+            // Novos Links Dario & Porto inseridos
+            URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=0&single=true&output=csv';
+            URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=82167012&single=true&output=csv';
+            URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9Pea0Jdg1zDprxm3RAgkOtDRH-2jT1LRSE1hncjxuTeqm9-B5rawgZok5iGRveEz3uGckx7PI3Ynh/pub?gid=327977986&single=true&output=csv';
+            URL_CONTADOR = ''; 
         }
 
         // ==========================================
