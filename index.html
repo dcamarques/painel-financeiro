@@ -93,7 +93,8 @@
 <body>
 
     <div class="header">
-        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
+        <!-- Correção Mobile: Removido o onerror que escondia a imagem durante o carregamento 3G/4G -->
+        <div class="logo"><img id="header-logo" src="logo.png" alt="Logo"></div>
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
             <div class="clock-box"><div class="label">New York</div><div id="ny-time" class="time">--:--:--</div></div>
@@ -161,12 +162,11 @@
         <div class="sidebar-qr" onclick="toggleFullScreen()">
             <div class="qr-section">
                 <div class="qr-box">
-                    <!-- ID adicionado ao QR Code para permitir atualização dinâmica -->
                     <img id="qr-sidebar-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.8</div>
+            <div class="version-tag">v: 1.8.9</div>
         </div>
     </div>
 
@@ -187,33 +187,38 @@
 
         if (tenant === 'safra') {
             document.documentElement.style.setProperty('--neon-color', '#C29B0C'); 
-            document.getElementById('header-logo').src = 'logo-safra.png';
-            publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
+            const logoEl = document.getElementById('header-logo');
+            logoEl.src = 'logo-safra.png';
+            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
             
+            publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
             URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=82167012&single=true&output=csv';
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=327977986&single=true&output=csv';
             URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbzI8HxET-dGKkV5jcrAYxH7xcG2SjCJdfugrW0_1y4t8_Gil0rKjxjnt8R-oFEV27I6IQ/exec';
+            
         } else if (tenant === 'btg') {
             document.documentElement.style.setProperty('--neon-color', '#00d2ff'); 
-            document.getElementById('header-logo').src = 'logo-btg.png';
-            publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
+            const logoEl = document.getElementById('header-logo');
+            logoEl.src = 'logo-btg.png';
+            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
             
+            publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
             URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=82167012&single=true&output=csv';
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=327977986&single=true&output=csv';
             URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbwksLJPfO9YyRGHKDCA6TkOtdhc3f7vNjJNNZNWtwv_TXPMWKdnAuBCfIoART3TmscMxw/exec';
+            
         } else if (tenant === 'darioporto') {
-            // --- AMBIENTE EXCLUSIVO: GRUPO DARIO & PORTO ---
             document.documentElement.style.setProperty('--neon-color', '#FFFFFF'); 
             
-            document.getElementById('header-logo').src = 'logo-darioporto.png?v=2';
+            const logoEl = document.getElementById('header-logo');
+            logoEl.src = 'logo-darioporto.png?v=2';
+            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
             
-            // NOVO: Altera o QR Code especificamente para o número de WhatsApp do Dario & Porto
             document.getElementById('qr-sidebar-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521971213845';
             
             publiImages = ['dp-publi1.png', 'dp-publi2.png', 'dp-publi3.png'];
-            
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=0&single=true&output=csv';
             URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=82167012&single=true&output=csv';
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9Pea0Jdg1zDprxm3RAgkOtDRH-2jT1LRSE1hncjxuTeqm9-B5rawgZok5iGRveEz3uGckx7PI3Ynh/pub?gid=327977986&single=true&output=csv';
