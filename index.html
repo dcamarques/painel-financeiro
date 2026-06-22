@@ -161,11 +161,12 @@
         <div class="sidebar-qr" onclick="toggleFullScreen()">
             <div class="qr-section">
                 <div class="qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
+                    <!-- ID adicionado ao QR Code para permitir atualização dinâmica -->
+                    <img id="qr-sidebar-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.7</div>
+            <div class="version-tag">v: 1.8.8</div>
         </div>
     </div>
 
@@ -206,8 +207,10 @@
             // --- AMBIENTE EXCLUSIVO: GRUPO DARIO & PORTO ---
             document.documentElement.style.setProperty('--neon-color', '#FFFFFF'); 
             
-            // Alterado de: logo-darioporto.png -> para: logo-darioporto.png?v=2 para quebrar o cache
             document.getElementById('header-logo').src = 'logo-darioporto.png?v=2';
+            
+            // NOVO: Altera o QR Code especificamente para o número de WhatsApp do Dario & Porto
+            document.getElementById('qr-sidebar-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521971213845';
             
             publiImages = ['dp-publi1.png', 'dp-publi2.png', 'dp-publi3.png'];
             
