@@ -130,7 +130,6 @@
                 <h2 id="title-macro" style="color:var(--neon-color); margin-bottom:20px;">INDICADORES MACRO &amp; ÍNDICES</h2>
                 <div class="macro-grid">
                     <div class="card-column">
-                        <!-- IDs Adicionados para atualização automática -->
                         <div class="info-card"><h3>SELIC (META)</h3><div id="selic-val" class="info-val">---</div></div>
                         <div class="info-card"><h3>IPCA</h3><div id="ipca-val" class="info-val">---</div></div>
                         <div class="info-card"><h3>CDI ACUM.</h3><div id="cdi-val" class="info-val">---</div></div>
@@ -166,7 +165,7 @@
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.6</div>
+            <div class="version-tag">v: 1.8.7</div>
         </div>
     </div>
 
@@ -180,18 +179,14 @@
 
         let URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=0&single=true&output=csv';
         let URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQea0VHfFg2M2BT0KdpN5uEnR_yIPpWD6ASnI8Zn4Ff_vVy0DoytjIh9ebHot-wWJeLoZ_eVg-L1YI/pub?gid=82167012&single=true&output=csv';
-        // URL da Matriz padrão
         let URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAOhT8trYO2BkjzBBZQsBdfuJSo5xA-3OljtFd9JkucbnDtC7J9komg3Glc0HlxUExTVqjapGeM3dY/pub?gid=327977986&single=true&output=csv';
         let URL_CONTADOR = ''; 
         
-        // --- ATENÇÃO: ARQUIVOS DA VERSÃO GENÉRICA ---
         let publiImages = ['publi1.mp4', 'publi2.png', 'publi3.png'];
 
         if (tenant === 'safra') {
             document.documentElement.style.setProperty('--neon-color', '#C29B0C'); 
             document.getElementById('header-logo').src = 'logo-safra.png';
-            
-            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO SAFRA ---
             publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
             
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
@@ -201,8 +196,6 @@
         } else if (tenant === 'btg') {
             document.documentElement.style.setProperty('--neon-color', '#00d2ff'); 
             document.getElementById('header-logo').src = 'logo-btg.png';
-            
-            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO BTG ---
             publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
             
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
@@ -211,13 +204,13 @@
             URL_CONTADOR = 'https://script.google.com/macros/s/AKfycbwksLJPfO9YyRGHKDCA6TkOtdhc3f7vNjJNNZNWtwv_TXPMWKdnAuBCfIoART3TmscMxw/exec';
         } else if (tenant === 'darioporto') {
             // --- AMBIENTE EXCLUSIVO: GRUPO DARIO & PORTO ---
-            document.documentElement.style.setProperty('--neon-color', '#FFFFFF'); // Você pode alterar essa cor hexadecimal da identidade visual deles depois
+            document.documentElement.style.setProperty('--neon-color', '#FFFFFF'); 
+            
+            // Alterado de: logo-darioporto.png -> para: logo-darioporto.png?v=2 para quebrar o cache
             document.getElementById('header-logo').src = 'logo-darioporto.png?v=2';
             
-            // --- ATENÇÃO: ARQUIVOS EXCLUSIVOS DO DARIO & PORTO ---
             publiImages = ['dp-publi1.png', 'dp-publi2.png', 'dp-publi3.png'];
             
-            // Novos Links Dario & Porto inseridos
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=0&single=true&output=csv';
             URL_RADAR = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFmc1NpRH8iG-TY9DPFcaLfDKpw-CNHI89vqPO_0JAJbjMnL3l3QS4hIHCzP58UDrFnNK6s0UqW8BO/pub?gid=82167012&single=true&output=csv';
             URL_MACRO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9Pea0Jdg1zDprxm3RAgkOtDRH-2jT1LRSE1hncjxuTeqm9-B5rawgZok5iGRveEz3uGckx7PI3Ynh/pub?gid=327977986&single=true&output=csv';
@@ -234,7 +227,6 @@
             }
         }
 
-        // --- SISTEMA DE TELEMETRIA SILENCIOSA E GEOGRÁFICA ---
         async function registrarAcesso() {
             if (!URL_CONTADOR || URL_CONTADOR === '') return;
             try {
@@ -244,7 +236,6 @@
                 try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 3000);
-                    
                     const geoRes = await fetch('https://freeipapi.com/api/json', { signal: controller.signal });
                     clearTimeout(timeoutId);
                     
@@ -280,7 +271,6 @@
                 }
             }
 
-            // --- RELÓGIOS GLOBAIS ---
             function updateClocks() {
                 try {
                     const now = new Date();
@@ -293,7 +283,6 @@
             }
             setInterval(updateClocks, 1000); updateClocks();
 
-            // --- PARSER DE CSV ---
             function parseCSV(text) {
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
                 return lines.map(line => {
@@ -314,7 +303,6 @@
                 });
             }
 
-            // --- QUADRO 1: OPORTUNIDADES DO DIA ---
             async function fetchOpportunities() {
                 try {
                     const response = await fetch(URL_OPORTUNIDADES + '&t=' + new Date().getTime());
@@ -350,7 +338,6 @@
                 } catch (e) {}
             }
 
-            // --- QUADRO 2: RADAR ECONÔMICO ---
             async function fetchAgenda() {
                 try {
                     const response = await fetch(URL_RADAR + '&t=' + new Date().getTime());
@@ -387,7 +374,6 @@
                 } catch (e) {}
             }
 
-            // --- QUADRO 3: ÍNDICES MACRO ---
             async function fetchMacro() {
                 try {
                     if (!URL_MACRO || URL_MACRO === '') return; 
@@ -405,7 +391,6 @@
                             
                             let valId = ''; let varId = ''; let isPercentOnly = false;
                             
-                            // Mapeamento dinâmico
                             if (indice.includes('IBOV')) { valId = 'ibov-val'; varId = 'ibov-var'; }
                             else if (indice.includes('S&P') || indice.includes('INX')) { valId = 'sp500-val'; varId = 'sp500-var'; }
                             else if (indice.includes('NASDAQ') || indice.includes('IXIC')) { valId = 'nasdaq-val'; varId = 'nasdaq-var'; }
@@ -431,7 +416,6 @@
                 } catch (e) {}
             }
 
-            // --- TICKER DE AÇÕES ---
             async function fetchBrapi() {
                 try {
                     const res = await fetch('https://brapi.dev/api/quote/list?sortBy=change&sortOrder=desc');
@@ -444,7 +428,6 @@
                 } catch(e) {}
             }
 
-            // --- CÂMBIO ---
             async function fetchAwesome() {
                 try {
                     const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,JPY-BRL,GBP-BRL');
@@ -460,7 +443,6 @@
                 } catch(e) {}
             }
 
-            // --- RSS NOTÍCIAS ---
             let newsList = [];
             async function fetchNews() {
                 const feeds = [
@@ -478,7 +460,6 @@
                 newsList.sort(() => Math.random() - 0.5);
             }
 
-            // --- INICIALIZAÇÃO E INTERVALOS ---
             registrarAcesso(); 
             fetchOpportunities(); fetchMacro(); fetchBrapi(); fetchAwesome(); fetchAgenda(); fetchNews();
             
@@ -489,7 +470,6 @@
             setInterval(fetchAgenda, 300000);         
             setInterval(fetchNews, 1800000);          
 
-            // Rotação Notícias
             let newsIdx = 0;
             setInterval(() => {
                 if(newsList.length && document.getElementById('block-news').style.display !== 'none'){
@@ -506,20 +486,16 @@
                 }
             }, 15000);
 
-            // ==========================================
-            // MOTOR DE ROTAÇÃO HÍBRIDO BLINDADO E PAUSA
-            // ==========================================
             const blocks = ['block-news', 'block-opps', 'block-publi', 'block-macro', 'block-agenda', 'block-coins'];
             let bIdx = 0; let pIdx = 0;
             let cycleTimeout;
             let pauseTimeout;
             let isPaused = false; 
 
-            // Fallback de erro no vídeo: Se o vídeo falhar, pule e evite tela preta infinita
             document.getElementById('publi-vid').addEventListener('error', function(e) {
                 console.warn("Vídeo não encontrado ou corrompido. Pulando tela.");
                 clearTimeout(cycleTimeout);
-                cycle(); // Força a rotação imediata
+                cycle(); 
             });
 
             function cycle() {
@@ -529,8 +505,6 @@
                     
                     setTimeout(() => {
                         cur.style.display = 'none';
-                        
-                        // Reseta o player de vídeo ao sair da tela de anúncios
                         if(blocks[bIdx] === 'block-publi') {
                             document.getElementById('publi-vid').pause();
                         }
@@ -538,7 +512,6 @@
                         bIdx = (bIdx + 1) % blocks.length;
                         const nxt = document.getElementById(blocks[bIdx]);
                         
-                        // MOTOR HÍBRIDO DE INJEÇÃO REVISADO
                         if(blocks[bIdx] === 'block-publi') {
                             const imgPubli = document.getElementById('publi-img');
                             const vidPubli = document.getElementById('publi-vid');
@@ -548,7 +521,6 @@
                                 imgPubli.style.display = 'none';
                                 vidPubli.style.display = 'block';
                                 
-                                // BLINDAGEM DE SEGUNDA ORDEM: Vídeos não usam cache-busting (?v=)
                                 if (vidPubli.getAttribute('src') !== currentMedia) {
                                     vidPubli.src = currentMedia;
                                     vidPubli.load(); 
@@ -558,7 +530,6 @@
                                 if (playPromise !== undefined) {
                                     playPromise.catch(error => {
                                         console.log("Falha no Autoplay:", error);
-                                        // A tela ainda fica visível, mas a tag de fallback 'error' resolve 404
                                     });
                                 }
                                 
@@ -582,7 +553,6 @@
             
             cycleTimeout = setTimeout(cycle, 60000);
 
-            // Ação: Toggle Pause
             const contentArea = document.getElementById('interactive-area');
             const pauseIndicator = document.getElementById('pause-indicator');
 
@@ -613,9 +583,6 @@
                 }
             });
 
-            // ==========================================
-            // MOTOR WAKE LOCK (TELA SEMPRE LIGADA)
-            // ==========================================
             let wakeLock = null;
             async function requestWakeLock() {
                 try {
@@ -624,16 +591,10 @@
                     }
                 } catch (err) {}
             }
-            
-            // Tenta ativar logo na abertura
             requestWakeLock();
-            
-            // Reativa por clique (caso o navegador exija interação prévia)
             document.addEventListener('click', function() { 
                 if (!wakeLock) requestWakeLock(); 
             }, { once: true });
-            
-            // Reativa caso o usuário minimize a janela e volte
             document.addEventListener('visibilitychange', function() { 
                 if (wakeLock !== null && document.visibilityState === 'visible') {
                     requestWakeLock(); 
