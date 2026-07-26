@@ -51,6 +51,10 @@
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+        button:disabled {
+            cursor: not-allowed;
         }
         #painel { display: none; }
     </style>
@@ -68,7 +72,7 @@
     <!-- TELA DO PAINEL (Oculta até logar) -->
     <div id="painel" style="width: 100%; height: 100%;">
         <h1>Bem-vindo à Agenda Boonus</h1>
-        <button onclick="fazerLogout()" style="width: auto; background: red;">Sair</button>
+        <button onclick="fazerLogout()" style="width: auto; background: red; padding: 10px 20px;">Sair</button>
         <!-- A estrutura de grid que desenhamos entrará aqui -->
     </div>
 
@@ -77,14 +81,22 @@
         const SUPABASE_URL = 'https://kafmnasrqcmbzvzaggap.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // CORREÇÃO: Usando window.supabase para evitar conflito de nomes e travamento
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Função para disparar o e-mail (Magic Link / OTP)
         async function enviarCodigo() {
             const email = document.getElementById('email-input').value;
             if(!email) return alert('Digite um e-mail válido.');
 
-            const { data, error } = await supabase.auth.signInWithOtp({
+            // Feedback visual de carregamento
+            const btn = document.querySelector('#login-screen button');
+            const textoOriginal = btn.innerText;
+            btn.innerText = 'Enviando...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            const { data, error } = await supabaseClient.auth.signInWithOtp({
                 email: email,
                 options: {
                     // Após validar o e-mail, redireciona para a mesma página
@@ -92,16 +104,21 @@
                 }
             });
 
+            // Retorna o botão ao normal após a resposta do servidor
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+
             if (error) {
                 alert('Erro ao enviar: ' + error.message);
             } else {
-                alert('Código enviado! Verifique sua caixa de entrada.');
+                alert('Código enviado! Verifique sua caixa de entrada e a pasta de spam.');
             }
         }
 
         // Verifica se o usuário já está logado ao abrir a página
         async function checarSessao() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 // Se estiver logado, esconde o login e mostra o painel
                 document.getElementById('login-screen').style.display = 'none';
@@ -110,10 +127,11 @@
         }
 
         async function fazerLogout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.reload();
         }
 
+        // Executa a verificação assim que a página é carregada
         checarSessao();
     </script>
 </body>
