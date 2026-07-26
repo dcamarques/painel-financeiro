@@ -34,8 +34,13 @@
 
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 2px solid var(--primary); background-color: var(--bg-color); }
         .header-left, .header-right, .header-center { display: flex; align-items: center; gap: 10px; }
-        .nav-btn { background: var(--btn-dark); color: white; border: 1px solid #444; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .nav-btn { background: var(--btn-dark); color: white; border: 1px solid #444; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .nav-btn:hover { background: #333; }
+        
+        /* Filtro Ativo */
+        .nav-btn.active-filter { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
+
         .btn-action { background: #0078D7; }
         .btn-action:hover { background: #005A9E; }
         .header-center h3 { margin: 0; padding: 0 15px; }
@@ -51,11 +56,18 @@
         
         /* TAREFAS */
         .tasks-panel { width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; }
+        
+        .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; }
+        
+        /* Destaque de Prioridade */
+        .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
+        .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
+        
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9em; color: #bbb;}
-        .task-cat-name { font-weight: bold; letter-spacing: 1px; }
+        .task-cat-name { font-weight: bold; letter-spacing: 1px; display: flex; align-items: center;}
         .task-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
         .task-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        
         .t-btn { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em; font-weight: bold; }
         .t-btn:hover { background: #555; }
         .t-btn.done { background: var(--primary); }
@@ -67,20 +79,17 @@
         .status-andamento { background-color: #FFEB3B; color: black; }
         .status-concluido { background-color: #4CAF50; color: white; }
 
-        /* MODAIS (Tarefas e Configurações) */
+        /* MODAIS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #222; padding: 25px; border-radius: 10px; width: 400px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
         .modal-content h3 { margin-top: 0; }
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
-        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #555; background: #111; color: white; }
+        .modal-content input[type="text"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #555; background: #111; color: white; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         
-        /* PALETA DE CORES */
         .color-palette { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-swatch.selected { border-color: white; transform: scale(1.1); }
-
-        /* LISTA DE CATEGORIAS (Config) */
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #333; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
@@ -106,9 +115,9 @@
     <div id="painel">
         <div class="header">
             <div class="header-left">
-                <button class="nav-btn">VENCIDAS</button>
-                <button class="nav-btn">PENDENTES</button>
-                <button class="nav-btn">PRIORIDADES</button>
+                <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
+                <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('PENDENTES')">PENDENTES</button>
+                <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
             </div>
             <div class="header-center">
                 <button class="nav-btn">&lt;</button>
@@ -132,7 +141,7 @@
             </div>
 
             <div class="tasks-panel" id="tasks-container">
-                <!-- As tarefas renderizadas via JavaScript aparecerão aqui -->
+                <!-- Renderizado via JavaScript -->
             </div>
         </div>
     </div>
@@ -159,6 +168,12 @@
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
 
+            <!-- CHECKBOX DE PRIORIDADE -->
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #333; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
+                <input type="checkbox" id="task-priority" style="width: 20px; height: 20px; margin: 0;">
+                <strong style="color: white;">Marcar como Prioridade Urgente</strong>
+            </label>
+
             <div class="modal-actions">
                 <button class="nav-btn" onclick="fecharModais()">Cancelar</button>
                 <button class="nav-btn btn-action" onclick="salvarTarefa()">Salvar Tarefa</button>
@@ -166,27 +181,18 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURAÇÕES (CATEGORIAS) -->
+    <!-- MODAL DE CONFIGURAÇÕES -->
     <div class="modal-overlay" id="configModal">
         <div class="modal-content">
             <h3>Configurações de Categorias</h3>
-            
-            <div id="categories-list" style="margin-bottom: 20px;">
-                <!-- Lista de categorias existentes -->
-            </div>
-
+            <div id="categories-list" style="margin-bottom: 20px;"></div>
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-            
             <h4>Criar Nova Categoria</h4>
             <label>Nome da Categoria</label>
             <input type="text" id="new-cat-name" placeholder="Ex: Visita">
-            
             <label>Cor de Identificação</label>
-            <div class="color-palette" id="color-picker">
-                <!-- Gerado via JS -->
-            </div>
+            <div class="color-palette" id="color-picker"></div>
             <input type="hidden" id="selected-color" value="#F44336">
-
             <div class="modal-actions">
                 <button class="nav-btn" onclick="fecharModais()">Fechar</button>
                 <button class="nav-btn btn-action" onclick="adicionarCategoria()">Adicionar Categoria</button>
@@ -198,33 +204,26 @@
         const SUPABASE_URL = 'https://kafmnasrqcmbzvzaggap.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let currentUser = null;
-
-        // --- SISTEMA DE CATEGORIAS (Memória Local Temporária) ---
-        const defaultColors = [
-            '#F44336', // Vermelho
-            '#4CAF50', // Verde
-            '#2196F3', // Azul
-            '#FFEB3B', // Amarelo
-            '#FF9800', // Laranja
-            '#00BCD4', // Ciano (Cian)
-            '#9C27B0', // Roxo
-            '#E91E63', // Rosa
-            '#795548', // Marrom
-            '#9E9E9E'  // Cinza
+        
+        let filtroAtual = 'TODAS'; // Estado do filtro: TODAS, VENCIDAS, PENDENTES, PRIORIDADES
+        
+        // Memória temporária das tarefas (Motor de Renderização)
+        let tarefasMock = [
+            { id: '1', titulo: 'Ligar para Fulano', categoria: 'Ligar', status: 'Pendente', data: '2026-07-26T11:00', prioridade: true },
+            { id: '2', titulo: 'Simular mútuo para Patatá', categoria: 'Reunir', status: 'Em andamento', data: '2026-07-26T14:00', prioridade: false },
+            { id: '3', titulo: 'Verificar rentabilidade', categoria: 'Ligar', status: 'Concluido', data: '2026-07-26T16:00', prioridade: false },
+            { id: '4', titulo: 'Reunião de Alocação de Portfólio', categoria: 'Reunir', status: 'Pendente', data: '2026-07-24T09:00', prioridade: true } // Tarefa vencida intencionalmente
         ];
 
-        // Carrega categorias ou define o padrão exigido
+        const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         let categorias = JSON.parse(localStorage.getItem('boonus_categorias')) || [
-            { id: 'cat_1', nome: 'Reunir', cor: '#FF9800' }, // Laranja
-            { id: 'cat_2', nome: 'Ligar', cor: '#00BCD4' }   // Ciano
+            { id: 'cat_1', nome: 'Reunir', cor: '#FF9800' },
+            { id: 'cat_2', nome: 'Ligar', cor: '#00BCD4' }
         ];
 
         function salvarCategoriasLocais() {
             localStorage.setItem('boonus_categorias', JSON.stringify(categorias));
-            renderizarSelectCategorias();
-            renderizarListaConfigCategorias();
-            carregarTarefasFalsas(); // Atualiza cores das tarefas na tela
+            renderizarSelectCategorias(); renderizarListaConfigCategorias(); renderizarTarefas();
         }
 
         // --- AUTENTICAÇÃO ---
@@ -232,35 +231,24 @@
             const email = document.getElementById('email-input').value;
             if(!email) return alert('Digite um e-mail válido.');
             const btn = document.querySelector('#login-screen button');
-            const textoOriginal = btn.innerText;
-            btn.innerText = 'Enviando...'; btn.disabled = true; btn.style.opacity = '0.7';
+            const textoOriginal = btn.innerText; btn.innerText = 'Enviando...'; btn.disabled = true; btn.style.opacity = '0.7';
 
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email: email, options: { emailRedirectTo: window.location.href }
-            });
-
+            const { error } = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } });
             btn.innerText = textoOriginal; btn.disabled = false; btn.style.opacity = '1';
-            if (error) alert('Erro: ' + error.message);
-            else alert('Código enviado! Verifique sua caixa de entrada.');
+            if (error) alert('Erro: ' + error.message); else alert('Código enviado! Verifique sua caixa de entrada.');
         }
 
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                currentUser = session.user;
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('painel').style.display = 'flex';
-                
-                inicializarPaletaDeCores();
-                renderizarSelectCategorias();
-                carregarNoticias();
-                carregarTarefasFalsas(); 
+                inicializarPaletaDeCores(); renderizarSelectCategorias(); carregarNoticias(); renderizarTarefas(); 
             }
         }
-
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- NOTÍCIAS (RSS Bypass) ---
+        // --- NOTÍCIAS ---
         async function carregarNoticias() {
             const container = document.getElementById('news-container');
             try {
@@ -268,58 +256,74 @@
                 const data = await response.json();
                 container.innerHTML = '';
                 data.items.slice(0, 8).forEach(item => {
-                    container.innerHTML += `
-                        <div class="news-card">
-                            <h4>${item.title}</h4>
-                            <p>Fonte: InfoMoney | ${new Date(item.pubDate).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    `;
+                    container.innerHTML += `<div class="news-card"><h4>${item.title}</h4><p>Fonte: InfoMoney | ${new Date(item.pubDate).toLocaleDateString('pt-BR')}</p></div>`;
                 });
-            } catch (error) {
-                container.innerHTML = '<p style="color:red;">Erro ao carregar radar de notícias.</p>';
+            } catch (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar radar de notícias.</p>'; }
+        }
+
+        // --- MOTOR DE TAREFAS E FILTROS ---
+        function definirFiltro(tipo) {
+            // Se clicar no botão que já está ativo, desliga ele (volta para TODAS)
+            if (filtroAtual === tipo) {
+                filtroAtual = 'TODAS';
+            } else {
+                filtroAtual = tipo;
             }
+
+            // Atualiza visual dos botões
+            document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter'));
+            if(filtroAtual !== 'TODAS') {
+                document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter');
+            }
+
+            renderizarTarefas();
         }
 
-        // --- GESTÃO VISUAL DE TAREFAS ---
-        function obterCorCategoria(nomeCategoria) {
-            const cat = categorias.find(c => c.nome === nomeCategoria);
-            return cat ? cat.cor : '#555';
-        }
-
-        function obterClasseStatus(status) {
-            if(status === 'Concluido') return 'status-concluido';
-            if(status === 'Em andamento') return 'status-andamento';
-            return 'status-pendente';
-        }
-
-        function carregarTarefasFalsas() {
+        function renderizarTarefas() {
             const container = document.getElementById('tasks-container');
-            container.innerHTML = renderizarCard('1', 'Ligar para Fulano', 'Ligar', 'Pendente', '2026-07-26T11:00');
-            container.innerHTML += renderizarCard('2', 'Simular mútuo para Patatá', 'Reunir', 'Em andamento', '2026-07-26T14:00');
-            container.innerHTML += renderizarCard('3', 'Verificar rentabilidade', 'Ligar', 'Concluido', '2026-07-26T16:00');
-        }
-
-        function renderizarCard(id, titulo, categoria, status, data) {
-            const cor = obterCorCategoria(categoria);
-            const statusClass = obterClasseStatus(status);
-            const statusTexto = status === 'Concluido' ? 'CONCLUÍDO' : status.toUpperCase();
-            const dataFormatada = new Date(data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            container.innerHTML = '';
             
-            return `
-                <div class="task-card" style="border-left: 8px solid ${cor};" id="task-${id}">
-                    <div class="task-header">
-                        <span class="task-cat-name" style="color: ${cor};">${categoria.toUpperCase()}</span>
-                        <strong>${dataFormatada}</strong>
-                        <span class="status-badge ${statusClass}">${statusTexto}</span>
+            const agora = new Date();
+            let tarefasFiltradas = tarefasMock;
+
+            // Aplica a lógica do filtro ativo
+            if (filtroAtual === 'PRIORIDADES') {
+                tarefasFiltradas = tarefasMock.filter(t => t.prioridade === true);
+            } else if (filtroAtual === 'PENDENTES') {
+                tarefasFiltradas = tarefasMock.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
+            } else if (filtroAtual === 'VENCIDAS') {
+                tarefasFiltradas = tarefasMock.filter(t => new Date(t.data) < agora && t.status !== 'Concluido');
+            }
+
+            if(tarefasFiltradas.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`;
+                return;
+            }
+
+            tarefasFiltradas.forEach(t => {
+                const cor = (categorias.find(c => c.nome === t.categoria) || {}).cor || '#555';
+                const statusClass = t.status === 'Concluido' ? 'status-concluido' : (t.status === 'Em andamento' ? 'status-andamento' : 'status-pendente');
+                const dataFormatada = new Date(t.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                
+                const prioridadeHTML = t.prioridade ? `<span class="priority-icon">⭐</span>` : '';
+                const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
+
+                container.innerHTML += `
+                    <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
+                        <div class="task-header">
+                            <span class="task-cat-name" style="color: ${cor};">${prioridadeHTML} ${t.categoria.toUpperCase()}</span>
+                            <strong>${dataFormatada}</strong>
+                            <span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span>
+                        </div>
+                        <div class="task-title">${t.titulo}</div>
+                        <div class="task-actions">
+                            <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo}', '${t.categoria}', '${t.status}', '${t.data}', ${t.prioridade})">✎ Editar</button>
+                            <button class="t-btn snooze" onclick="adiarTarefa('${t.id}')">+10m Adiar</button>
+                            <button class="t-btn done" onclick="concluirTarefaVisual('${t.id}')">✓ Concluir</button>
+                        </div>
                     </div>
-                    <div class="task-title">${titulo}</div>
-                    <div class="task-actions">
-                        <button class="t-btn" onclick="abrirModalTarefa('${id}', '${titulo}', '${categoria}', '${status}', '${data}')">✎ Editar</button>
-                        <button class="t-btn snooze" onclick="adiarTarefa('${id}')">+10m Adiar</button>
-                        <button class="t-btn done" onclick="concluirTarefaVisual('${id}')">✓ Concluir</button>
-                    </div>
-                </div>
-            `;
+                `;
+            });
         }
 
         // --- CONTROLE DOS MODAIS ---
@@ -328,15 +332,14 @@
             document.getElementById('configModal').style.display = 'none';
         }
 
-        // Modal Tarefa
-        function abrirModalTarefa(id = '', titulo = '', categoria = categorias[0]?.nome || '', status = 'Pendente', data = '') {
+        function abrirModalTarefa(id = '', titulo = '', categoria = categorias[0]?.nome || '', status = 'Pendente', data = '', prioridade = false) {
             document.getElementById('taskModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = id ? 'Editar Tarefa' : 'Nova Tarefa';
             document.getElementById('task-id').value = id;
             document.getElementById('task-title-input').value = titulo;
-            document.getElementById('task-status').value = status; // Status Pendente por default em novas
+            document.getElementById('task-status').value = status;
             document.getElementById('task-date').value = data;
-            
+            document.getElementById('task-priority').checked = prioridade;
             renderizarSelectCategorias();
             document.getElementById('task-category-select').value = categoria;
         }
@@ -345,80 +348,56 @@
             const titulo = document.getElementById('task-title-input').value;
             const data = document.getElementById('task-date').value;
             if(!titulo || !data) return alert('Preencha o que precisa ser feito e a data.');
-            alert('Aguardando criação das tabelas no Supabase para gravar a tarefa de fato.');
+            
+            alert('Lógica visual conectada! O estado Prioridade e Filtros funcionam perfeitamente. Falta apenas o Supabase BD.');
+            
+            // Para evitar a "armadilha do filtro", ao salvar algo novo, limpamos o filtro para o usuário ver a tarefa que criou.
+            if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual); // desliga o filtro
             fecharModais();
         }
 
-        // Modal Configurações
-        function abrirModalConfig() {
-            document.getElementById('configModal').style.display = 'flex';
-            renderizarListaConfigCategorias();
-        }
-
+        function abrirModalConfig() { document.getElementById('configModal').style.display = 'flex'; renderizarListaConfigCategorias(); }
+        
         function renderizarListaConfigCategorias() {
-            const list = document.getElementById('categories-list');
-            list.innerHTML = '';
+            const list = document.getElementById('categories-list'); list.innerHTML = '';
             categorias.forEach(cat => {
-                list.innerHTML += `
-                    <div class="cat-list-item">
-                        <div>
-                            <span class="cat-list-color" style="background-color: ${cat.cor};"></span>
-                            <strong>${cat.nome}</strong>
-                        </div>
-                        <button class="t-btn" style="background: darkred;" onclick="removerCategoria('${cat.id}')">Excluir</button>
-                    </div>
-                `;
+                list.innerHTML += `<div class="cat-list-item"><div><span class="cat-list-color" style="background-color: ${cat.cor};"></span><strong>${cat.nome}</strong></div>
+                    <button class="t-btn" style="background: darkred;" onclick="removerCategoria('${cat.id}')">Excluir</button></div>`;
             });
         }
 
         function renderizarSelectCategorias() {
-            const select = document.getElementById('task-category-select');
-            select.innerHTML = '';
-            categorias.forEach(cat => {
-                select.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`;
-            });
+            const select = document.getElementById('task-category-select'); select.innerHTML = '';
+            categorias.forEach(cat => { select.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`; });
         }
 
         function inicializarPaletaDeCores() {
-            const picker = document.getElementById('color-picker');
-            picker.innerHTML = '';
+            const picker = document.getElementById('color-picker'); picker.innerHTML = '';
             defaultColors.forEach(cor => {
-                const div = document.createElement('div');
-                div.className = 'color-swatch';
-                div.style.backgroundColor = cor;
-                if(cor === '#F44336') div.classList.add('selected'); // Vermelho como inicial default da paleta
-                div.onclick = () => selecionarCor(div, cor);
-                picker.appendChild(div);
+                const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = cor;
+                if(cor === '#F44336') div.classList.add('selected');
+                div.onclick = () => selecionarCor(div, cor); picker.appendChild(div);
             });
         }
 
         function selecionarCor(elemento, cor) {
             document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
-            elemento.classList.add('selected');
-            document.getElementById('selected-color').value = cor;
+            elemento.classList.add('selected'); document.getElementById('selected-color').value = cor;
         }
 
         function adicionarCategoria() {
-            const nome = document.getElementById('new-cat-name').value.trim();
-            const cor = document.getElementById('selected-color').value;
-            
+            const nome = document.getElementById('new-cat-name').value.trim(); const cor = document.getElementById('selected-color').value;
             if(!nome) return alert('Digite o nome da categoria.');
             if(categorias.find(c => c.nome.toLowerCase() === nome.toLowerCase())) return alert('Categoria já existe.');
-
-            const novaCat = { id: 'cat_' + Date.now(), nome: nome, cor: cor };
-            categorias.push(novaCat);
-            salvarCategoriasLocais();
-            
-            document.getElementById('new-cat-name').value = ''; // limpa o campo
+            categorias.push({ id: 'cat_' + Date.now(), nome: nome, cor: cor }); salvarCategoriasLocais();
+            document.getElementById('new-cat-name').value = '';
         }
 
         function removerCategoria(id) {
             if(categorias.length <= 1) return alert('Você precisa ter pelo menos uma categoria.');
-            categorias = categorias.filter(c => c.id !== id);
-            salvarCategoriasLocais();
+            categorias = categorias.filter(c => c.id !== id); salvarCategoriasLocais();
         }
 
-        // --- AÇÕES RÁPIDAS ---
         function adiarTarefa(id) { alert('Lógica de adiar +10min aguardando banco de dados.'); }
         function concluirTarefaVisual(id) { alert('Marcado como concluído (Aguardando BD).'); document.getElementById('task-'+id).style.opacity = '0.4'; }
         function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
