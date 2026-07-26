@@ -37,37 +37,39 @@
         
         .nav-btn { background: var(--btn-dark); color: white; border: 1px solid #444; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .nav-btn:hover { background: #333; }
-        
-        /* Filtro Ativo */
         .nav-btn.active-filter { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
 
         .btn-action { background: #0078D7; }
         .btn-action:hover { background: #005A9E; }
-        .header-center h3 { margin: 0; padding: 0 15px; }
+        .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase;}
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        /* NOTÍCIAS */
-        .news-panel { width: 60%; padding: 20px; border-right: 1px solid #333; display: flex; flex-direction: column; overflow-y: auto; }
-        .news-panel h2 { margin-top: 0; font-weight: normal; text-align: center;}
-        .news-card { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); }
-        .news-card h4 { margin: 0 0 10px 0; color: #ddd; }
-        .news-card p { margin: 0; font-size: 0.9em; color: #aaa; }
+        /* NOTÍCIAS (CARROSSEL ESTILO TV) */
+        .news-panel { width: 60%; padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .news-panel h2 { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px;}
         
+        #news-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        .news-slide { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeIn 1s ease-in-out; }
+        .news-image { max-width: 100%; max-height: 40vh; border-radius: 12px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
+        .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         /* TAREFAS */
         .tasks-panel { width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; }
-        
-        /* Destaque de Prioridade */
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
-        
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9em; color: #bbb;}
         .task-cat-name { font-weight: bold; letter-spacing: 1px; display: flex; align-items: center;}
         .task-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
         .task-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        
         .t-btn { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em; font-weight: bold; }
         .t-btn:hover { background: #555; }
         .t-btn.done { background: var(--primary); }
@@ -121,7 +123,7 @@
             </div>
             <div class="header-center">
                 <button class="nav-btn">&lt;</button>
-                <h3>HOJE, 26 DE JULHO</h3>
+                <h3 id="display-data"></h3>
                 <button class="nav-btn">&gt;</button>
             </div>
             <div class="header-right">
@@ -136,7 +138,7 @@
             <div class="news-panel">
                 <h2>RADAR DE NOTÍCIAS</h2>
                 <div id="news-container">
-                    <p style="text-align:center; color:#555;">Carregando radar de mercado...</p>
+                    <p style="text-align:center; color:#555;">Sintonizando radares...</p>
                 </div>
             </div>
 
@@ -146,34 +148,27 @@
         </div>
     </div>
 
-    <!-- MODAL DE CRIAR/EDITAR TAREFA -->
+    <!-- MODAIS DE TAREFA E CONFIGURAÇÕES MANTIDOS IDÊNTICOS -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal-content">
             <h3 id="modal-title">Nova Tarefa</h3>
             <input type="hidden" id="task-id">
-            
             <label>O que precisa ser feito?</label>
             <input type="text" id="task-title-input" placeholder="Ex: Ligar para Fulano">
-            
             <label>Categoria</label>
             <select id="task-category-select"></select>
-
             <label>Status</label>
             <select id="task-status">
                 <option value="Pendente" style="color: #F44336; font-weight: bold;">Pendente (Vermelho)</option>
                 <option value="Em andamento" style="color: #FFEB3B; font-weight: bold;">Em andamento (Amarelo)</option>
                 <option value="Concluido" style="color: #4CAF50; font-weight: bold;">Concluído (Verde)</option>
             </select>
-
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
-
-            <!-- CHECKBOX DE PRIORIDADE -->
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #333; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
                 <input type="checkbox" id="task-priority" style="width: 20px; height: 20px; margin: 0;">
                 <strong style="color: white;">Marcar como Prioridade Urgente</strong>
             </label>
-
             <div class="modal-actions">
                 <button class="nav-btn" onclick="fecharModais()">Cancelar</button>
                 <button class="nav-btn btn-action" onclick="salvarTarefa()">Salvar Tarefa</button>
@@ -181,7 +176,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURAÇÕES -->
     <div class="modal-overlay" id="configModal">
         <div class="modal-content">
             <h3>Configurações de Categorias</h3>
@@ -205,14 +199,18 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let filtroAtual = 'TODAS'; // Estado do filtro: TODAS, VENCIDAS, PENDENTES, PRIORIDADES
+        let filtroAtual = 'TODAS'; 
         
-        // Memória temporária das tarefas (Motor de Renderização)
+        // Configura a data de hoje no topo
+        const hojeObj = new Date();
+        const opcoesData = { day: 'numeric', month: 'long' };
+        document.getElementById('display-data').innerText = `HOJE, ${hojeObj.toLocaleDateString('pt-BR', opcoesData)}`;
+        
         let tarefasMock = [
             { id: '1', titulo: 'Ligar para Fulano', categoria: 'Ligar', status: 'Pendente', data: '2026-07-26T11:00', prioridade: true },
             { id: '2', titulo: 'Simular mútuo para Patatá', categoria: 'Reunir', status: 'Em andamento', data: '2026-07-26T14:00', prioridade: false },
             { id: '3', titulo: 'Verificar rentabilidade', categoria: 'Ligar', status: 'Concluido', data: '2026-07-26T16:00', prioridade: false },
-            { id: '4', titulo: 'Reunião de Alocação de Portfólio', categoria: 'Reunir', status: 'Pendente', data: '2026-07-24T09:00', prioridade: true } // Tarefa vencida intencionalmente
+            { id: '4', titulo: 'Reunião de Alocação de Portfólio', categoria: 'Reunir', status: 'Pendente', data: '2026-07-24T09:00', prioridade: true } 
         ];
 
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
@@ -226,7 +224,6 @@
             renderizarSelectCategorias(); renderizarListaConfigCategorias(); renderizarTarefas();
         }
 
-        // --- AUTENTICAÇÃO ---
         async function enviarCodigo() {
             const email = document.getElementById('email-input').value;
             if(!email) return alert('Digite um e-mail válido.');
@@ -248,63 +245,93 @@
         }
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- NOTÍCIAS ---
+        // --- SISTEMA DE NOTÍCIAS (TV CAROUSEL) ---
+        let noticiasGlobais = [];
+        let indiceNoticiaAtual = 0;
+        let loopNoticias;
+
         async function carregarNoticias() {
             const container = document.getElementById('news-container');
             try {
                 const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/');
                 const data = await response.json();
-                container.innerHTML = '';
-                data.items.slice(0, 8).forEach(item => {
-                    container.innerHTML += `<div class="news-card"><h4>${item.title}</h4><p>Fonte: InfoMoney | ${new Date(item.pubDate).toLocaleDateString('pt-BR')}</p></div>`;
+                
+                noticiasGlobais = data.items.map(item => {
+                    // Caça o link da imagem via Thumbnail ou no meio do HTML da descrição (Expressão Regular)
+                    let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
+                    if (!imgSrc) {
+                        const imgRegex = /<img[^>]+src="([^">]+)"/;
+                        const match = item.content.match(imgRegex) || item.description.match(imgRegex);
+                        if (match) imgSrc = match[1];
+                    }
+                    return {
+                        titulo: item.title,
+                        imagem: imgSrc,
+                        dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR')
+                    };
                 });
-            } catch (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar radar de notícias.</p>'; }
+
+                if (noticiasGlobais.length > 0) {
+                    indiceNoticiaAtual = 0;
+                    renderizarNoticiaSlide();
+                    
+                    // Limpa qualquer loop antigo preso na memória antes de iniciar o novo
+                    if(loopNoticias) clearInterval(loopNoticias);
+                    loopNoticias = setInterval(proximaNoticia, 15000); // 15 segundos
+                }
+            } catch (error) { 
+                container.innerHTML = '<p style="color:red;">Erro ao carregar radares. O portal pode estar bloqueando a requisição.</p>'; 
+            }
+        }
+
+        function renderizarNoticiaSlide() {
+            const container = document.getElementById('news-container');
+            const noticia = noticiasGlobais[indiceNoticiaAtual];
+            if(!noticia) return;
+
+            // Só monta a tag da imagem se a caça ao link (Regex) teve sucesso
+            const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem destaque">` : '';
+
+            container.innerHTML = `
+                <div class="news-slide">
+                    ${htmlImagem}
+                    <div class="news-title">${noticia.titulo}</div>
+                    <div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div>
+                </div>
+            `;
+        }
+
+        function proximaNoticia() {
+            indiceNoticiaAtual++;
+            if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0;
+            renderizarNoticiaSlide();
         }
 
         // --- MOTOR DE TAREFAS E FILTROS ---
         function definirFiltro(tipo) {
-            // Se clicar no botão que já está ativo, desliga ele (volta para TODAS)
-            if (filtroAtual === tipo) {
-                filtroAtual = 'TODAS';
-            } else {
-                filtroAtual = tipo;
-            }
-
-            // Atualiza visual dos botões
+            if (filtroAtual === tipo) filtroAtual = 'TODAS'; else filtroAtual = tipo;
             document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter'));
-            if(filtroAtual !== 'TODAS') {
-                document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter');
-            }
-
+            if(filtroAtual !== 'TODAS') document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter');
             renderizarTarefas();
         }
 
         function renderizarTarefas() {
-            const container = document.getElementById('tasks-container');
-            container.innerHTML = '';
-            
+            const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             let tarefasFiltradas = tarefasMock;
 
-            // Aplica a lógica do filtro ativo
-            if (filtroAtual === 'PRIORIDADES') {
-                tarefasFiltradas = tarefasMock.filter(t => t.prioridade === true);
-            } else if (filtroAtual === 'PENDENTES') {
-                tarefasFiltradas = tarefasMock.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
-            } else if (filtroAtual === 'VENCIDAS') {
-                tarefasFiltradas = tarefasMock.filter(t => new Date(t.data) < agora && t.status !== 'Concluido');
-            }
+            if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasMock.filter(t => t.prioridade === true);
+            else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasMock.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
+            else if (filtroAtual === 'VENCIDAS') tarefasFiltradas = tarefasMock.filter(t => new Date(t.data) < agora && t.status !== 'Concluido');
 
             if(tarefasFiltradas.length === 0) {
-                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`;
-                return;
+                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return;
             }
 
             tarefasFiltradas.forEach(t => {
                 const cor = (categorias.find(c => c.nome === t.categoria) || {}).cor || '#555';
                 const statusClass = t.status === 'Concluido' ? 'status-concluido' : (t.status === 'Em andamento' ? 'status-andamento' : 'status-pendente');
                 const dataFormatada = new Date(t.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                
                 const prioridadeHTML = t.prioridade ? `<span class="priority-icon">⭐</span>` : '';
                 const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
@@ -326,11 +353,8 @@
             });
         }
 
-        // --- CONTROLE DOS MODAIS ---
-        function fecharModais() {
-            document.getElementById('taskModal').style.display = 'none';
-            document.getElementById('configModal').style.display = 'none';
-        }
+        // --- CONTROLE DOS MODAIS E AÇÕES ---
+        function fecharModais() { document.getElementById('taskModal').style.display = 'none'; document.getElementById('configModal').style.display = 'none'; }
 
         function abrirModalTarefa(id = '', titulo = '', categoria = categorias[0]?.nome || '', status = 'Pendente', data = '', prioridade = false) {
             document.getElementById('taskModal').style.display = 'flex';
@@ -340,24 +364,18 @@
             document.getElementById('task-status').value = status;
             document.getElementById('task-date').value = data;
             document.getElementById('task-priority').checked = prioridade;
-            renderizarSelectCategorias();
-            document.getElementById('task-category-select').value = categoria;
+            renderizarSelectCategorias(); document.getElementById('task-category-select').value = categoria;
         }
 
         function salvarTarefa() {
-            const titulo = document.getElementById('task-title-input').value;
-            const data = document.getElementById('task-date').value;
+            const titulo = document.getElementById('task-title-input').value; const data = document.getElementById('task-date').value;
             if(!titulo || !data) return alert('Preencha o que precisa ser feito e a data.');
-            
-            alert('Lógica visual conectada! O estado Prioridade e Filtros funcionam perfeitamente. Falta apenas o Supabase BD.');
-            
-            // Para evitar a "armadilha do filtro", ao salvar algo novo, limpamos o filtro para o usuário ver a tarefa que criou.
-            if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual); // desliga o filtro
+            alert('Configuração visual ok. O próximo passo é rodar o script no Supabase.');
+            if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual); 
             fecharModais();
         }
 
         function abrirModalConfig() { document.getElementById('configModal').style.display = 'flex'; renderizarListaConfigCategorias(); }
-        
         function renderizarListaConfigCategorias() {
             const list = document.getElementById('categories-list'); list.innerHTML = '';
             categorias.forEach(cat => {
@@ -398,8 +416,8 @@
             categorias = categorias.filter(c => c.id !== id); salvarCategoriasLocais();
         }
 
-        function adiarTarefa(id) { alert('Lógica de adiar +10min aguardando banco de dados.'); }
-        function concluirTarefaVisual(id) { alert('Marcado como concluído (Aguardando BD).'); document.getElementById('task-'+id).style.opacity = '0.4'; }
+        function adiarTarefa(id) { alert('Aguardando BD.'); }
+        function concluirTarefaVisual(id) { alert('Aguardando BD.'); }
         function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
 
         checarSessao();
