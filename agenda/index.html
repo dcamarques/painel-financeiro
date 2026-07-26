@@ -1,1 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agenda | Boonus</title>
+    <!-- Importando o Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --primary: #4CAF50;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        input {
+            width: 90%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #painel { display: none; }
+    </style>
+</head>
+<body>
 
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="login-container">
+        <h2>Acesso à Agenda</h2>
+        <p>Digite seu e-mail para receber o código de acesso.</p>
+        <input type="email" id="email-input" placeholder="seu@email.com">
+        <button onclick="enviarCodigo()">Enviar Código</button>
+    </div>
+
+    <!-- TELA DO PAINEL (Oculta até logar) -->
+    <div id="painel" style="width: 100%; height: 100%;">
+        <h1>Bem-vindo à Agenda Boonus</h1>
+        <button onclick="fazerLogout()" style="width: auto; background: red;">Sair</button>
+        <!-- A estrutura de grid que desenhamos entrará aqui -->
+    </div>
+
+    <script>
+        // Chaves do Supabase injetadas
+        const SUPABASE_URL = 'https://kafmnasrqcmbzvzaggap.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Função para disparar o e-mail (Magic Link / OTP)
+        async function enviarCodigo() {
+            const email = document.getElementById('email-input').value;
+            if(!email) return alert('Digite um e-mail válido.');
+
+            const { data, error } = await supabase.auth.signInWithOtp({
+                email: email,
+                options: {
+                    // Após validar o e-mail, redireciona para a mesma página
+                    emailRedirectTo: window.location.href 
+                }
+            });
+
+            if (error) {
+                alert('Erro ao enviar: ' + error.message);
+            } else {
+                alert('Código enviado! Verifique sua caixa de entrada.');
+            }
+        }
+
+        // Verifica se o usuário já está logado ao abrir a página
+        async function checarSessao() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // Se estiver logado, esconde o login e mostra o painel
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('painel').style.display = 'block';
+            }
+        }
+
+        async function fazerLogout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        checarSessao();
+    </script>
+</body>
+</html>
