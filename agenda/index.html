@@ -11,17 +11,28 @@
             --bg-color: #000000;
             --text-color: #ffffff;
             --primary: #4CAF50;
+            --btn-dark: #222222;
         }
+        
+        * { box-sizing: border-box; }
+        
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* Evita barra de rolagem geral */
+        }
+
+        /* --- TELA DE LOGIN --- */
+        .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            width: 100vw;
         }
         .login-container {
             background: #1e1e1e;
@@ -31,7 +42,7 @@
             width: 100%;
             max-width: 400px;
         }
-        input {
+        .login-container input {
             width: 90%;
             padding: 15px;
             margin: 10px 0;
@@ -41,7 +52,7 @@
             color: white;
             font-size: 16px;
         }
-        button {
+        .login-container button {
             width: 100%;
             padding: 15px;
             background: var(--primary);
@@ -53,43 +64,146 @@
             font-weight: bold;
             transition: opacity 0.3s ease;
         }
-        button:disabled {
-            cursor: not-allowed;
+        .login-container button:disabled { cursor: not-allowed; }
+
+        /* --- DASHBOARD (Oculto até logar) --- */
+        #painel {
+            display: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        #painel { display: none; }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 2px solid var(--primary);
+            background-color: var(--bg-color);
+        }
+        .header-left, .header-right, .header-center {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-btn {
+            background: var(--btn-dark);
+            color: white;
+            border: 1px solid #444;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .nav-btn:hover { background: #333; }
+        .header-center h3 { margin: 0; padding: 0 15px; }
+
+        /* CORPO (Grid) */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .news-panel {
+            width: 60%;
+            padding: 20px;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .news-panel h2 { margin-top: 0; font-weight: normal; }
+        
+        .tasks-panel {
+            width: 40%;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* RESPONSIVIDADE (Celular) */
+        @media (max-width: 768px) {
+            .news-panel { display: none; /* Esconde notícias no mobile */ }
+            .tasks-panel { width: 100%; }
+            .header { flex-direction: column; gap: 15px; }
+            .header-center { order: -1; } /* Data sobe no mobile */
+        }
     </style>
 </head>
 <body>
 
     <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="login-container">
-        <h2>Acesso à Agenda</h2>
-        <p>Digite seu e-mail para receber o código de acesso.</p>
-        <input type="email" id="email-input" placeholder="seu@email.com">
-        <button onclick="enviarCodigo()">Enviar Código</button>
+    <div id="login-wrapper" class="login-wrapper">
+        <div id="login-screen" class="login-container">
+            <h2>Acesso à Agenda</h2>
+            <p>Digite seu e-mail para receber o código de acesso.</p>
+            <input type="email" id="email-input" placeholder="seu@email.com">
+            <button onclick="enviarCodigo()">Enviar Código</button>
+        </div>
     </div>
 
-    <!-- TELA DO PAINEL (Oculta até logar) -->
-    <div id="painel" style="width: 100%; height: 100%;">
-        <h1>Bem-vindo à Agenda Boonus</h1>
-        <button onclick="fazerLogout()" style="width: auto; background: red; padding: 10px 20px;">Sair</button>
-        <!-- A estrutura de grid que desenhamos entrará aqui -->
+    <!-- TELA DO PAINEL -->
+    <div id="painel" style="display: none;">
+        
+        <!-- BARRA SUPERIOR -->
+        <div class="header">
+            <div class="header-left">
+                <button class="nav-btn">VENCIDAS</button>
+                <button class="nav-btn">PENDENTES</button>
+                <button class="nav-btn">PRIORIDADES</button>
+            </div>
+            <div class="header-center">
+                <button class="nav-btn">&lt;</button>
+                <h3>HOJE, 26 DE JULHO</h3>
+                <button class="nav-btn">&gt;</button>
+            </div>
+            <div class="header-right">
+                <!-- Botão de Sair embutido no menu -->
+                <button class="nav-btn" onclick="toggleFullScreen()">[ ] TELA CHEIA</button>
+                <button class="nav-btn" style="background: darkred;" onclick="fazerLogout()">SAIR</button>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="main-content">
+            <!-- ESQUERDA: NOTÍCIAS -->
+            <div class="news-panel">
+                <h2>RADAR DE NOTÍCIAS</h2>
+                <div style="width: 100%; height: 300px; background: #1a1a1a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #555;">
+                    [ O feed de notícias aparecerá aqui ]
+                </div>
+            </div>
+
+            <!-- DIREITA: TAREFAS -->
+            <div class="tasks-panel">
+                <div style="width: 100%; height: 80px; background: #2a2a2a; border-radius: 10px; border-left: 10px solid red; display: flex; align-items: center; padding: 10px;">
+                    [ Exemplo de Tarefa - LIGAR ]
+                </div>
+                <div style="width: 100%; height: 80px; background: #2a2a2a; border-radius: 10px; border-left: 10px solid #ffcc00; display: flex; align-items: center; padding: 10px;">
+                    [ Exemplo de Tarefa - APLICAR ]
+                </div>
+                <div style="width: 100%; height: 80px; background: #2a2a2a; border-radius: 10px; border-left: 10px solid #4CAF50; display: flex; align-items: center; padding: 10px;">
+                    [ Exemplo de Tarefa - REALOCAR ]
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Chaves do Supabase injetadas
         const SUPABASE_URL = 'https://kafmnasrqcmbzvzaggap.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
-
-        // CORREÇÃO: Usando window.supabase para evitar conflito de nomes e travamento
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Função para disparar o e-mail (Magic Link / OTP)
         async function enviarCodigo() {
             const email = document.getElementById('email-input').value;
             if(!email) return alert('Digite um e-mail válido.');
 
-            // Feedback visual de carregamento
             const btn = document.querySelector('#login-screen button');
             const textoOriginal = btn.innerText;
             btn.innerText = 'Enviando...';
@@ -98,13 +212,9 @@
 
             const { data, error } = await supabaseClient.auth.signInWithOtp({
                 email: email,
-                options: {
-                    // Após validar o e-mail, redireciona para a mesma página
-                    emailRedirectTo: window.location.href 
-                }
+                options: { emailRedirectTo: window.location.href }
             });
 
-            // Retorna o botão ao normal após a resposta do servidor
             btn.innerText = textoOriginal;
             btn.disabled = false;
             btn.style.opacity = '1';
@@ -112,17 +222,15 @@
             if (error) {
                 alert('Erro ao enviar: ' + error.message);
             } else {
-                alert('Código enviado! Verifique sua caixa de entrada e a pasta de spam.');
+                alert('Código enviado! Verifique sua caixa de entrada.');
             }
         }
 
-        // Verifica se o usuário já está logado ao abrir a página
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                // Se estiver logado, esconde o login e mostra o painel
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('painel').style.display = 'block';
+                document.getElementById('login-wrapper').style.display = 'none';
+                document.getElementById('painel').style.display = 'flex'; // Usando flex para manter o layout
             }
         }
 
@@ -131,7 +239,17 @@
             window.location.reload();
         }
 
-        // Executa a verificação assim que a página é carregada
+        // Função nativa para tela cheia (tablet/desktop)
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Erro ao tentar tela cheia: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
         checarSessao();
     </script>
 </body>
