@@ -1,1 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boonus | Admin Control</title>
+    
+    <!-- Supabase e Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root { --bg-color: #050505; --panel-bg: #111111; --text-color: #ffffff; --primary: #00BCD4; --card-bg: #1a1a1a; }
+        * { box-sizing: border-box; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
 
+        /* --- LOGIN --- */
+        .login-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
+        .login-container { background: var(--panel-bg); padding: 40px; border-radius: 10px; text-align: center; width: 100%; max-width: 400px; border: 1px solid #333; }
+        .login-container input { width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 5px; background: #222; color: white; font-size: 16px; }
+        .login-container button { width: 100%; padding: 15px; background: var(--primary); color: #000; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; }
+
+        /* --- DASHBOARD ADMIN --- */
+        #admin-panel { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; color: var(--primary); font-size: 24px; letter-spacing: 2px; }
+        .btn-logout { background: darkred; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* --- KPIs --- */
+        .kpi-row { display: flex; gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: var(--card-bg); flex: 1; padding: 25px; border-radius: 10px; border-left: 5px solid var(--primary); }
+        .kpi-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #aaa; text-transform: uppercase; }
+        .kpi-card .value { font-size: 36px; font-weight: bold; margin: 0; }
+
+        /* --- GRÁFICO E TABELA --- */
+        .content-row { display: flex; flex-direction: column; gap: 30px; }
+        .chart-container { background: var(--card-bg); padding: 20px; border-radius: 10px; height: 400px; }
+        
+        .table-container { background: var(--card-bg); padding: 20px; border-radius: 10px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px; border-bottom: 1px solid #333; }
+        th { color: #aaa; font-weight: normal; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        tr:hover { background: #222; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-active { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+        .status-expired { background: rgba(244, 67, 54, 0.2); color: #F44336; }
+        
+        .btn-edit { background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .btn-edit:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        /* --- MODAL DE EDIÇÃO --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--panel-bg); padding: 30px; border-radius: 10px; width: 400px; border: 1px solid #333; }
+        .modal-content h3 { margin-top: 0; color: var(--primary); }
+        .modal-content label { display: block; margin-top: 20px; font-size: 14px; color: #aaa; }
+        .modal-content input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; }
+        .btn-save { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-cancel { background: transparent; color: white; border: 1px solid #555; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-wrapper" class="login-wrapper">
+        <div class="login-container">
+            <h2 style="color: var(--primary); letter-spacing: 2px;">BOONUS ADMIN</h2>
+            <p style="color: #aaa;">Controle Central de Usuários</p>
+            <input type="email" id="email-input" placeholder="e-mail administrador">
+            <button id="btn-login" onclick="enviarCodigo()">Acessar Backoffice</button>
+        </div>
+    </div>
+
+    <!-- PAINEL -->
+    <div id="admin-panel">
+        <div class="header">
+            <h1>BOONUS | BACKOFFICE</h1>
+            <button class="btn-logout" onclick="fazerLogout()">Encerrar Sessão</button>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <h3>Total de Usuários Cadastrados</h3>
+                <p class="value" id="kpi-total">0</p>
+            </div>
+            <div class="kpi-card" style="border-left-color: #4CAF50;">
+                <h3>Assinaturas Ativas</h3>
+                <p class="value" id="kpi-ativos" style="color: #4CAF50;">0</p>
+            </div>
+            <div class="kpi-card" style="border-left-color: #F44336;">
+                <h3>Assinaturas Expiradas</h3>
+                <p class="value" id="kpi-expirados" style="color: #F44336;">0</p>
+            </div>
+        </div>
+
+        <div class="content-row">
+            <!-- GRÁFICO -->
+            <div class="chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+
+            <!-- TABELA DE USUÁRIOS -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>E-mail do Cliente</th>
+                            <th>Data de Cadastro</th>
+                            <th>Vencimento da Assinatura</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RENOVAÇÃO -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <h3>Atualizar Assinatura</h3>
+            <p id="modal-user-email" style="color: #fff; font-weight: bold;"></p>
+            <input type="hidden" id="modal-user-id">
+            
+            <label>Nova Data de Vencimento</label>
+            <input type="date" id="modal-new-date">
+            
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-save" id="btn-salvar-data" onclick="salvarNovaData()">Confirmar Renovação</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://kafmnasrqcmbzvzaggap.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_k4w2E4ur7xJR6qd575inBA_sJoXqHoN';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let chartInstance = null;
+        let perfisGlobais = [];
+
+        // --- AUTENTICAÇÃO E VERIFICAÇÃO DE ADMIN ---
+        async function enviarCodigo() {
+            const email = document.getElementById('email-input').value;
+            if(!email) return alert('Digite o e-mail.');
+            const btn = document.getElementById('btn-login');
+            btn.innerText = 'Enviando...'; btn.disabled = true;
+
+            const { error } = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } });
+            btn.innerText = 'Acessar Backoffice'; btn.disabled = false;
+            if (error) alert('Erro: ' + error.message); else alert('Código enviado para o seu e-mail!');
+        }
+
+        async function checarSessao() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const userId = session.user.id;
+                
+                // Verifica se o usuário tem a Chave Mestra (is_admin = true)
+                const { data: perfil } = await supabaseClient.from('perfis').select('is_admin').eq('id_usuario', userId).single();
+                
+                if (perfil && perfil.is_admin === true) {
+                    document.getElementById('login-wrapper').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'block';
+                    carregarDadosBackoffice();
+                } else {
+                    alert('⛔ ACESSO NEGADO. Você não tem permissões de Administrador.');
+                    await supabaseClient.auth.signOut();
+                }
+            }
+        }
+        
+        async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
+
+        // --- MOTOR DO BACKOFFICE ---
+        async function carregarDadosBackoffice() {
+            // Como o admin tem a RLS liberada, ele consegue puxar todos os perfis da base
+            const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
+            if (error) { console.error('Erro ao carregar dados:', error); return; }
+            
+            perfisGlobais = data;
+            
+            calcularKPIs();
+            renderizarTabela();
+            gerarGrafico();
+        }
+
+        function calcularKPIs() {
+            const agora = new Date();
+            let ativos = 0;
+            let expirados = 0;
+
+            perfisGlobais.forEach(p => {
+                if (new Date(p.data_vencimento) > agora) ativos++; else expirados++;
+            });
+
+            document.getElementById('kpi-total').innerText = perfisGlobais.length;
+            document.getElementById('kpi-ativos').innerText = ativos;
+            document.getElementById('kpi-expirados').innerText = expirados;
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            const agora = new Date();
+
+            perfisGlobais.forEach(p => {
+                const dataCadastro = new Date(p.criado_em).toLocaleDateString('pt-BR');
+                const dataVenc = new Date(p.data_vencimento).toLocaleDateString('pt-BR');
+                
+                const isAtivo = new Date(p.data_vencimento) > agora;
+                const statusHtml = isAtivo 
+                    ? `<span class="status-badge status-active">Ativo</span>` 
+                    : `<span class="status-badge status-expired">Expirado</span>`;
+
+                // Formato exigido pelo input type="date" (YYYY-MM-DD)
+                const dataInputFormat = new Date(p.data_vencimento).toISOString().split('T')[0];
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: bold;">${p.email}</td>
+                        <td>${dataCadastro}</td>
+                        <td>${dataVenc}</td>
+                        <td>${statusHtml}</td>
+                        <td>
+                            <button class="btn-edit" onclick="abrirModal('${p.id_usuario}', '${p.email}', '${dataInputFormat}')">
+                                Atualizar Data
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- GRÁFICO (Últimos 12 Meses) ---
+        function gerarGrafico() {
+            // Agrupa os cadastros (criado_em) por Mês/Ano
+            const contagemMeses = {};
+            const mesesAbreviados = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            
+            // Gera os últimos 12 meses para o eixo X, mesmo que tenham valor 0
+            const labels = [];
+            const dados = [];
+            const hoje = new Date();
+            
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const chave = `${d.getFullYear()}-${d.getMonth()}`;
+                contagemMeses[chave] = 0;
+                labels.push(`${mesesAbreviados[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`);
+            }
+
+            perfisGlobais.forEach(p => {
+                const d = new Date(p.criado_em);
+                const chave = `${d.getFullYear()}-${d.getMonth()}`;
+                if (contagemMeses[chave] !== undefined) {
+                    contagemMeses[chave]++;
+                }
+            });
+
+            for (const key in contagemMeses) dados.push(contagemMeses[key]);
+
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if(chartInstance) chartInstance.destroy(); // Limpa gráfico antigo se houver recarregamento
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Novos Usuários',
+                        data: dados,
+                        backgroundColor: '#00BCD4',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#333' }, ticks: { stepSize: 1, color: '#aaa' } },
+                        x: { grid: { display: false }, ticks: { color: '#aaa' } }
+                    }
+                }
+            });
+        }
+
+        // --- CONTROLE DO MODAL DE EDIÇÃO ---
+        function abrirModal(id_usuario, email, dataAtualIso) {
+            document.getElementById('editModal').style.display = 'flex';
+            document.getElementById('modal-user-id').value = id_usuario;
+            document.getElementById('modal-user-email').innerText = email;
+            document.getElementById('modal-new-date').value = dataAtualIso;
+        }
+
+        function fecharModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function salvarNovaData() {
+            const id = document.getElementById('modal-user-id').value;
+            const novaDataInput = document.getElementById('modal-new-date').value;
+            
+            if(!novaDataInput) return alert('Selecione uma data válida.');
+
+            // Ajusta o fuso horário para salvar no final do dia (23:59:59)
+            const dataObj = new Date(novaDataInput);
+            dataObj.setHours(23, 59, 59);
+            const dataIsoFinal = dataObj.toISOString();
+
+            const btn = document.getElementById('btn-salvar-data');
+            btn.innerText = 'Salvando...';
+
+            const { error } = await supabaseClient.from('perfis').update({ data_vencimento: dataIsoFinal }).eq('id_usuario', id);
+            
+            btn.innerText = 'Confirmar Renovação';
+
+            if (error) {
+                alert('Erro ao atualizar: ' + error.message);
+            } else {
+                fecharModal();
+                await carregarDadosBackoffice(); // Recarrega os dados e a tabela atualizada
+            }
+        }
+
+        checarSessao();
+    </script>
+</body>
+</html>
