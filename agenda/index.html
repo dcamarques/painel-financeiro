@@ -28,25 +28,41 @@
 
         .btn-action { background: #0078D7; }
         .btn-action:hover { background: #005A9E; }
-        
         .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase; cursor: pointer; transition: color 0.2s;}
         .header-center h3:hover { color: var(--primary); }
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        /* NOTÍCIAS */
-        .news-panel { width: 60%; padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; }
-        .news-panel h2 { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px;}
+        /* PAINEL ESQUERDO (Notícias ou Alertas) */
+        .left-panel { width: 60%; padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        #left-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px; transition: color 0.3s; }
+        
         #news-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .news-slide { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeIn 1s ease-in-out; }
         .news-image { max-width: 100%; max-height: 40vh; border-radius: 12px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
         .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
 
+        /* CARD GIGANTE (Alerta) */
+        #alert-container { display: none; flex: 1; flex-direction: column; justify-content: center; align-items: center; animation: pulseRed 2s infinite; }
+        .giant-card { background: #F44336; width: 80%; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 30px rgba(244, 67, 54, 0.4); }
+        .giant-time { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
+        .giant-title { font-size: 3em; font-weight: bold; margin-bottom: 40px; line-height: 1.2; text-transform: uppercase; }
+        .giant-actions { display: flex; gap: 20px; justify-content: center; }
+        .giant-btn { padding: 20px 40px; font-size: 1.5em; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+        .btn-concluir-gigante { background: white; color: #F44336; }
+        .btn-adiar-gigante { background: #222; color: white; border: 2px solid white; }
+
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } 50% { box-shadow: inset 0 0 50px rgba(244, 67, 54, 0.2); } 100% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } }
 
         /* TAREFAS */
-        .tasks-panel { width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .tasks-panel { 
+            width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; 
+            -ms-overflow-style: none; scrollbar-width: none; /* Esconde scrollbar Firefox/IE */
+        }
+        .tasks-panel::-webkit-scrollbar { display: none; } /* Esconde scrollbar Chrome/Safari */
+
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
@@ -80,7 +96,7 @@
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
         @media (max-width: 768px) {
-            .news-panel { display: none; }
+            .left-panel { display: none; }
             .tasks-panel { width: 100%; }
             .header { flex-direction: column; gap: 15px; }
             .header-center { order: -1; }
@@ -119,10 +135,25 @@
         </div>
 
         <div class="main-content">
-            <div class="news-panel">
-                <h2>RADAR DE NOTÍCIAS</h2>
+            <div class="left-panel" id="left-panel">
+                <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
+                
+                <!-- CARROSSEL DE NOTÍCIAS -->
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
+                
+                <!-- CARD GIGANTE (Alerta de Tarefa) -->
+                <div id="alert-container">
+                    <div class="giant-card" id="giant-card">
+                        <div class="giant-time" id="giant-time">11:00</div>
+                        <div class="giant-title" id="giant-title">LIGAR PARA FULANO</div>
+                        <div class="giant-actions">
+                            <button class="giant-btn btn-adiar-gigante" onclick="adiarTarefaGigante()">⏰ +10 MIN ADIAR</button>
+                            <button class="giant-btn btn-concluir-gigante" onclick="concluirTarefaGigante()">✓ CONCLUIR</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="tasks-panel" id="tasks-container">
                 <!-- Renderizado via JavaScript -->
             </div>
@@ -191,29 +222,18 @@
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         
-        // MOTOR DE NAVEGAÇÃO DE DATAS
+        // NAVEGAÇÃO DE DATAS
         let dataPointer = new Date();
-
         function atualizarDisplayData() {
             const hoje = new Date();
-            const isHoje = dataPointer.getDate() === hoje.getDate() && 
-                           dataPointer.getMonth() === hoje.getMonth() && 
-                           dataPointer.getFullYear() === hoje.getFullYear();
-            
+            const isHoje = dataPointer.getDate() === hoje.getDate() && dataPointer.getMonth() === hoje.getMonth() && dataPointer.getFullYear() === hoje.getFullYear();
             const opcoes = { day: 'numeric', month: 'long', year: isHoje ? undefined : 'numeric' };
             const textoData = dataPointer.toLocaleDateString('pt-BR', opcoes).toUpperCase();
-            
             document.getElementById('display-data').innerText = isHoje ? `HOJE, ${textoData}` : textoData;
         }
-
         function mudarData(acao) {
-            if (acao === 'hoje') {
-                dataPointer = new Date();
-            } else {
-                dataPointer.setDate(dataPointer.getDate() + acao);
-            }
-            atualizarDisplayData();
-            renderizarTarefas();
+            if (acao === 'hoje') dataPointer = new Date(); else dataPointer.setDate(dataPointer.getDate() + acao);
+            atualizarDisplayData(); renderizarTarefas();
         }
 
         // --- AUTENTICAÇÃO ---
@@ -240,15 +260,91 @@
                 carregarNoticias(); 
                 await carregarCategoriasDB();
                 await carregarTarefasDB(); 
+                
+                // Liga o Motor de Alertas (A cada 30 segundos)
+                setInterval(motorDeAlertas, 30000);
             }
         }
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- INTEGRAÇÃO SUPABASE: CATEGORIAS ---
+        // --- MOTOR DE ALERTAS (CARD GIGANTE) ---
+        let tarefaAlertaAtual = null;
+
+        function motorDeAlertas() {
+            const agora = new Date();
+            
+            // Procura tarefas que já venceram e NÃO estão concluídas
+            const tarefasAtrasadas = tarefasGlobais.filter(t => {
+                if(t.status === 'Concluido') return false;
+                const d = new Date(t.data_agendamento);
+                return d <= agora;
+            }).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); // A mais velha primeiro
+
+            if(tarefasAtrasadas.length > 0) {
+                const proximaAlerta = tarefasAtrasadas[0];
+                // Se já estiver mostrando a mesma, não refaz
+                if(!tarefaAlertaAtual || tarefaAlertaAtual.id !== proximaAlerta.id) {
+                    dispararAlertaGigante(proximaAlerta);
+                }
+            } else {
+                desligarAlertaGigante();
+            }
+        }
+
+        function dispararAlertaGigante(tarefa) {
+            tarefaAlertaAtual = tarefa;
+            
+            // Pausa notícias
+            document.getElementById('news-container').style.display = 'none';
+            document.getElementById('alert-container').style.display = 'flex';
+            
+            const tituloPanel = document.getElementById('left-panel-title');
+            tituloPanel.innerText = '⚠️ ATENÇÃO À AGENDA ⚠️';
+            tituloPanel.style.color = '#F44336';
+            tituloPanel.style.fontWeight = 'bold';
+
+            // Pinta o Card com a cor da categoria
+            const cor = (categoriasGlobais.find(c => c.nome === tarefa.categoria) || {}).cor || '#F44336';
+            document.getElementById('giant-card').style.backgroundColor = cor;
+            document.getElementById('giant-title').innerText = tarefa.titulo;
+            
+            const hora = new Date(tarefa.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            document.getElementById('giant-time').innerText = `${tarefa.categoria.toUpperCase()} | ${hora}`;
+        }
+
+        function desligarAlertaGigante() {
+            tarefaAlertaAtual = null;
+            document.getElementById('alert-container').style.display = 'none';
+            document.getElementById('news-container').style.display = 'flex';
+            
+            const tituloPanel = document.getElementById('left-panel-title');
+            tituloPanel.innerText = 'RADAR DE NOTÍCIAS';
+            tituloPanel.style.color = 'white';
+            tituloPanel.style.fontWeight = 'normal';
+        }
+
+        // Ações do Card Gigante
+        async function concluirTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            const btn = document.querySelector('.btn-concluir-gigante'); btn.innerText = '...';
+            await concluirTarefaDB(tarefaAlertaAtual.id);
+            btn.innerText = '✓ CONCLUIR';
+            motorDeAlertas(); // Recalcula a fila imediatamente
+        }
+
+        async function adiarTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            const btn = document.querySelector('.btn-adiar-gigante'); btn.innerText = '...';
+            await adiarTarefaDB(tarefaAlertaAtual.id, tarefaAlertaAtual.data_agendamento);
+            btn.innerText = '⏰ +10 MIN ADIAR';
+            motorDeAlertas(); // Recalcula a fila imediatamente
+        }
+
+
+        // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
         async function carregarCategoriasDB() {
             const { data, error } = await supabaseClient.from('categorias').select('*').order('criado_em', { ascending: true });
             if (error) { console.error('Erro ao buscar categorias:', error); return; }
-            
             if (data.length === 0) {
                 const catPadrao = [{ id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' }, { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }];
                 await supabaseClient.from('categorias').insert(catPadrao);
@@ -265,8 +361,7 @@
             document.getElementById('btn-add-cat').innerText = 'Salvando...';
             const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, nome, cor }]);
             document.getElementById('btn-add-cat').innerText = 'Adicionar';
-            if(error) alert('Erro ao salvar: ' + error.message);
-            else { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); renderizarTarefas(); }
+            if(error) alert('Erro ao salvar: ' + error.message); else { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); renderizarTarefas(); }
         }
 
         async function removerCategoriaDB(id) {
@@ -276,14 +371,13 @@
             if(error) alert('Erro ao excluir: ' + error.message); else { await carregarCategoriasDB(); renderizarTarefas(); }
         }
 
-        // --- INTEGRAÇÃO SUPABASE: TAREFAS ---
         async function carregarTarefasDB() {
             const container = document.getElementById('tasks-container');
-            container.innerHTML = '<p style="text-align:center; color:#777;">Sincronizando tarefas...</p>';
             const { data, error } = await supabaseClient.from('tarefas').select('*').order('data_agendamento', { ascending: true });
             if (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar tarefas.</p>'; return; }
             tarefasGlobais = data;
             renderizarTarefas();
+            motorDeAlertas(); // Verifica se há alertas pendentes logo ao carregar
         }
 
         async function salvarTarefaDB() {
@@ -298,67 +392,51 @@
             const dataIso = new Date(dataInput).toISOString();
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvando...';
             
-            let erroDB = null;
-            if (id) {
-                const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id); erroDB = error;
-            } else {
-                const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, titulo, categoria, status, data_agendamento: dataIso, prioridade }]); erroDB = error;
-            }
-            document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
+            if (id) await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id);
+            else await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
             
-            if(erroDB) alert('Erro ao salvar tarefa: ' + erroDB.message);
-            else { 
-                if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual);
-                fecharModais(); await carregarTarefasDB(); 
-            }
+            document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
+            fecharModais(); await carregarTarefasDB(); 
         }
 
         async function excluirTarefa() {
             const id = document.getElementById('task-id').value; if(!id) return;
-            if(!confirm('Tem certeza que deseja apagar esta tarefa definitivamente?')) return;
+            if(!confirm('Tem certeza que deseja apagar?')) return;
             document.getElementById('btn-excluir-tarefa').innerText = 'Excluindo...';
-            const { error } = await supabaseClient.from('tarefas').delete().eq('id', id);
-            if(error) alert('Erro ao apagar: ' + error.message); else { fecharModais(); await carregarTarefasDB(); }
+            await supabaseClient.from('tarefas').delete().eq('id', id);
+            fecharModais(); await carregarTarefasDB(); 
         }
 
         async function concluirTarefaDB(id) {
             document.getElementById('task-'+id).style.opacity = '0.3';
-            const { error } = await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id);
-            if(error) { alert('Erro ao concluir.'); await carregarTarefasDB(); } else { await carregarTarefasDB(); }
+            await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id);
+            await carregarTarefasDB(); 
         }
 
         async function adiarTarefaDB(id, dataAtualBanco) {
             document.getElementById('task-'+id).style.opacity = '0.5';
             const dataObj = new Date(dataAtualBanco); dataObj.setMinutes(dataObj.getMinutes() + 10);
-            const { error } = await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id);
-            if(error) { alert('Erro ao adiar.'); await carregarTarefasDB(); } else { await carregarTarefasDB(); }
+            await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id);
+            await carregarTarefasDB(); 
         }
 
-        // --- MOTOR DE FILTRAGEM (Vencidas Global vs. Dia Específico) ---
         function renderizarTarefas() {
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             let tarefasFiltradas = tarefasGlobais;
 
             if (filtroAtual === 'VENCIDAS') {
-                // Comportamento Global: Ignora a data do ponteiro e varre a base inteira atrás de pendências
                 tarefasFiltradas = tarefasGlobais.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
             } else {
-                // Filtra estritamente pelo dia do ponteiro atual (< e >)
                 tarefasFiltradas = tarefasGlobais.filter(t => {
                     const d = new Date(t.data_agendamento);
-                    return d.getDate() === dataPointer.getDate() && 
-                           d.getMonth() === dataPointer.getMonth() && 
-                           d.getFullYear() === dataPointer.getFullYear();
+                    return d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
                 });
-
                 if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasFiltradas.filter(t => t.prioridade === true);
                 else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasFiltradas.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
             }
 
-            if(tarefasFiltradas.length === 0) {
-                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro/data.</div>`; return;
-            }
+            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Agenda limpa.</div>`; return; }
 
             tarefasFiltradas.forEach(t => {
                 const cor = (categoriasGlobais.find(c => c.nome === t.categoria) || {}).cor || '#555';
@@ -369,11 +447,7 @@
 
                 container.innerHTML += `
                     <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
-                        <div class="task-header">
-                            <span class="task-cat-name" style="color: ${cor};">${prioridadeHTML} ${t.categoria.toUpperCase()}</span>
-                            <strong>${dataFormatada}</strong>
-                            <span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span>
-                        </div>
+                        <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${prioridadeHTML} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
                         <div class="task-title">${t.titulo}</div>
                         <div class="task-actions">
                             <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade})">✎ Editar</button>
@@ -388,17 +462,12 @@
         // --- SISTEMA DE NOTÍCIAS (TV CAROUSEL) ---
         let noticiasGlobais = []; let indiceNoticiaAtual = 0; let loopNoticias;
         async function carregarNoticias() {
-            const container = document.getElementById('news-container');
             try {
                 const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/');
                 const data = await response.json();
                 noticiasGlobais = data.items.map(item => {
                     let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
-                    if (!imgSrc) {
-                        const imgRegex = /<img[^>]+src="([^">]+)"/;
-                        const match = item.content.match(imgRegex) || item.description.match(imgRegex);
-                        if (match) imgSrc = match[1];
-                    }
+                    if (!imgSrc) { const match = item.content.match(/<img[^>]+src="([^">]+)"/) || item.description.match(/<img[^>]+src="([^">]+)"/); if (match) imgSrc = match[1]; }
                     return { titulo: item.title, imagem: imgSrc, dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR') };
                 });
                 if (noticiasGlobais.length > 0) {
@@ -406,14 +475,15 @@
                     if(loopNoticias) clearInterval(loopNoticias);
                     loopNoticias = setInterval(proximaNoticia, 15000);
                 }
-            } catch (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar radares.</p>'; }
+            } catch (error) { document.getElementById('news-container').innerHTML = '<p style="color:red;">Erro ao carregar radares.</p>'; }
         }
         function renderizarNoticiaSlide() {
+            if(tarefaAlertaAtual) return; // Se o alerta estiver na tela, congela a renderização de notícias
             const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
             const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem destaque">` : '';
             container.innerHTML = `<div class="news-slide">${htmlImagem}<div class="news-title">${noticia.titulo}</div><div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div></div>`;
         }
-        function proximaNoticia() { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); }
+        function proximaNoticia() { if(!tarefaAlertaAtual) { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); } }
 
         // --- UI AUXILIAR ---
         function definirFiltro(tipo) { if (filtroAtual === tipo) filtroAtual = 'TODAS'; else filtroAtual = tipo; document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter')); if(filtroAtual !== 'TODAS') document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); renderizarTarefas(); }
@@ -421,10 +491,7 @@
         
         function formatarDataParaInputHTML(dataIsoString) {
             if(!dataIsoString) {
-                // Ao criar tarefa nova, preenche com a data do ponteiro atual e hora zerada (opcional) ou atual
-                const agora = new Date();
-                const d = new Date(dataPointer);
-                d.setHours(agora.getHours(), agora.getMinutes());
+                const agora = new Date(); const d = new Date(dataPointer); d.setHours(agora.getHours(), agora.getMinutes());
                 return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
             }
             const data = new Date(dataIsoString);
