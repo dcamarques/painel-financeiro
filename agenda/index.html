@@ -49,9 +49,11 @@
         .giant-time { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
         .giant-title { font-size: 3em; font-weight: bold; margin-bottom: 40px; line-height: 1.2; text-transform: uppercase; }
         .giant-actions { display: flex; gap: 20px; justify-content: center; }
-        .giant-btn { padding: 20px 40px; font-size: 1.5em; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+        .giant-btn { padding: 15px 30px; font-size: 1.2em; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s;}
+        .giant-btn:hover { transform: scale(1.05); }
         .btn-concluir-gigante { background: white; color: #F44336; }
         .btn-adiar-gigante { background: #222; color: white; border: 2px solid white; }
+        .btn-editar-gigante { background: #444; color: white; }
 
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes pulseRed { 0% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } 50% { box-shadow: inset 0 0 50px rgba(244, 67, 54, 0.2); } 100% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } }
@@ -59,9 +61,9 @@
         /* TAREFAS */
         .tasks-panel { 
             width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; 
-            -ms-overflow-style: none; scrollbar-width: none; /* Esconde scrollbar Firefox/IE */
+            -ms-overflow-style: none; scrollbar-width: none; 
         }
-        .tasks-panel::-webkit-scrollbar { display: none; } /* Esconde scrollbar Chrome/Safari */
+        .tasks-panel::-webkit-scrollbar { display: none; } 
 
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
@@ -138,15 +140,14 @@
             <div class="left-panel" id="left-panel">
                 <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
                 
-                <!-- CARROSSEL DE NOTÍCIAS -->
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
                 
-                <!-- CARD GIGANTE (Alerta de Tarefa) -->
                 <div id="alert-container">
                     <div class="giant-card" id="giant-card">
                         <div class="giant-time" id="giant-time">11:00</div>
                         <div class="giant-title" id="giant-title">LIGAR PARA FULANO</div>
                         <div class="giant-actions">
+                            <button class="giant-btn btn-editar-gigante" onclick="editarTarefaGigante()">✎ EDITAR</button>
                             <button class="giant-btn btn-adiar-gigante" onclick="adiarTarefaGigante()">⏰ +10 MIN ADIAR</button>
                             <button class="giant-btn btn-concluir-gigante" onclick="concluirTarefaGigante()">✓ CONCLUIR</button>
                         </div>
@@ -278,11 +279,10 @@
                 if(t.status === 'Concluido') return false;
                 const d = new Date(t.data_agendamento);
                 return d <= agora;
-            }).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); // A mais velha primeiro
+            }).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); 
 
             if(tarefasAtrasadas.length > 0) {
                 const proximaAlerta = tarefasAtrasadas[0];
-                // Se já estiver mostrando a mesma, não refaz
                 if(!tarefaAlertaAtual || tarefaAlertaAtual.id !== proximaAlerta.id) {
                     dispararAlertaGigante(proximaAlerta);
                 }
@@ -294,7 +294,6 @@
         function dispararAlertaGigante(tarefa) {
             tarefaAlertaAtual = tarefa;
             
-            // Pausa notícias
             document.getElementById('news-container').style.display = 'none';
             document.getElementById('alert-container').style.display = 'flex';
             
@@ -303,7 +302,6 @@
             tituloPanel.style.color = '#F44336';
             tituloPanel.style.fontWeight = 'bold';
 
-            // Pinta o Card com a cor da categoria
             const cor = (categoriasGlobais.find(c => c.nome === tarefa.categoria) || {}).cor || '#F44336';
             document.getElementById('giant-card').style.backgroundColor = cor;
             document.getElementById('giant-title').innerText = tarefa.titulo;
@@ -323,13 +321,12 @@
             tituloPanel.style.fontWeight = 'normal';
         }
 
-        // Ações do Card Gigante
         async function concluirTarefaGigante() {
             if(!tarefaAlertaAtual) return;
             const btn = document.querySelector('.btn-concluir-gigante'); btn.innerText = '...';
             await concluirTarefaDB(tarefaAlertaAtual.id);
             btn.innerText = '✓ CONCLUIR';
-            motorDeAlertas(); // Recalcula a fila imediatamente
+            motorDeAlertas(); 
         }
 
         async function adiarTarefaGigante() {
@@ -337,9 +334,20 @@
             const btn = document.querySelector('.btn-adiar-gigante'); btn.innerText = '...';
             await adiarTarefaDB(tarefaAlertaAtual.id, tarefaAlertaAtual.data_agendamento);
             btn.innerText = '⏰ +10 MIN ADIAR';
-            motorDeAlertas(); // Recalcula a fila imediatamente
+            motorDeAlertas(); 
         }
 
+        function editarTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            abrirModalTarefa(
+                tarefaAlertaAtual.id, 
+                tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), 
+                tarefaAlertaAtual.categoria, 
+                tarefaAlertaAtual.status, 
+                tarefaAlertaAtual.data_agendamento, 
+                tarefaAlertaAtual.prioridade
+            );
+        }
 
         // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
         async function carregarCategoriasDB() {
@@ -377,7 +385,7 @@
             if (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar tarefas.</p>'; return; }
             tarefasGlobais = data;
             renderizarTarefas();
-            motorDeAlertas(); // Verifica se há alertas pendentes logo ao carregar
+            motorDeAlertas(); 
         }
 
         async function salvarTarefaDB() {
@@ -389,7 +397,28 @@
             const prioridade = document.getElementById('task-priority').checked;
             
             if(!titulo || !dataInput) return alert('Preencha o que precisa ser feito e a data.');
-            const dataIso = new Date(dataInput).toISOString();
+            
+            const dataSelecionada = new Date(dataInput);
+            const hoje = new Date();
+            
+            // Zera as horas para comparar estritamente os DIAS do calendário
+            hoje.setHours(0, 0, 0, 0);
+            const diaSelecionado = new Date(dataSelecionada);
+            diaSelecionado.setHours(0, 0, 0, 0);
+            
+            // TRAVA DE SEGURANÇA (Prevenção de DIAS no passado)
+            if (!id) {
+                if (diaSelecionado < hoje) {
+                    return alert('⚠️ TRAVA DE SEGURANÇA: Não é possível incluir uma nova tarefa em um dia que já passou.');
+                }
+            } else {
+                if (diaSelecionado < hoje && status !== 'Concluido') {
+                    const confirmar = confirm('⚠️ ATENÇÃO: Você está movendo esta tarefa para um dia no passado. Deseja continuar?');
+                    if (!confirmar) return;
+                }
+            }
+
+            const dataIso = dataSelecionada.toISOString();
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvando...';
             
             if (id) await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id);
@@ -478,7 +507,7 @@
             } catch (error) { document.getElementById('news-container').innerHTML = '<p style="color:red;">Erro ao carregar radares.</p>'; }
         }
         function renderizarNoticiaSlide() {
-            if(tarefaAlertaAtual) return; // Se o alerta estiver na tela, congela a renderização de notícias
+            if(tarefaAlertaAtual) return; 
             const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
             const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem destaque">` : '';
             container.innerHTML = `<div class="news-slide">${htmlImagem}<div class="news-title">${noticia.titulo}</div><div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div></div>`;
