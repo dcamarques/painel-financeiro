@@ -28,7 +28,9 @@
 
         .btn-action { background: #0078D7; }
         .btn-action:hover { background: #005A9E; }
-        .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase;}
+        
+        .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase; cursor: pointer; transition: color 0.2s;}
+        .header-center h3:hover { color: var(--primary); }
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
@@ -104,9 +106,9 @@
                 <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
             </div>
             <div class="header-center">
-                <button class="nav-btn">&lt;</button>
-                <h3 id="display-data"></h3>
-                <button class="nav-btn">&gt;</button>
+                <button class="nav-btn" onclick="mudarData(-1)">&lt;</button>
+                <h3 id="display-data" onclick="mudarData('hoje')" title="Clique para voltar para Hoje"></h3>
+                <button class="nav-btn" onclick="mudarData(1)">&gt;</button>
             </div>
             <div class="header-right">
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">[+] NOVA TAREFA</button>
@@ -189,9 +191,30 @@
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         
-        // Data atual na tela
-        const hojeObj = new Date();
-        document.getElementById('display-data').innerText = `HOJE, ${hojeObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}`;
+        // MOTOR DE NAVEGAÇÃO DE DATAS
+        let dataPointer = new Date();
+
+        function atualizarDisplayData() {
+            const hoje = new Date();
+            const isHoje = dataPointer.getDate() === hoje.getDate() && 
+                           dataPointer.getMonth() === hoje.getMonth() && 
+                           dataPointer.getFullYear() === hoje.getFullYear();
+            
+            const opcoes = { day: 'numeric', month: 'long', year: isHoje ? undefined : 'numeric' };
+            const textoData = dataPointer.toLocaleDateString('pt-BR', opcoes).toUpperCase();
+            
+            document.getElementById('display-data').innerText = isHoje ? `HOJE, ${textoData}` : textoData;
+        }
+
+        function mudarData(acao) {
+            if (acao === 'hoje') {
+                dataPointer = new Date();
+            } else {
+                dataPointer.setDate(dataPointer.getDate() + acao);
+            }
+            atualizarDisplayData();
+            renderizarTarefas();
+        }
 
         // --- AUTENTICAÇÃO ---
         async function enviarCodigo() {
@@ -212,6 +235,7 @@
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('painel').style.display = 'flex';
                 
+                atualizarDisplayData();
                 inicializarPaletaDeCores(); 
                 carregarNoticias(); 
                 await carregarCategoriasDB();
@@ -223,35 +247,24 @@
         // --- INTEGRAÇÃO SUPABASE: CATEGORIAS ---
         async function carregarCategoriasDB() {
             const { data, error } = await supabaseClient.from('categorias').select('*').order('criado_em', { ascending: true });
-            
             if (error) { console.error('Erro ao buscar categorias:', error); return; }
             
             if (data.length === 0) {
-                // Insere categorias padrão se a conta for nova
-                const catPadrao = [
-                    { id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' },
-                    { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }
-                ];
+                const catPadrao = [{ id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' }, { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }];
                 await supabaseClient.from('categorias').insert(catPadrao);
                 const { data: newData } = await supabaseClient.from('categorias').select('*').order('criado_em', { ascending: true });
                 categoriasGlobais = newData || [];
-            } else {
-                categoriasGlobais = data;
-            }
-            renderizarListaConfigCategorias();
-            renderizarSelectCategorias();
+            } else { categoriasGlobais = data; }
+            renderizarListaConfigCategorias(); renderizarSelectCategorias();
         }
 
         async function adicionarCategoriaDB() {
-            const nome = document.getElementById('new-cat-name').value.trim(); 
-            const cor = document.getElementById('selected-color').value;
+            const nome = document.getElementById('new-cat-name').value.trim(); const cor = document.getElementById('selected-color').value;
             if(!nome) return alert('Digite o nome da categoria.');
             if(categoriasGlobais.find(c => c.nome.toLowerCase() === nome.toLowerCase())) return alert('Categoria já existe.');
-            
             document.getElementById('btn-add-cat').innerText = 'Salvando...';
             const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, nome, cor }]);
             document.getElementById('btn-add-cat').innerText = 'Adicionar';
-            
             if(error) alert('Erro ao salvar: ' + error.message);
             else { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); renderizarTarefas(); }
         }
@@ -259,20 +272,16 @@
         async function removerCategoriaDB(id) {
             if(categoriasGlobais.length <= 1) return alert('Você precisa ter pelo menos uma categoria.');
             if(!confirm('Tem certeza que deseja excluir esta categoria?')) return;
-            
             const { error } = await supabaseClient.from('categorias').delete().eq('id', id);
-            if(error) alert('Erro ao excluir: ' + error.message);
-            else { await carregarCategoriasDB(); renderizarTarefas(); }
+            if(error) alert('Erro ao excluir: ' + error.message); else { await carregarCategoriasDB(); renderizarTarefas(); }
         }
 
         // --- INTEGRAÇÃO SUPABASE: TAREFAS ---
         async function carregarTarefasDB() {
             const container = document.getElementById('tasks-container');
             container.innerHTML = '<p style="text-align:center; color:#777;">Sincronizando tarefas...</p>';
-
             const { data, error } = await supabaseClient.from('tarefas').select('*').order('data_agendamento', { ascending: true });
             if (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar tarefas.</p>'; return; }
-            
             tarefasGlobais = data;
             renderizarTarefas();
         }
@@ -286,75 +295,69 @@
             const prioridade = document.getElementById('task-priority').checked;
             
             if(!titulo || !dataInput) return alert('Preencha o que precisa ser feito e a data.');
-            
-            // Converte a data local para padrão ISO de Banco de Dados
             const dataIso = new Date(dataInput).toISOString();
-            
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvando...';
             
             let erroDB = null;
             if (id) {
-                // Atualiza existente
-                const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id);
-                erroDB = error;
+                const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id); erroDB = error;
             } else {
-                // Cria nova
-                const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
-                erroDB = error;
+                const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, titulo, categoria, status, data_agendamento: dataIso, prioridade }]); erroDB = error;
             }
-
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
             
             if(erroDB) alert('Erro ao salvar tarefa: ' + erroDB.message);
             else { 
-                if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual); // reseta filtro para a tarefa nova aparecer
-                fecharModais(); 
-                await carregarTarefasDB(); 
+                if(filtroAtual !== 'TODAS') definirFiltro(filtroAtual);
+                fecharModais(); await carregarTarefasDB(); 
             }
         }
 
         async function excluirTarefa() {
-            const id = document.getElementById('task-id').value;
-            if(!id) return; // Segurança
+            const id = document.getElementById('task-id').value; if(!id) return;
             if(!confirm('Tem certeza que deseja apagar esta tarefa definitivamente?')) return;
-            
             document.getElementById('btn-excluir-tarefa').innerText = 'Excluindo...';
             const { error } = await supabaseClient.from('tarefas').delete().eq('id', id);
-            
-            if(error) alert('Erro ao apagar: ' + error.message);
-            else { fecharModais(); await carregarTarefasDB(); }
+            if(error) alert('Erro ao apagar: ' + error.message); else { fecharModais(); await carregarTarefasDB(); }
         }
 
         async function concluirTarefaDB(id) {
             document.getElementById('task-'+id).style.opacity = '0.3';
             const { error } = await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id);
-            if(error) { alert('Erro ao concluir.'); await carregarTarefasDB(); }
-            else { await carregarTarefasDB(); }
+            if(error) { alert('Erro ao concluir.'); await carregarTarefasDB(); } else { await carregarTarefasDB(); }
         }
 
         async function adiarTarefaDB(id, dataAtualBanco) {
             document.getElementById('task-'+id).style.opacity = '0.5';
-            
-            const dataObj = new Date(dataAtualBanco);
-            dataObj.setMinutes(dataObj.getMinutes() + 10);
-            const novaDataIso = dataObj.toISOString();
-            
-            const { error } = await supabaseClient.from('tarefas').update({ data_agendamento: novaDataIso }).eq('id', id);
-            if(error) { alert('Erro ao adiar.'); await carregarTarefasDB(); }
-            else { await carregarTarefasDB(); }
+            const dataObj = new Date(dataAtualBanco); dataObj.setMinutes(dataObj.getMinutes() + 10);
+            const { error } = await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id);
+            if(error) { alert('Erro ao adiar.'); await carregarTarefasDB(); } else { await carregarTarefasDB(); }
         }
 
+        // --- MOTOR DE FILTRAGEM (Vencidas Global vs. Dia Específico) ---
         function renderizarTarefas() {
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             let tarefasFiltradas = tarefasGlobais;
 
-            if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasGlobais.filter(t => t.prioridade === true);
-            else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasGlobais.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
-            else if (filtroAtual === 'VENCIDAS') tarefasFiltradas = tarefasGlobais.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
+            if (filtroAtual === 'VENCIDAS') {
+                // Comportamento Global: Ignora a data do ponteiro e varre a base inteira atrás de pendências
+                tarefasFiltradas = tarefasGlobais.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
+            } else {
+                // Filtra estritamente pelo dia do ponteiro atual (< e >)
+                tarefasFiltradas = tarefasGlobais.filter(t => {
+                    const d = new Date(t.data_agendamento);
+                    return d.getDate() === dataPointer.getDate() && 
+                           d.getMonth() === dataPointer.getMonth() && 
+                           d.getFullYear() === dataPointer.getFullYear();
+                });
+
+                if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasFiltradas.filter(t => t.prioridade === true);
+                else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasFiltradas.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
+            }
 
             if(tarefasFiltradas.length === 0) {
-                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return;
+                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro/data.</div>`; return;
             }
 
             tarefasFiltradas.forEach(t => {
@@ -417,14 +420,15 @@
         function fecharModais() { document.getElementById('taskModal').style.display = 'none'; document.getElementById('configModal').style.display = 'none'; }
         
         function formatarDataParaInputHTML(dataIsoString) {
-            // Converte ISO do banco (UTC) para o formato exato que o input datetime-local exige (YYYY-MM-DDThh:mm) no fuso local
-            if(!dataIsoString) return '';
+            if(!dataIsoString) {
+                // Ao criar tarefa nova, preenche com a data do ponteiro atual e hora zerada (opcional) ou atual
+                const agora = new Date();
+                const d = new Date(dataPointer);
+                d.setHours(agora.getHours(), agora.getMinutes());
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+            }
             const data = new Date(dataIsoString);
-            return data.getFullYear() + '-' + 
-                   String(data.getMonth() + 1).padStart(2, '0') + '-' + 
-                   String(data.getDate()).padStart(2, '0') + 'T' + 
-                   String(data.getHours()).padStart(2, '0') + ':' + 
-                   String(data.getMinutes()).padStart(2, '0');
+            return data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0') + '-' + String(data.getDate()).padStart(2, '0') + 'T' + String(data.getHours()).padStart(2, '0') + ':' + String(data.getMinutes()).padStart(2, '0');
         }
 
         function abrirModalTarefa(id = '', titulo = '', categoria = categoriasGlobais[0]?.nome || '', status = 'Pendente', dataIso = '', prioridade = false) {
@@ -435,7 +439,7 @@
             document.getElementById('task-status').value = status;
             document.getElementById('task-date').value = formatarDataParaInputHTML(dataIso);
             document.getElementById('task-priority').checked = prioridade;
-            document.getElementById('btn-excluir-tarefa').style.display = id ? 'block' : 'none'; // Mostra botão Excluir só na edição
+            document.getElementById('btn-excluir-tarefa').style.display = id ? 'block' : 'none'; 
             renderizarSelectCategorias(); document.getElementById('task-category-select').value = categoria;
         }
 
