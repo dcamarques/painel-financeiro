@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agenda | Boonus</title>
+    
+    <!-- Tags para Preview do WhatsApp e Redes Sociais -->
+    <meta property="og:title" content="Boonus Agenda">
+    <meta property="og:description" content="Painel Executivo de Gestão, Produtividade e Mercado.">
+    <meta property="og:image" content="https://tv.boonus.app.br/agenda/capa-whatsapp.jpg">
+    <meta property="og:url" content="https://tv.boonus.app.br/agenda/">
+    <meta property="og:type" content="website">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-color: #000000; --text-color: #ffffff; --primary: #4CAF50; --btn-dark: #222222; --card-bg: #2a2a2a; }
@@ -514,6 +522,49 @@
         }
         function proximaNoticia() { if(!tarefaAlertaAtual) { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); } }
 
+        // --- CONTROLE DE TELA CHEIA E TELA ATIVA (WAKE LOCK) ---
+        let bloqueioDeTela = null;
+
+        async function ativarBloqueioDeTela() {
+            try {
+                if ('wakeLock' in navigator) {
+                    bloqueioDeTela = await navigator.wakeLock.request('screen');
+                    console.log('Tela blindada contra bloqueio de energia.');
+                }
+            } catch (err) {
+                console.error(`Erro ao tentar manter a tela ligada: ${err.message}`);
+            }
+        }
+
+        function liberarBloqueioDeTela() {
+            if (bloqueioDeTela !== null) {
+                bloqueioDeTela.release().then(() => {
+                    bloqueioDeTela = null;
+                    console.log('Bloqueio de tela liberado.');
+                });
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    ativarBloqueioDeTela();
+                }).catch(err => {
+                    alert(`Erro ao tentar tela cheia: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    liberarBloqueioDeTela();
+                });
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && document.fullscreenElement) {
+                ativarBloqueioDeTela();
+            }
+        });
+
         // --- UI AUXILIAR ---
         function definirFiltro(tipo) { if (filtroAtual === tipo) filtroAtual = 'TODAS'; else filtroAtual = tipo; document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter')); if(filtroAtual !== 'TODAS') document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); renderizarTarefas(); }
         function fecharModais() { document.getElementById('taskModal').style.display = 'none'; document.getElementById('configModal').style.display = 'none'; }
@@ -544,7 +595,6 @@
         function renderizarSelectCategorias() { const select = document.getElementById('task-category-select'); select.innerHTML = ''; categoriasGlobais.forEach(cat => { select.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`; }); }
         function inicializarPaletaDeCores() { const picker = document.getElementById('color-picker'); picker.innerHTML = ''; defaultColors.forEach(cor => { const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = cor; if(cor === '#F44336') div.classList.add('selected'); div.onclick = () => selecionarCor(div, cor); picker.appendChild(div); }); }
         function selecionarCor(elemento, cor) { document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected')); elemento.classList.add('selected'); document.getElementById('selected-color').value = cor; }
-        function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
 
         checarSessao();
     </script>
