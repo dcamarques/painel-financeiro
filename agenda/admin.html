@@ -174,13 +174,13 @@
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                const userEmail = session.user.email;
+                const userId = session.user.id;
                 
-                // Verifica na tabela perfis usando o e-mail diretamente
+                // Verifica na tabela perfis usando o id_usuario correto
                 const { data: perfil, error } = await supabaseClient
                     .from('perfis')
                     .select('is_admin')
-                    .eq('email', userEmail)
+                    .eq('id_usuario', userId)
                     .single();
                 
                 if (perfil && perfil.is_admin === true) {
@@ -189,7 +189,7 @@
                     carregarDadosBackoffice();
                 } else {
                     console.error("Erro ou perfil não encontrado:", error);
-                    alert('⛔ ACESSO NEGADO. O e-mail logado não tem permissão de Administrador na tabela perfis.');
+                    alert('⛔ ACESSO NEGADO. O usuário logado não tem permissão de Administrador na tabela perfis.');
                     await supabaseClient.auth.signOut();
                 }
             }
