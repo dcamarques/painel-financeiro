@@ -69,7 +69,8 @@
             <h2 style="color: var(--primary); letter-spacing: 2px;">BOONUS ADMIN</h2>
             <p style="color: #aaa;">Controle Central de Usuários</p>
             <input type="email" id="email-input" placeholder="e-mail administrador">
-            <button id="btn-login" onclick="enviarCodigo()">Acessar Backoffice</button>
+            <input type="password" id="senha-input" placeholder="digite sua senha">
+            <button id="btn-login" onclick="acessarPainel()">Acessar Backoffice</button>
         </div>
     </div>
 
@@ -146,16 +147,29 @@
         let chartInstance = null;
         let perfisGlobais = [];
 
-        // --- AUTENTICAÇÃO E VERIFICAÇÃO DE ADMIN ---
-        async function enviarCodigo() {
+        // --- AUTENTICAÇÃO COM SENHA E VERIFICAÇÃO DE ADMIN ---
+        async function acessarPainel() {
             const email = document.getElementById('email-input').value;
-            if(!email) return alert('Digite o e-mail.');
+            const senha = document.getElementById('senha-input').value;
+            
+            if(!email || !senha) return alert('Digite o e-mail e a senha.');
+            
             const btn = document.getElementById('btn-login');
-            btn.innerText = 'Enviando...'; btn.disabled = true;
+            btn.innerText = 'Autenticando...'; btn.disabled = true;
 
-            const { error } = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+                email: email, 
+                password: senha 
+            });
+            
             btn.innerText = 'Acessar Backoffice'; btn.disabled = false;
-            if (error) alert('Erro: ' + error.message); else alert('Código enviado para o seu e-mail!');
+            
+            if (error) {
+                alert('Erro: ' + error.message);
+            } else {
+                // Se a senha estiver certa, ele checa se tem a Chave Mestra
+                checarSessao();
+            }
         }
 
         async function checarSessao() {
