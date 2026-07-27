@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agenda | Boonus</title>
     
-    <!-- Tags para Preview do WhatsApp e Redes Sociais -->
     <meta property="og:title" content="Boonus Agenda">
     <meta property="og:description" content="Painel Executivo de Gestão, Produtividade e Mercado.">
     <meta property="og:image" content="https://tv.boonus.app.br/agenda/capa-whatsapp.jpg">
@@ -18,12 +17,12 @@
         * { box-sizing: border-box; }
         body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
-        /* --- LOGIN --- */
-        .login-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
-        .login-container { background: #1e1e1e; padding: 30px; border-radius: 10px; text-align: center; width: 100%; max-width: 400px; }
-        .login-container input { width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; background: #333; color: white; font-size: 16px; }
-        .login-container button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: opacity 0.3s ease; }
-        .login-container button:disabled { cursor: not-allowed; }
+        /* --- TELAS BASE --- */
+        .full-screen-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
+        .box-container { background: #1e1e1e; padding: 30px; border-radius: 10px; text-align: center; width: 100%; max-width: 450px; }
+        .box-container input { width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; background: #333; color: white; font-size: 16px; }
+        .box-container button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: opacity 0.3s ease; }
+        .box-container button:disabled { cursor: not-allowed; }
 
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
@@ -41,7 +40,7 @@
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        /* PAINEL ESQUERDO (Notícias ou Alertas) */
+        /* PAINEL ESQUERDO */
         .left-panel { width: 60%; padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; }
         #left-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px; transition: color 0.3s; }
         
@@ -67,12 +66,8 @@
         @keyframes pulseRed { 0% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } 50% { box-shadow: inset 0 0 50px rgba(244, 67, 54, 0.2); } 100% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } }
 
         /* TAREFAS */
-        .tasks-panel { 
-            width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; 
-            -ms-overflow-style: none; scrollbar-width: none; 
-        }
+        .tasks-panel { width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; -ms-overflow-style: none; scrollbar-width: none; }
         .tasks-panel::-webkit-scrollbar { display: none; } 
-
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
@@ -98,7 +93,6 @@
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
         .modal-content input[type="text"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #555; background: #111; color: white; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        
         .color-palette { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-swatch.selected { border-color: white; transform: scale(1.1); }
@@ -115,8 +109,9 @@
 </head>
 <body>
 
-    <div id="login-wrapper" class="login-wrapper">
-        <div id="login-screen" class="login-container">
+    <!-- TELA DE LOGIN -->
+    <div id="login-wrapper" class="full-screen-wrapper">
+        <div id="login-screen" class="box-container">
             <h2>Acesso à Agenda</h2>
             <p>Digite seu e-mail para receber o código de acesso.</p>
             <input type="email" id="email-input" placeholder="seu@email.com">
@@ -124,6 +119,19 @@
         </div>
     </div>
 
+    <!-- TELA DE BLOQUEIO (Vencimento) -->
+    <div id="bloqueio-wrapper" class="full-screen-wrapper" style="display: none;">
+        <div class="box-container" style="border: 2px solid #F44336;">
+            <h2 style="color: #F44336;">Acesso Expirado</h2>
+            <p>Seu período de acesso à Boonus Agenda chegou ao fim. Renove agora para garantir mais 1 ano de alta performance na gestão de suas operações.</p>
+            <p id="data-expiracao-texto" style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;"></p>
+            
+            <button style="background: #F44336; margin-bottom: 10px;" onclick="alert('Aqui entrará o seu link de pagamento (Stripe, Kiwify, etc).')">Renovar Assinatura (1 Ano)</button>
+            <button style="background: #333;" onclick="fazerLogout()">Sair</button>
+        </div>
+    </div>
+
+    <!-- TELA PRINCIPAL -->
     <div id="painel">
         <div class="header">
             <div class="header-left">
@@ -147,9 +155,7 @@
         <div class="main-content">
             <div class="left-panel" id="left-panel">
                 <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
-                
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
-                
                 <div id="alert-container">
                     <div class="giant-card" id="giant-card">
                         <div class="giant-time" id="giant-time">11:00</div>
@@ -163,9 +169,7 @@
                 </div>
             </div>
 
-            <div class="tasks-panel" id="tasks-container">
-                <!-- Renderizado via JavaScript -->
-            </div>
+            <div class="tasks-panel" id="tasks-container"></div>
         </div>
     </div>
 
@@ -245,7 +249,7 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- AUTENTICAÇÃO ---
+        // --- AUTENTICAÇÃO E CHECAGEM DE ASSINATURA ---
         async function enviarCodigo() {
             const email = document.getElementById('email-input').value;
             if(!email) return alert('Digite um e-mail válido.');
@@ -261,6 +265,22 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 currentUser = session.user;
+                
+                // Validação da Catraca Digital
+                const { data: perfil } = await supabaseClient.from('perfis').select('data_vencimento').eq('id_usuario', currentUser.id).single();
+                
+                if (perfil) {
+                    const vencimento = new Date(perfil.data_vencimento);
+                    if (vencimento < new Date()) {
+                        // BLOQUEADO
+                        document.getElementById('login-wrapper').style.display = 'none';
+                        document.getElementById('bloqueio-wrapper').style.display = 'flex';
+                        document.getElementById('data-expiracao-texto').innerText = `Expirado em: ${vencimento.toLocaleDateString('pt-BR')}`;
+                        return; // Para a execução do código aqui, impedindo acesso à agenda
+                    }
+                }
+
+                // LIBERADO
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('painel').style.display = 'flex';
                 
@@ -270,23 +290,20 @@
                 await carregarCategoriasDB();
                 await carregarTarefasDB(); 
                 
-                // Liga o Motor de Alertas (A cada 30 segundos)
                 setInterval(motorDeAlertas, 30000);
             }
         }
+        
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- MOTOR DE ALERTAS (CARD GIGANTE) ---
+        // --- MOTOR DE ALERTAS ---
         let tarefaAlertaAtual = null;
 
         function motorDeAlertas() {
             const agora = new Date();
-            
-            // Procura tarefas que já venceram e NÃO estão concluídas
             const tarefasAtrasadas = tarefasGlobais.filter(t => {
                 if(t.status === 'Concluido') return false;
-                const d = new Date(t.data_agendamento);
-                return d <= agora;
+                return new Date(t.data_agendamento) <= agora;
             }).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); 
 
             if(tarefasAtrasadas.length > 0) {
@@ -301,7 +318,6 @@
 
         function dispararAlertaGigante(tarefa) {
             tarefaAlertaAtual = tarefa;
-            
             document.getElementById('news-container').style.display = 'none';
             document.getElementById('alert-container').style.display = 'flex';
             
@@ -347,14 +363,7 @@
 
         function editarTarefaGigante() {
             if(!tarefaAlertaAtual) return;
-            abrirModalTarefa(
-                tarefaAlertaAtual.id, 
-                tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), 
-                tarefaAlertaAtual.categoria, 
-                tarefaAlertaAtual.status, 
-                tarefaAlertaAtual.data_agendamento, 
-                tarefaAlertaAtual.prioridade
-            );
+            abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade);
         }
 
         // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
@@ -388,9 +397,8 @@
         }
 
         async function carregarTarefasDB() {
-            const container = document.getElementById('tasks-container');
             const { data, error } = await supabaseClient.from('tarefas').select('*').order('data_agendamento', { ascending: true });
-            if (error) { container.innerHTML = '<p style="color:red;">Erro ao carregar tarefas.</p>'; return; }
+            if (error) return; 
             tarefasGlobais = data;
             renderizarTarefas();
             motorDeAlertas(); 
@@ -408,21 +416,15 @@
             
             const dataSelecionada = new Date(dataInput);
             const hoje = new Date();
-            
-            // Zera as horas para comparar estritamente os DIAS do calendário
             hoje.setHours(0, 0, 0, 0);
             const diaSelecionado = new Date(dataSelecionada);
             diaSelecionado.setHours(0, 0, 0, 0);
             
-            // TRAVA DE SEGURANÇA (Prevenção de DIAS no passado)
             if (!id) {
-                if (diaSelecionado < hoje) {
-                    return alert('⚠️ TRAVA DE SEGURANÇA: Não é possível incluir uma nova tarefa em um dia que já passou.');
-                }
+                if (diaSelecionado < hoje) return alert('⚠️ TRAVA DE SEGURANÇA: Não é possível incluir uma nova tarefa em um dia que já passou.');
             } else {
                 if (diaSelecionado < hoje && status !== 'Concluido') {
-                    const confirmar = confirm('⚠️ ATENÇÃO: Você está movendo esta tarefa para um dia no passado. Deseja continuar?');
-                    if (!confirmar) return;
+                    if (!confirm('⚠️ ATENÇÃO: Você está movendo esta tarefa para um dia no passado. Deseja continuar?')) return;
                 }
             }
 
@@ -496,7 +498,7 @@
             });
         }
 
-        // --- SISTEMA DE NOTÍCIAS (TV CAROUSEL) ---
+        // --- SISTEMA DE NOTÍCIAS ---
         let noticiasGlobais = []; let indiceNoticiaAtual = 0; let loopNoticias;
         async function carregarNoticias() {
             try {
@@ -509,8 +511,7 @@
                 });
                 if (noticiasGlobais.length > 0) {
                     indiceNoticiaAtual = 0; renderizarNoticiaSlide();
-                    if(loopNoticias) clearInterval(loopNoticias);
-                    loopNoticias = setInterval(proximaNoticia, 15000);
+                    if(loopNoticias) clearInterval(loopNoticias); loopNoticias = setInterval(proximaNoticia, 15000);
                 }
             } catch (error) { document.getElementById('news-container').innerHTML = '<p style="color:red;">Erro ao carregar radares.</p>'; }
         }
@@ -522,48 +523,15 @@
         }
         function proximaNoticia() { if(!tarefaAlertaAtual) { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); } }
 
-        // --- CONTROLE DE TELA CHEIA E TELA ATIVA (WAKE LOCK) ---
+        // --- WAKE LOCK ---
         let bloqueioDeTela = null;
-
-        async function ativarBloqueioDeTela() {
-            try {
-                if ('wakeLock' in navigator) {
-                    bloqueioDeTela = await navigator.wakeLock.request('screen');
-                    console.log('Tela blindada contra bloqueio de energia.');
-                }
-            } catch (err) {
-                console.error(`Erro ao tentar manter a tela ligada: ${err.message}`);
-            }
-        }
-
-        function liberarBloqueioDeTela() {
-            if (bloqueioDeTela !== null) {
-                bloqueioDeTela.release().then(() => {
-                    bloqueioDeTela = null;
-                    console.log('Bloqueio de tela liberado.');
-                });
-            }
-        }
-
+        async function ativarBloqueioDeTela() { try { if ('wakeLock' in navigator) { bloqueioDeTela = await navigator.wakeLock.request('screen'); } } catch (err) {} }
+        function liberarBloqueioDeTela() { if (bloqueioDeTela !== null) { bloqueioDeTela.release().then(() => { bloqueioDeTela = null; }); } }
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    ativarBloqueioDeTela();
-                }).catch(err => {
-                    alert(`Erro ao tentar tela cheia: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen().then(() => {
-                    liberarBloqueioDeTela();
-                });
-            }
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().then(() => { ativarBloqueioDeTela(); }).catch(err => { alert(`Erro: ${err.message}`); }); } 
+            else { document.exitFullscreen().then(() => { liberarBloqueioDeTela(); }); }
         }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && document.fullscreenElement) {
-                ativarBloqueioDeTela();
-            }
-        });
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && document.fullscreenElement) { ativarBloqueioDeTela(); } });
 
         // --- UI AUXILIAR ---
         function definirFiltro(tipo) { if (filtroAtual === tipo) filtroAtual = 'TODAS'; else filtroAtual = tipo; document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter')); if(filtroAtual !== 'TODAS') document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); renderizarTarefas(); }
