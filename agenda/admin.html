@@ -167,7 +167,6 @@
             if (error) {
                 alert('Erro: ' + error.message);
             } else {
-                // Se a senha estiver certa, ele checa se tem a Chave Mestra
                 checarSessao();
             }
         }
@@ -175,17 +174,22 @@
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                const userId = session.user.id;
+                const userEmail = session.user.email;
                 
-                // Verifica se o usuário tem a Chave Mestra (is_admin = true)
-                const { data: perfil } = await supabaseClient.from('perfis').select('is_admin').eq('id_usuario', userId).single();
+                // Verifica na tabela perfis usando o e-mail diretamente
+                const { data: perfil, error } = await supabaseClient
+                    .from('perfis')
+                    .select('is_admin')
+                    .eq('email', userEmail)
+                    .single();
                 
                 if (perfil && perfil.is_admin === true) {
                     document.getElementById('login-wrapper').style.display = 'none';
                     document.getElementById('admin-panel').style.display = 'block';
                     carregarDadosBackoffice();
                 } else {
-                    alert('⛔ ACESSO NEGADO. Você não tem permissões de Administrador.');
+                    console.error("Erro ou perfil não encontrado:", error);
+                    alert('⛔ ACESSO NEGADO. O e-mail logado não tem permissão de Administrador na tabela perfis.');
                     await supabaseClient.auth.signOut();
                 }
             }
@@ -195,7 +199,6 @@
 
         // --- MOTOR DO BACKOFFICE ---
         async function carregarDadosBackoffice() {
-            // Como o admin tem a RLS liberada, ele consegue puxar todos os perfis da base
             const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
             if (error) { console.error('Erro ao carregar dados:', error); return; }
             
@@ -234,7 +237,6 @@
                     ? `<span class="status-badge status-active">Ativo</span>` 
                     : `<span class="status-badge status-expired">Expirado</span>`;
 
-                // Formato exigido pelo input type="date" (YYYY-MM-DD)
                 const dataInputFormat = new Date(p.data_vencimento).toISOString().split('T')[0];
 
                 tbody.innerHTML += `
@@ -255,11 +257,9 @@
 
         // --- GRÁFICO (Últimos 12 Meses) ---
         function gerarGrafico() {
-            // Agrupa os cadastros (criado_em) por Mês/Ano
             const contagemMeses = {};
             const mesesAbreviados = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             
-            // Gera os últimos 12 meses para o eixo X, mesmo que tenham valor 0
             const labels = [];
             const dados = [];
             const hoje = new Date();
@@ -283,7 +283,7 @@
 
             const ctx = document.getElementById('growthChart').getContext('2d');
             
-            if(chartInstance) chartInstance.destroy(); // Limpa gráfico antigo se houver recarregamento
+            if(chartInstance) chartInstance.destroy();
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -326,7 +326,6 @@
             
             if(!novaDataInput) return alert('Selecione uma data válida.');
 
-            // Ajusta o fuso horário para salvar no final do dia (23:59:59)
             const dataObj = new Date(novaDataInput);
             dataObj.setHours(23, 59, 59);
             const dataIsoFinal = dataObj.toISOString();
@@ -342,7 +341,7 @@
                 alert('Erro ao atualizar: ' + error.message);
             } else {
                 fecharModal();
-                await carregarDadosBackoffice(); // Recarrega os dados e a tabela atualizada
+                await carregarDadosBackoffice();
             }
         }
 
