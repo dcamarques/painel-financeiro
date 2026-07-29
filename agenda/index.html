@@ -259,7 +259,7 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- NOVA AUTENTICAÇÃO: E-MAIL, SENHA, CADASTRO E RECUPERAÇÃO ---
+        // --- AUTENTICAÇÃO: E-MAIL, SENHA, CADASTRO E RECUPERAÇÃO ---
         async function fazerLogin() {
             const email = document.getElementById('email-input').value;
             const senha = document.getElementById('senha-input').value;
@@ -343,15 +343,30 @@
                 
                 atualizarDisplayData();
                 inicializarPaletaDeCores(); 
-                carregarNoticias(); 
+                
+                carregarNoticias();
+                setInterval(carregarNoticias, 1800000); // ATUALIZAR NOTÍCIAS A CADA 30 MINUTOS
+                
                 await carregarCategoriasDB();
                 await carregarTarefasDB(); 
                 
                 setInterval(motorDeAlertas, 30000);
+                iniciarEscutaRealtime(); // ATIVAR A MAGIA DO TEMPO REAL (Celular/Tablet)
             }
         }
         
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
+
+        // --- SISTEMA TEMPO REAL SUPABASE ---
+        function iniciarEscutaRealtime() {
+            supabaseClient
+                .channel('mudancas-tarefas')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, payload => {
+                    // Quando alguém altera pelo celular, o tablet recarrega as tarefas de forma invisível
+                    carregarTarefasDB();
+                })
+                .subscribe();
+        }
 
         // --- MOTOR DE ALERTAS ---
         let tarefaAlertaAtual = null;
