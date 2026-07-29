@@ -26,22 +26,39 @@
 
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 2px solid var(--primary); background-color: var(--bg-color); }
-        .header-left, .header-right, .header-center { display: flex; align-items: center; gap: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
+        .header-left, .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
         
-        .nav-btn { background: var(--btn-dark); color: white; border: 1px solid #444; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .nav-btn:hover { background: #333; }
-        .nav-btn.active-filter { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
+        /* BOTÕES CLEAN (NOVO VISUAL) */
+        .nav-btn { 
+            background: transparent; 
+            color: #a0a0a0; 
+            border: 1px solid #444; 
+            padding: 6px 14px; 
+            border-radius: 20px; /* Efeito Pílula */
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            transition: all 0.2s ease; 
+        }
+        .nav-btn:hover { background: #222; color: #fff; border-color: #666; }
+        
+        .nav-btn.active-filter { background: rgba(76, 175, 80, 0.15); border-color: var(--primary); color: var(--primary); box-shadow: none; }
+        
+        .btn-action { background: rgba(0, 120, 215, 0.15); border-color: #0078D7; color: #4da6ff; }
+        .btn-action:hover { background: #0078D7; color: #fff; border-color: #0078D7; }
+        
+        .btn-danger { background: rgba(244, 67, 54, 0.1); border-color: #F44336; color: #F44336; }
+        .btn-danger:hover { background: #F44336; color: #fff; border-color: #F44336; }
 
-        .btn-action { background: #0078D7; }
-        .btn-action:hover { background: #005A9E; }
-        .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase; cursor: pointer; transition: color 0.2s;}
+        .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase; cursor: pointer; transition: color 0.2s; font-size: 1.1rem; letter-spacing: 1px;}
         .header-center h3:hover { color: var(--primary); }
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
         /* PAINEL ESQUERDO */
-        .left-panel { width: 60%; padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .left-panel { width: 60%; padding: 30px; border-right: 1px solid #222; display: flex; flex-direction: column; }
         #left-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px; transition: color 0.3s; }
         
         #news-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -75,28 +92,28 @@
         .task-cat-name { font-weight: bold; letter-spacing: 1px; display: flex; align-items: center;}
         .task-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
         .task-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .t-btn { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .t-btn { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em; font-weight: bold; transition: 0.2s;}
         .t-btn:hover { background: #555; }
-        .t-btn.done { background: var(--primary); }
+        .t-btn.done { background: var(--primary); color: white;}
         .t-btn.snooze { background: #ff9800; color: #000; }
 
         /* STATUS BADGE */
-        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-pendente { background-color: #F44336; color: white; }
         .status-andamento { background-color: #FFEB3B; color: black; }
         .status-concluido { background-color: #4CAF50; color: white; }
 
         /* MODAIS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #222; padding: 25px; border-radius: 10px; width: 400px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 400px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
         .modal-content h3 { margin-top: 0; }
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
-        .modal-content input[type="text"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #555; background: #111; color: white; }
+        .modal-content input[type="text"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .color-palette { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-swatch.selected { border-color: white; transform: scale(1.1); }
-        .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #333; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
+        .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
         @media (max-width: 768px) {
@@ -156,9 +173,9 @@
             </div>
             <div class="header-right">
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">[+] NOVA TAREFA</button>
-                <button class="nav-btn" onclick="abrirModalConfig()">⚙️ CONFIGURAÇÕES</button>
-                <button class="nav-btn" onclick="toggleFullScreen()">[ ] TELA CHEIA</button>
-                <button class="nav-btn" style="background: darkred;" onclick="fazerLogout()">SAIR</button>
+                <button class="nav-btn" onclick="abrirModalConfig()">CONFIGURAÇÕES</button>
+                <button class="nav-btn" onclick="toggleFullScreen()">TELA CHEIA</button>
+                <button class="nav-btn btn-danger" onclick="fazerLogout()">SAIR</button>
             </div>
         </div>
 
@@ -200,14 +217,14 @@
             </select>
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #333; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #000; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
                 <input type="checkbox" id="task-priority" style="width: 20px; height: 20px; margin: 0;">
-                <strong style="color: white;">Marcar como Prioridade Urgente</strong>
+                <strong style="color: white; font-size: 0.9em;">Marcar como Prioridade Urgente</strong>
             </label>
             
             <div class="modal-actions" style="justify-content: space-between; margin-top: 30px;">
-                <button class="nav-btn" style="background: darkred; display: none;" id="btn-excluir-tarefa" onclick="excluirTarefa()">Excluir</button>
-                <div style="display: flex; gap: 10px;">
+                <button class="nav-btn btn-danger" style="display: none;" id="btn-excluir-tarefa" onclick="excluirTarefa()">Excluir</button>
+                <div style="display: flex; gap: 10px; width: 100%; justify-content: flex-end;">
                     <button class="nav-btn" onclick="fecharModais()">Cancelar</button>
                     <button class="nav-btn btn-action" onclick="salvarTarefaDB()" id="btn-salvar-tarefa">Salvar Tarefa</button>
                 </div>
@@ -220,7 +237,7 @@
         <div class="modal-content">
             <h3>Configurações de Categorias</h3>
             <div id="categories-list" style="margin-bottom: 20px;"></div>
-            <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
             <h4>Criar Nova Categoria</h4>
             <label>Nome da Categoria</label>
             <input type="text" id="new-cat-name" placeholder="Ex: Visita">
@@ -351,7 +368,7 @@
                 await carregarTarefasDB(); 
                 
                 setInterval(motorDeAlertas, 30000);
-                iniciarEscutaRealtime(); // ATIVAR A MAGIA DO TEMPO REAL (Celular/Tablet)
+                iniciarEscutaRealtime(); 
             }
         }
         
@@ -362,11 +379,9 @@
             supabaseClient
                 .channel('mudancas-banco')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, payload => {
-                    // Quando alguém altera tarefas pelo celular, o tablet recarrega de forma invisível
                     carregarTarefasDB();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => {
-                    // Quando alguém adiciona/deleta categorias pelo celular, o tablet também recarrega e já traz em ordem alfabética
                     carregarCategoriasDB();
                 })
                 .subscribe();
@@ -444,13 +459,11 @@
 
         // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
         async function carregarCategoriasDB() {
-            // A MÁGICA DA ORDEM ALFABÉTICA: Aqui o .order foi modificado de 'criado_em' para 'nome'
             const { data, error } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
             if (error) { console.error('Erro ao buscar categorias:', error); return; }
             if (data.length === 0) {
                 const catPadrao = [{ id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' }, { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }];
                 await supabaseClient.from('categorias').insert(catPadrao);
-                // Garantimos a ordem alfabética também na criação automática inicial
                 const { data: newData } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
                 categoriasGlobais = newData || [];
             } else { categoriasGlobais = data; }
