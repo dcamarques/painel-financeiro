@@ -360,10 +360,14 @@
         // --- SISTEMA TEMPO REAL SUPABASE ---
         function iniciarEscutaRealtime() {
             supabaseClient
-                .channel('mudancas-tarefas')
+                .channel('mudancas-banco')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, payload => {
-                    // Quando alguém altera pelo celular, o tablet recarrega as tarefas de forma invisível
+                    // Quando alguém altera tarefas pelo celular, o tablet recarrega de forma invisível
                     carregarTarefasDB();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => {
+                    // Quando alguém adiciona/deleta categorias pelo celular, o tablet também recarrega e já traz em ordem alfabética
+                    carregarCategoriasDB();
                 })
                 .subscribe();
         }
@@ -440,12 +444,14 @@
 
         // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
         async function carregarCategoriasDB() {
-            const { data, error } = await supabaseClient.from('categorias').select('*').order('criado_em', { ascending: true });
+            // A MÁGICA DA ORDEM ALFABÉTICA: Aqui o .order foi modificado de 'criado_em' para 'nome'
+            const { data, error } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
             if (error) { console.error('Erro ao buscar categorias:', error); return; }
             if (data.length === 0) {
                 const catPadrao = [{ id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' }, { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }];
                 await supabaseClient.from('categorias').insert(catPadrao);
-                const { data: newData } = await supabaseClient.from('categorias').select('*').order('criado_em', { ascending: true });
+                // Garantimos a ordem alfabética também na criação automática inicial
+                const { data: newData } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
                 categoriasGlobais = newData || [];
             } else { categoriasGlobais = data; }
             renderizarListaConfigCategorias(); renderizarSelectCategorias();
