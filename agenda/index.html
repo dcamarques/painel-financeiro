@@ -109,13 +109,23 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN ATUALIZADA -->
     <div id="login-wrapper" class="full-screen-wrapper">
         <div id="login-screen" class="box-container">
             <h2>Acesso à Agenda</h2>
-            <p>Digite seu e-mail para receber o código de acesso.</p>
+            <p>Digite seu e-mail e senha para acessar.</p>
             <input type="email" id="email-input" placeholder="seu@email.com">
-            <button onclick="enviarCodigo()">Enviar Código</button>
+            <input type="password" id="senha-input" placeholder="sua senha">
+            
+            <button id="btn-login" onclick="fazerLogin()">Entrar</button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button id="btn-cadastrar" style="background: #444;" onclick="fazerCadastro()">Cadastrar-se</button>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                <a href="#" style="color: var(--primary); text-decoration: none;" onclick="recuperarSenha()">Esqueci minha senha</a>
+            </p>
         </div>
     </div>
 
@@ -249,16 +259,63 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- AUTENTICAÇÃO E CHECAGEM DE ASSINATURA ---
-        async function enviarCodigo() {
+        // --- NOVA AUTENTICAÇÃO: E-MAIL, SENHA, CADASTRO E RECUPERAÇÃO ---
+        async function fazerLogin() {
             const email = document.getElementById('email-input').value;
-            if(!email) return alert('Digite um e-mail válido.');
-            const btn = document.querySelector('#login-screen button');
-            const textoOriginal = btn.innerText; btn.innerText = 'Enviando...'; btn.disabled = true; btn.style.opacity = '0.7';
+            const senha = document.getElementById('senha-input').value;
+            
+            if(!email || !senha) return alert('Por favor, digite seu e-mail e sua senha.');
+            
+            const btn = document.getElementById('btn-login');
+            const textoOriginal = btn.innerText; 
+            btn.innerText = 'Entrando...'; btn.disabled = true; btn.style.opacity = '0.7';
 
-            const { error } = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+            
             btn.innerText = textoOriginal; btn.disabled = false; btn.style.opacity = '1';
-            if (error) alert('Erro: ' + error.message); else alert('Código enviado! Verifique sua caixa de entrada.');
+            
+            if (error) {
+                alert('Erro ao entrar: ' + error.message);
+            } else {
+                checarSessao();
+            }
+        }
+
+        async function fazerCadastro() {
+            const email = document.getElementById('email-input').value;
+            const senha = document.getElementById('senha-input').value;
+            
+            if(!email || !senha) return alert('Para se cadastrar, digite seu e-mail e crie uma senha no campo acima.');
+            
+            const btn = document.getElementById('btn-cadastrar');
+            const textoOriginal = btn.innerText; 
+            btn.innerText = 'Cadastrando...'; btn.disabled = true; btn.style.opacity = '0.7';
+
+            const { error } = await supabaseClient.auth.signUp({ email: email, password: senha });
+            
+            btn.innerText = textoOriginal; btn.disabled = false; btn.style.opacity = '1';
+            
+            if (error) {
+                alert('Erro ao cadastrar: ' + error.message);
+            } else {
+                alert('Cadastro realizado com sucesso! Você já pode acessar a agenda.');
+                checarSessao();
+            }
+        }
+
+        async function recuperarSenha() {
+            const email = document.getElementById('email-input').value;
+            if(!email) return alert('Por favor, digite seu e-mail no campo acima para enviarmos o link de recuperação de senha.');
+            
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { 
+                redirectTo: window.location.href 
+            });
+            
+            if (error) {
+                alert('Erro ao recuperar senha: ' + error.message);
+            } else {
+                alert('O link de recuperação de senha foi enviado para o seu e-mail!');
+            }
         }
 
         async function checarSessao() {
@@ -269,7 +326,7 @@
                 // Validação da Catraca Digital
                 const { data: perfil } = await supabaseClient.from('perfis').select('data_vencimento').eq('id_usuario', currentUser.id).single();
                 
-                if (perfil) {
+                if (perfil && perfil.data_vencimento) {
                     const vencimento = new Date(perfil.data_vencimento);
                     if (vencimento < new Date()) {
                         // BLOQUEADO
