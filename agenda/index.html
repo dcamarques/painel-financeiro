@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agenda | Boonus</title>
     
+    <meta name="description" content="Painel Executivo Boonus. Gestão de produtividade, acompanhamento de mercado e controle de agenda para escritórios de investimentos.">
+    <meta name="keywords" content="agenda, produtividade, painel executivo, investimentos, boonus">
+
     <meta property="og:title" content="Boonus Agenda">
     <meta property="og:description" content="Painel Executivo de Gestão, Produtividade e Mercado.">
     <meta property="og:image" content="https://tv.boonus.app.br/agenda/capa-whatsapp.jpg">
@@ -57,7 +60,7 @@
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        /* PAINEL ESQUERDO */
+        /* PAINEL ESQUERDO (NOTÍCIAS) */
         .left-panel { width: 60%; padding: 30px; border-right: 1px solid #222; display: flex; flex-direction: column; }
         #left-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px; transition: color 0.3s; }
         
@@ -67,8 +70,19 @@
         .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
         .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
 
-        /* CARD GIGANTE (Alerta) */
-        #alert-container { display: none; flex: 1; flex-direction: column; justify-content: center; align-items: center; animation: pulseRed 2s infinite; }
+        /* CONTAINER ALERTA HÍBRIDO (Substitui Notícias no Desktop / Pop-up no Celular) */
+        #alert-container { 
+            display: none; /* Inicialmente oculto */
+            width: 60%; 
+            padding: 30px; 
+            border-right: 1px solid #222; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            animation: pulseRed 2s infinite; 
+        }
+        #alert-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: bold; text-align: center; font-size: 1.5em; letter-spacing: 1px; color: #F44336; }
+
         .giant-card { background: #F44336; width: 80%; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 30px rgba(244, 67, 54, 0.4); }
         .giant-time { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
         .giant-title { font-size: 3em; font-weight: bold; margin-bottom: 40px; line-height: 1.2; text-transform: uppercase; }
@@ -116,11 +130,29 @@
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
+        /* ADAPTAÇÃO MOBILE (A Mágica do Alerta) */
         @media (max-width: 768px) {
-            .left-panel { display: none; }
+            .left-panel { display: none !important; }
             .tasks-panel { width: 100%; }
             .header { flex-direction: column; gap: 15px; }
             .header-center { order: -1; }
+            
+            /* Transforma o container de alerta num Pop-up flutuante */
+            #alert-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                z-index: 9999;
+                border: none;
+                padding: 20px;
+            }
+            .giant-card { width: 100%; padding: 25px; }
+            .giant-title { font-size: 2em; }
+            .giant-actions { flex-direction: column; gap: 10px; }
+            .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
     </style>
 </head>
@@ -172,7 +204,6 @@
                 <button class="nav-btn" onclick="mudarData(1)">&gt;</button>
             </div>
             <div class="header-right">
-                <!-- BOTÃO ATUALIZADO AQUI: Removido o [+] -->
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">NOVA TAREFA</button>
                 <button class="nav-btn" onclick="abrirModalConfig()">CONFIGURAÇÕES</button>
                 <button class="nav-btn" onclick="toggleFullScreen()">TELA CHEIA</button>
@@ -181,18 +212,22 @@
         </div>
 
         <div class="main-content">
+            <!-- PAINEL DE NOTÍCIAS (Visível no Desktop) -->
             <div class="left-panel" id="left-panel">
                 <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
-                <div id="alert-container">
-                    <div class="giant-card" id="giant-card">
-                        <div class="giant-time" id="giant-time">11:00</div>
-                        <div class="giant-title" id="giant-title">LIGAR PARA FULANO</div>
-                        <div class="giant-actions">
-                            <button class="giant-btn btn-editar-gigante" onclick="editarTarefaGigante()">✎ EDITAR</button>
-                            <button class="giant-btn btn-adiar-gigante" onclick="adiarTarefaGigante()">⏰ +10 MIN ADIAR</button>
-                            <button class="giant-btn btn-concluir-gigante" onclick="concluirTarefaGigante()">✓ CONCLUIR</button>
-                        </div>
+            </div>
+
+            <!-- CONTAINER DO ALERTA (Ocupa o espaço das Notícias no Desktop ou vira Pop-up no Mobile) -->
+            <div id="alert-container">
+                <h2 id="alert-panel-title">⚠️ ATENÇÃO À AGENDA ⚠️</h2>
+                <div class="giant-card" id="giant-card">
+                    <div class="giant-time" id="giant-time">11:00</div>
+                    <div class="giant-title" id="giant-title">LIGAR PARA FULANO</div>
+                    <div class="giant-actions">
+                        <button class="giant-btn btn-editar-gigante" onclick="editarTarefaGigante()">✎ EDITAR</button>
+                        <button class="giant-btn btn-adiar-gigante" onclick="adiarTarefaGigante()">⏰ +10 MIN ADIAR</button>
+                        <button class="giant-btn btn-concluir-gigante" onclick="concluirTarefaGigante()">✓ CONCLUIR</button>
                     </div>
                 </div>
             </div>
@@ -410,13 +445,10 @@
 
         function dispararAlertaGigante(tarefa) {
             tarefaAlertaAtual = tarefa;
-            document.getElementById('news-container').style.display = 'none';
-            document.getElementById('alert-container').style.display = 'flex';
             
-            const tituloPanel = document.getElementById('left-panel-title');
-            tituloPanel.innerText = '⚠️ ATENÇÃO À AGENDA ⚠️';
-            tituloPanel.style.color = '#F44336';
-            tituloPanel.style.fontWeight = 'bold';
+            // Oculta o painel de notícias e exibe o alerta
+            document.getElementById('left-panel').style.display = 'none';
+            document.getElementById('alert-container').style.display = 'flex';
 
             const cor = (categoriasGlobais.find(c => c.nome === tarefa.categoria) || {}).cor || '#F44336';
             document.getElementById('giant-card').style.backgroundColor = cor;
@@ -428,13 +460,10 @@
 
         function desligarAlertaGigante() {
             tarefaAlertaAtual = null;
-            document.getElementById('alert-container').style.display = 'none';
-            document.getElementById('news-container').style.display = 'flex';
             
-            const tituloPanel = document.getElementById('left-panel-title');
-            tituloPanel.innerText = 'RADAR DE NOTÍCIAS';
-            tituloPanel.style.color = 'white';
-            tituloPanel.style.fontWeight = 'normal';
+            // Oculta o alerta e devolve o controle do painel de notícias para o CSS
+            document.getElementById('alert-container').style.display = 'none';
+            document.getElementById('left-panel').style.display = ''; 
         }
 
         async function concluirTarefaGigante() {
