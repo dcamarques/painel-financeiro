@@ -14,7 +14,7 @@
     <meta property="og:url" content="https://tv.boonus.app.br/agenda/">
     <meta property="og:type" content="website">
 
-    <!-- TAGS DA APPLE (PWA) - Permite tela cheia ao "Adicionar à Tela de Início" no iPhone -->
+    <!-- TAGS DA APPLE (PWA) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Agenda Boonus">
@@ -112,8 +112,8 @@
         .status-andamento { background-color: #FFEB3B; color: black; }
         .status-concluido { background-color: #4CAF50; color: white; }
 
-        /* MODAIS */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        /* MODAIS - ATUALIZADO Z-INDEX PARA 99999 PARA PASSAR POR CIMA DO ALERTA MOBILE */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 99999; }
         .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
         .modal-content h3 { margin-top: 0; margin-bottom: 15px; }
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
@@ -194,7 +194,6 @@
             <div class="header-right">
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">NOVA TAREFA</button>
                 <button class="nav-btn" onclick="abrirModalConfig()">CONFIGURAÇÕES</button>
-                <!-- BOTÃO TELA CHEIA (Recebeu ID para ser oculto no iOS) -->
                 <button class="nav-btn" id="btn-tela-cheia" onclick="toggleFullScreen()">TELA CHEIA</button>
                 <button class="nav-btn btn-danger" onclick="fazerLogout()">SAIR</button>
             </div>
@@ -294,14 +293,12 @@
 
             <!-- ABA EQUIPE -->
             <div id="aba-equipe" style="display: none;">
-                <!-- SE NÃO TIVER EQUIPE -->
                 <div id="panel-criar-equipe">
                     <p style="font-size: 0.9em; color:#aaa;">Você ainda não faz parte de nenhuma equipe. Crie a sua para compartilhar agenda.</p>
                     <label>Nome do Time / Escritório</label>
                     <input type="text" id="nome-equipe" placeholder="Ex: Safra Niterói">
                     <button class="nav-btn btn-action" style="margin-top: 15px; width:100%;" onclick="criarEquipe()">Criar Equipe</button>
                 </div>
-                <!-- SE TIVER EQUIPE -->
                 <div id="panel-gerenciar-equipe" style="display: none;">
                     <h3 id="display-nome-equipe" style="color: var(--primary); text-transform: uppercase; margin-top:0;"></h3>
                     <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
@@ -331,7 +328,7 @@
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         
-        // --- DETECÇÃO DE iOS (Esconde Botão Tela Cheia) ---
+        // --- DETECÇÃO DE iOS ---
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         if (isIOS) {
             const btnTelaCheia = document.getElementById('btn-tela-cheia');
@@ -352,7 +349,7 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- FILTROS DE VISÃO E PRAZO ---
+        // --- FILTROS ---
         function definirVisao(visao) {
             if(!minhaEquipe && visao !== 'MINHAS') return alert("Você precisa configurar uma equipe para usar esta visão.");
             filtroVisao = visao;
@@ -368,7 +365,7 @@
             renderizarTarefas(); 
         }
 
-        // --- AUTENTICAÇÃO E INICIALIZAÇÃO ---
+        // --- AUTENTICAÇÃO ---
         async function fazerLogin() {
             const email = document.getElementById('email-input').value; const senha = document.getElementById('senha-input').value;
             if(!email || !senha) return alert('Por favor, digite seu e-mail e sua senha.');
@@ -422,7 +419,7 @@
         }
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- SISTEMA DE EQUIPES MULTI-TENANT ---
+        // --- SISTEMA DE EQUIPES ---
         async function carregarEquipe() {
             minhaEquipe = null;
             let { data: eqDono } = await supabaseClient.from('equipes').select('*').eq('id_criador', currentUser.id).single();
@@ -476,7 +473,7 @@
             });
         }
 
-        // --- INTEGRAÇÃO SUPABASE: TAREFAS E CATEGORIAS COM FILTRO DE EQUIPE ---
+        // --- TAREFAS E CATEGORIAS ---
         async function carregarCategoriasDB() {
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
@@ -548,10 +545,22 @@
             await supabaseClient.from('tarefas').delete().eq('id', id);
             fecharModais(); await carregarTarefasDB(); 
         }
-        async function concluirTarefaDB(id) { await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id); await carregarTarefasDB(); }
+
+        // --- ATUALIZAÇÕES COM TRAVA ANTI-BUG DO iOS (O SEGREDO ESTÁ NO 'if (el)') ---
+        async function concluirTarefaDB(id) { 
+            let el = document.getElementById('task-'+id);
+            if(el) el.style.opacity = '0.3'; // Trava de segurança: só oculta se a tarefa estiver visível no filtro
+            
+            await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id); 
+            await carregarTarefasDB(); 
+        }
         async function adiarTarefaDB(id, dataAtual) {
+            let el = document.getElementById('task-'+id);
+            if(el) el.style.opacity = '0.5'; // Trava de segurança
+            
             const dataObj = new Date(dataAtual); dataObj.setMinutes(dataObj.getMinutes() + 10);
-            await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); await carregarTarefasDB(); 
+            await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); 
+            await carregarTarefasDB(); 
         }
 
         function renderizarTarefas() {
@@ -637,6 +646,28 @@
         function desligarAlertaGigante() {
             tarefaAlertaAtual = null;
             document.getElementById('alert-container').style.display = 'none'; document.getElementById('left-panel').style.display = ''; 
+        }
+
+        async function concluirTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            const btn = document.querySelector('.btn-concluir-gigante'); btn.innerText = '...';
+            await concluirTarefaDB(tarefaAlertaAtual.id);
+            btn.innerText = '✓ CONCLUIR';
+            motorDeAlertas(); 
+        }
+
+        async function adiarTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            const btn = document.querySelector('.btn-adiar-gigante'); btn.innerText = '...';
+            await adiarTarefaDB(tarefaAlertaAtual.id, tarefaAlertaAtual.data_agendamento);
+            btn.innerText = '⏰ +10 MIN ADIAR';
+            motorDeAlertas(); 
+        }
+
+        function editarTarefaGigante() {
+            if(!tarefaAlertaAtual) return;
+            // Abre o modal com os dados da tarefa gigante
+            abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null);
         }
 
         // --- MÓDULO DE NOTÍCIAS ---
