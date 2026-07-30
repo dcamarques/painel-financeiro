@@ -178,12 +178,11 @@
                     <button class="nav-btn" id="btn-visao-equipe" onclick="definirVisao('EQUIPE')">👥 EQUIPE</button>
                     <button class="nav-btn" id="btn-visao-ambas" onclick="definirVisao('AMBAS')">🌐 AMBAS</button>
                 </div>
-                <!-- FILTROS DE STATUS -->
+                <!-- FILTROS DE STATUS (LIGA/DESLIGA) -->
                 <div class="filtro-group">
-                    <button class="nav-btn active-filter" id="btn-filtro-todas" onclick="definirFiltro('TODAS')">TODAS</button>
-                    <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
-                    <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('PENDENTES')">PENDENTES</button>
-                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
+                    <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('vencidas')">VENCIDAS</button>
+                    <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('pendentes')">PENDENTES</button>
+                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('prioridades')">PRIORIDADES</button>
                 </div>
             </div>
             <div class="header-center">
@@ -321,7 +320,8 @@
         let currentUser = null;
         let minhaEquipe = null; 
         
-        let filtroAtual = 'TODAS'; 
+        // --- NOVA LÓGICA DE FILTROS (Toggles) ---
+        let filtrosAtivos = { vencidas: false, pendentes: false, prioridades: false };
         let filtroVisao = 'MINHAS'; 
         
         let tarefasGlobais = [];
@@ -349,7 +349,7 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- FILTROS ---
+        // --- FILTROS DE VISÃO E LIGA/DESLIGA ---
         function definirVisao(visao) {
             if(!minhaEquipe && visao !== 'MINHAS') return alert("Você precisa configurar uma equipe para usar esta visão.");
             filtroVisao = visao;
@@ -359,9 +359,15 @@
         }
 
         function definirFiltro(tipo) { 
-            filtroAtual = tipo; 
-            document.querySelectorAll('.filtro-group .nav-btn').forEach(btn => btn.classList.remove('active-filter')); 
-            document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); 
+            // Inverte o estado atual do botão (Liga/Desliga)
+            filtrosAtivos[tipo] = !filtrosAtivos[tipo]; 
+            
+            const btn = document.getElementById('btn-filtro-' + tipo);
+            if (filtrosAtivos[tipo]) {
+                btn.classList.add('active-filter');
+            } else {
+                btn.classList.remove('active-filter');
+            }
             renderizarTarefas(); 
         }
 
@@ -473,7 +479,7 @@
             });
         }
 
-        // --- TAREFAS E CATEGORIAS CORRIGIDAS (NUNCA MAIS PERDE O ID DO USUÁRIO) ---
+        // --- TAREFAS E CATEGORIAS ---
         async function carregarCategoriasDB() {
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
@@ -497,7 +503,6 @@
             if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; }
 
             document.getElementById('btn-add-cat').innerText = 'Salvando...';
-            // Correção Aplicada: Sempre mantemos o currentUser.id gravado como "pai"
             const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, nome, cor }]);
             document.getElementById('btn-add-cat').innerText = 'Adicionar';
             
@@ -544,7 +549,6 @@
                 const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
                 if (error) alert("Erro ao editar: " + error.message);
             } else {
-                // Correção Aplicada: Sempre mantemos o currentUser.id gravado como "pai"
                 const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
                 if (error) alert("Erro ao salvar: " + error.message);
             }
@@ -578,27 +582,39 @@
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             
+            // Passo 1: Filtrar Contexto (Minhas / Equipe / Ambas)
             let tarefasFiltradas = tarefasGlobais.filter(t => {
                 if (filtroVisao === 'MINHAS') return !t.id_equipe;
                 if (filtroVisao === 'EQUIPE') return t.id_equipe !== null;
                 return true; 
             });
 
-            if (filtroAtual === 'VENCIDAS') {
-                tarefasFiltradas = tarefasFiltradas.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
-            } else if (filtroAtual !== 'TODAS') {
-                tarefasFiltradas = tarefasFiltradas.filter(t => {
-                    const d = new Date(t.data_agendamento);
-                    return d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
-                });
-                if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasFiltradas.filter(t => t.prioridade === true);
-                else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasFiltradas.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
-            } else {
-                tarefasFiltradas = tarefasFiltradas.filter(t => {
-                    const d = new Date(t.data_agendamento);
-                    return d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
-                });
-            }
+            // Passo 2: O Cruzamento Inteligente dos Botões Liga/Desliga
+            tarefasFiltradas = tarefasFiltradas.filter(t => {
+                const d = new Date(t.data_agendamento);
+                const isHoje = d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
+                const isVencida = d < agora && t.status !== 'Concluido';
+
+                // Regra 1: Qual dia estamos olhando?
+                // Se VENCIDAS estiver ligado, mostramos as vencidas do passado. Se não, mostramos as do dia selecionado no calendário.
+                if (filtrosAtivos.vencidas) {
+                    if (!isVencida) return false;
+                } else {
+                    if (!isHoje) return false;
+                }
+
+                // Regra 2: Cruzar com o botão PENDENTES
+                if (filtrosAtivos.pendentes) {
+                    if (t.status === 'Concluido') return false;
+                }
+
+                // Regra 3: Cruzar com o botão PRIORIDADES
+                if (filtrosAtivos.prioridades) {
+                    if (!t.prioridade) return false;
+                }
+
+                return true; // Se sobreviveu a todas as regras ativas, ela aparece!
+            });
 
             if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return; }
 
