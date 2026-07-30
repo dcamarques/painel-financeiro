@@ -30,24 +30,21 @@
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
-        .header-left, .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
+        .header-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
         
-        /* BOTÕES CLEAN (NOVO VISUAL) */
+        .visao-group { background: #111; border: 1px solid #333; border-radius: 20px; padding: 4px; display: flex; gap: 5px; margin-right: 15px; }
+
+        /* BOTÕES CLEAN */
         .nav-btn { 
-            background: transparent; 
-            color: #a0a0a0; 
-            border: 1px solid #444; 
-            padding: 6px 14px; 
-            border-radius: 20px; /* Efeito Pílula */
-            cursor: pointer; 
-            font-size: 0.8rem; 
-            font-weight: 600; 
-            letter-spacing: 0.5px; 
-            transition: all 0.2s ease; 
+            background: transparent; color: #a0a0a0; border: 1px solid #444; padding: 6px 14px; 
+            border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; 
+            letter-spacing: 0.5px; transition: all 0.2s ease; 
         }
         .nav-btn:hover { background: #222; color: #fff; border-color: #666; }
         
         .nav-btn.active-filter { background: rgba(76, 175, 80, 0.15); border-color: var(--primary); color: var(--primary); box-shadow: none; }
+        .nav-btn.active-visao { background: #333; color: #fff; border-color: #555; }
         
         .btn-action { background: rgba(0, 120, 215, 0.15); border-color: #0078D7; color: #4da6ff; }
         .btn-action:hover { background: #0078D7; color: #fff; border-color: #0078D7; }
@@ -60,7 +57,7 @@
 
         .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        /* PAINEL ESQUERDO (NOTÍCIAS) */
+        /* PAINEL ESQUERDO */
         .left-panel { width: 60%; padding: 30px; border-right: 1px solid #222; display: flex; flex-direction: column; }
         #left-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: normal; text-align: center; font-size: 1.5em; letter-spacing: 1px; transition: color 0.3s; }
         
@@ -70,19 +67,9 @@
         .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
         .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
 
-        /* CONTAINER ALERTA HÍBRIDO (Substitui Notícias no Desktop / Pop-up no Celular) */
-        #alert-container { 
-            display: none; /* Inicialmente oculto */
-            width: 60%; 
-            padding: 30px; 
-            border-right: 1px solid #222; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            animation: pulseRed 2s infinite; 
-        }
+        /* CONTAINER ALERTA */
+        #alert-container { display: none; width: 60%; padding: 30px; border-right: 1px solid #222; flex-direction: column; justify-content: center; align-items: center; animation: pulseRed 2s infinite; }
         #alert-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: bold; text-align: center; font-size: 1.5em; letter-spacing: 1px; color: #F44336; }
-
         .giant-card { background: #F44336; width: 80%; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 30px rgba(244, 67, 54, 0.4); }
         .giant-time { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
         .giant-title { font-size: 3em; font-weight: bold; margin-bottom: 40px; line-height: 1.2; text-transform: uppercase; }
@@ -102,6 +89,7 @@
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
+        .team-icon { color: #2196F3; margin-right: 8px; font-size: 1em; }
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9em; color: #bbb;}
         .task-cat-name { font-weight: bold; letter-spacing: 1px; display: flex; align-items: center;}
         .task-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
@@ -119,10 +107,10 @@
 
         /* MODAIS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 400px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
-        .modal-content h3 { margin-top: 0; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+        .modal-content h3 { margin-top: 0; margin-bottom: 15px; }
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
-        .modal-content input[type="text"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; }
+        .modal-content input[type="text"], .modal-content input[type="email"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .color-palette { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
@@ -130,25 +118,14 @@
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
-        /* ADAPTAÇÃO MOBILE (A Mágica do Alerta) */
+        /* ADAPTAÇÃO MOBILE */
         @media (max-width: 768px) {
             .left-panel { display: none !important; }
             .tasks-panel { width: 100%; }
             .header { flex-direction: column; gap: 15px; }
             .header-center { order: -1; }
             
-            /* Transforma o container de alerta num Pop-up flutuante */
-            #alert-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.95);
-                z-index: 9999;
-                border: none;
-                padding: 20px;
-            }
+            #alert-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 9999; border: none; padding: 20px; }
             .giant-card { width: 100%; padding: 25px; }
             .giant-title { font-size: 2em; }
             .giant-actions { flex-direction: column; gap: 10px; }
@@ -158,34 +135,28 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN ATUALIZADA -->
+    <!-- TELA DE LOGIN -->
     <div id="login-wrapper" class="full-screen-wrapper">
         <div id="login-screen" class="box-container">
             <h2>Acesso à Agenda</h2>
             <p>Digite seu e-mail e senha para acessar.</p>
             <input type="email" id="email-input" placeholder="seu@email.com">
             <input type="password" id="senha-input" placeholder="sua senha">
-            
             <button id="btn-login" onclick="fazerLogin()">Entrar</button>
-            
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button id="btn-cadastrar" style="background: #444;" onclick="fazerCadastro()">Cadastrar-se</button>
             </div>
-            
             <p style="margin-top: 20px; font-size: 0.9em;">
                 <a href="#" style="color: var(--primary); text-decoration: none;" onclick="recuperarSenha()">Esqueci minha senha</a>
             </p>
         </div>
     </div>
 
-    <!-- TELA DE BLOQUEIO (Vencimento) -->
+    <!-- TELA DE BLOQUEIO -->
     <div id="bloqueio-wrapper" class="full-screen-wrapper" style="display: none;">
         <div class="box-container" style="border: 2px solid #F44336;">
             <h2 style="color: #F44336;">Acesso Expirado</h2>
-            <p>Seu período de acesso à Boonus Agenda chegou ao fim. Renove agora para garantir mais 1 ano de alta performance na gestão de suas operações.</p>
-            <p id="data-expiracao-texto" style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;"></p>
-            
-            <button style="background: #F44336; margin-bottom: 10px;" onclick="alert('Aqui entrará o seu link de pagamento (Stripe, Kiwify, etc).')">Renovar Assinatura (1 Ano)</button>
+            <p>Seu período de acesso à Boonus Agenda chegou ao fim.</p>
             <button style="background: #333;" onclick="fazerLogout()">Sair</button>
         </div>
     </div>
@@ -194,6 +165,13 @@
     <div id="painel">
         <div class="header">
             <div class="header-left">
+                <!-- NOVOS FILTROS DE VISÃO MULTI-TENANT -->
+                <div class="visao-group">
+                    <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="definirVisao('MINHAS')">👤 MINHAS</button>
+                    <button class="nav-btn" id="btn-visao-equipe" onclick="definirVisao('EQUIPE')">👥 EQUIPE</button>
+                    <button class="nav-btn" id="btn-visao-ambas" onclick="definirVisao('AMBAS')">🌐 AMBAS</button>
+                </div>
+                <button class="nav-btn active-filter" id="btn-filtro-todas" onclick="definirFiltro('TODAS')">TODAS</button>
                 <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
                 <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('PENDENTES')">PENDENTES</button>
                 <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
@@ -212,13 +190,11 @@
         </div>
 
         <div class="main-content">
-            <!-- PAINEL DE NOTÍCIAS (Visível no Desktop) -->
             <div class="left-panel" id="left-panel">
                 <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
             </div>
 
-            <!-- CONTAINER DO ALERTA (Ocupa o espaço das Notícias no Desktop ou vira Pop-up no Mobile) -->
             <div id="alert-container">
                 <h2 id="alert-panel-title">⚠️ ATENÇÃO À AGENDA ⚠️</h2>
                 <div class="giant-card" id="giant-card">
@@ -253,9 +229,16 @@
             </select>
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
+            
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #000; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
                 <input type="checkbox" id="task-priority" style="width: 20px; height: 20px; margin: 0;">
                 <strong style="color: white; font-size: 0.9em;">Marcar como Prioridade Urgente</strong>
+            </label>
+
+            <!-- NOVO: CONTEXTO DE EQUIPE NA TAREFA -->
+            <label id="container-tarefa-equipe" style="display: none; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px; background: #000; padding: 10px; border-radius: 5px; border-left: 4px solid #2196F3;">
+                <input type="checkbox" id="task-is-equipe" style="width: 20px; height: 20px; margin: 0;">
+                <strong style="color: white; font-size: 0.9em;">Compartilhar com a Equipe 👥</strong>
             </label>
             
             <div class="modal-actions" style="justify-content: space-between; margin-top: 30px;">
@@ -270,19 +253,55 @@
 
     <!-- MODAL DE CONFIGURAÇÕES -->
     <div class="modal-overlay" id="configModal">
-        <div class="modal-content">
-            <h3>Configurações de Categorias</h3>
-            <div id="categories-list" style="margin-bottom: 20px;"></div>
-            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-            <h4>Criar Nova Categoria</h4>
-            <label>Nome da Categoria</label>
-            <input type="text" id="new-cat-name" placeholder="Ex: Visita">
-            <label>Cor de Identificação</label>
-            <div class="color-palette" id="color-picker"></div>
-            <input type="hidden" id="selected-color" value="#F44336">
-            <div class="modal-actions">
-                <button class="nav-btn" onclick="fecharModais()">Fechar</button>
-                <button class="nav-btn btn-action" id="btn-add-cat" onclick="adicionarCategoriaDB()">Adicionar</button>
+        <div class="modal-content" style="padding-top: 15px;">
+            <!-- ABAS -->
+            <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
+                <button class="nav-btn active-visao" onclick="alternarAbaConfig('cat')" id="tab-cat">Categorias</button>
+                <button class="nav-btn" onclick="alternarAbaConfig('eq')" id="tab-eq">Minha Equipe</button>
+                <button class="nav-btn" style="margin-left: auto; border:none;" onclick="fecharModais()">✖</button>
+            </div>
+
+            <!-- ABA CATEGORIAS -->
+            <div id="aba-categorias">
+                <div id="categories-list" style="margin-bottom: 20px;"></div>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+                <h4>Criar Nova Categoria</h4>
+                <label>Nome da Categoria</label>
+                <input type="text" id="new-cat-name" placeholder="Ex: Visita">
+                <label>Cor de Identificação</label>
+                <div class="color-palette" id="color-picker"></div>
+                <input type="hidden" id="selected-color" value="#F44336">
+                
+                <label id="container-cat-equipe" style="display: none; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px;">
+                    <input type="checkbox" id="cat-is-equipe" style="width: 15px; height: 15px; margin: 0;">
+                    <strong style="color: #2196F3; font-size: 0.9em;">Disponibilizar para Equipe 👥</strong>
+                </label>
+
+                <div class="modal-actions">
+                    <button class="nav-btn btn-action" id="btn-add-cat" onclick="adicionarCategoriaDB()">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- ABA EQUIPE -->
+            <div id="aba-equipe" style="display: none;">
+                <!-- SE NÃO TIVER EQUIPE -->
+                <div id="panel-criar-equipe">
+                    <p style="font-size: 0.9em; color:#aaa;">Você ainda não faz parte de nenhuma equipe. Crie a sua para compartilhar agenda.</p>
+                    <label>Nome do Time / Escritório</label>
+                    <input type="text" id="nome-equipe" placeholder="Ex: Safra Niterói">
+                    <button class="nav-btn btn-action" style="margin-top: 15px; width:100%;" onclick="criarEquipe()">Criar Equipe</button>
+                </div>
+                <!-- SE TIVER EQUIPE -->
+                <div id="panel-gerenciar-equipe" style="display: none;">
+                    <h3 id="display-nome-equipe" style="color: var(--primary); text-transform: uppercase; margin-top:0;"></h3>
+                    <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
+                    <label>Convidar Membro (E-mail)</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="email" id="email-membro" placeholder="parceiro@email.com">
+                        <button class="nav-btn btn-action" onclick="adicionarMembro()">Add</button>
+                    </div>
+                    <div id="lista-membros" style="margin-top: 20px;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -293,12 +312,16 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let currentUser = null;
-        let filtroAtual = 'TODAS'; 
+        let minhaEquipe = null; // Guarda os dados da equipe se o usuário tiver
+        
+        let filtroAtual = 'TODAS'; // Prazos
+        let filtroVisao = 'MINHAS'; // Multi-tenant: MINHAS, EQUIPE, AMBAS
+        
         let tarefasGlobais = [];
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         
-        // NAVEGAÇÃO DE DATAS
+        // --- NAVEGAÇÃO DE DATAS ---
         let dataPointer = new Date();
         function atualizarDisplayData() {
             const hoje = new Date();
@@ -312,94 +335,68 @@
             atualizarDisplayData(); renderizarTarefas();
         }
 
-        // --- AUTENTICAÇÃO: E-MAIL, SENHA, CADASTRO E RECUPERAÇÃO ---
-        async function fazerLogin() {
-            const email = document.getElementById('email-input').value;
-            const senha = document.getElementById('senha-input').value;
-            
-            if(!email || !senha) return alert('Por favor, digite seu e-mail e sua senha.');
-            
-            const btn = document.getElementById('btn-login');
-            const textoOriginal = btn.innerText; 
-            btn.innerText = 'Entrando...'; btn.disabled = true; btn.style.opacity = '0.7';
+        // --- FILTROS DE VISÃO E PRAZO ---
+        function definirVisao(visao) {
+            if(!minhaEquipe && visao !== 'MINHAS') return alert("Você precisa configurar uma equipe para usar esta visão.");
+            filtroVisao = visao;
+            document.querySelectorAll('.visao-group .nav-btn').forEach(btn => btn.classList.remove('active-visao'));
+            document.getElementById('btn-visao-' + visao.toLowerCase()).classList.add('active-visao');
+            renderizarTarefas();
+        }
 
+        function definirFiltro(tipo) { 
+            filtroAtual = tipo; 
+            document.querySelectorAll('.header-left > .nav-btn').forEach(btn => btn.classList.remove('active-filter')); 
+            document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); 
+            renderizarTarefas(); 
+        }
+
+        // --- AUTENTICAÇÃO E INICIALIZAÇÃO ---
+        async function fazerLogin() {
+            const email = document.getElementById('email-input').value; const senha = document.getElementById('senha-input').value;
+            if(!email || !senha) return alert('Por favor, digite seu e-mail e sua senha.');
+            const btn = document.getElementById('btn-login'); const textoOriginal = btn.innerText; 
+            btn.innerText = 'Entrando...'; btn.disabled = true; btn.style.opacity = '0.7';
             const { error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
-            
             btn.innerText = textoOriginal; btn.disabled = false; btn.style.opacity = '1';
-            
-            if (error) {
-                alert('Erro ao entrar: ' + error.message);
-            } else {
-                checarSessao();
-            }
+            if (error) alert('Erro ao entrar: ' + error.message); else checarSessao();
         }
 
         async function fazerCadastro() {
-            const email = document.getElementById('email-input').value;
-            const senha = document.getElementById('senha-input').value;
-            
-            if(!email || !senha) return alert('Para se cadastrar, digite seu e-mail e crie uma senha no campo acima.');
-            
-            const btn = document.getElementById('btn-cadastrar');
-            const textoOriginal = btn.innerText; 
+            const email = document.getElementById('email-input').value; const senha = document.getElementById('senha-input').value;
+            if(!email || !senha) return alert('Para se cadastrar, digite seu e-mail e crie uma senha.');
+            const btn = document.getElementById('btn-cadastrar'); const textoOriginal = btn.innerText; 
             btn.innerText = 'Cadastrando...'; btn.disabled = true; btn.style.opacity = '0.7';
-
             const { error } = await supabaseClient.auth.signUp({ email: email, password: senha });
-            
             btn.innerText = textoOriginal; btn.disabled = false; btn.style.opacity = '1';
-            
-            if (error) {
-                alert('Erro ao cadastrar: ' + error.message);
-            } else {
-                alert('Cadastro realizado com sucesso! Você já pode acessar a agenda.');
-                checarSessao();
-            }
+            if (error) alert('Erro ao cadastrar: ' + error.message); else { alert('Sucesso! Pode entrar.'); checarSessao(); }
         }
 
         async function recuperarSenha() {
             const email = document.getElementById('email-input').value;
-            if(!email) return alert('Por favor, digite seu e-mail no campo acima para enviarmos o link de recuperação de senha.');
-            
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { 
-                redirectTo: window.location.href 
-            });
-            
-            if (error) {
-                alert('Erro ao recuperar senha: ' + error.message);
-            } else {
-                alert('O link de recuperação de senha foi enviado para o seu e-mail!');
-            }
+            if(!email) return alert('Digite seu e-mail no campo acima.');
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if (error) alert('Erro: ' + error.message); else alert('Link enviado para o e-mail!');
         }
 
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 currentUser = session.user;
-                
-                // Validação da Catraca Digital
+                // Validação Catraca (Opcional, desativada se não existir na tabela perfis)
                 const { data: perfil } = await supabaseClient.from('perfis').select('data_vencimento').eq('id_usuario', currentUser.id).single();
-                
-                if (perfil && perfil.data_vencimento) {
-                    const vencimento = new Date(perfil.data_vencimento);
-                    if (vencimento < new Date()) {
-                        // BLOQUEADO
-                        document.getElementById('login-wrapper').style.display = 'none';
-                        document.getElementById('bloqueio-wrapper').style.display = 'flex';
-                        document.getElementById('data-expiracao-texto').innerText = `Expirado em: ${vencimento.toLocaleDateString('pt-BR')}`;
-                        return; // Para a execução do código aqui, impedindo acesso à agenda
-                    }
+                if (perfil && perfil.data_vencimento && new Date(perfil.data_vencimento) < new Date()) {
+                    document.getElementById('login-wrapper').style.display = 'none';
+                    document.getElementById('bloqueio-wrapper').style.display = 'flex'; return;
                 }
 
-                // LIBERADO
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('painel').style.display = 'flex';
                 
-                atualizarDisplayData();
-                inicializarPaletaDeCores(); 
+                atualizarDisplayData(); inicializarPaletaDeCores(); carregarNoticias();
+                setInterval(carregarNoticias, 1800000); 
                 
-                carregarNoticias();
-                setInterval(carregarNoticias, 1800000); // ATUALIZAR NOTÍCIAS A CADA 30 MINUTOS
-                
+                await carregarEquipe(); // Carrega contexto da equipe antes
                 await carregarCategoriasDB();
                 await carregarTarefasDB(); 
                 
@@ -407,122 +404,108 @@
                 iniciarEscutaRealtime(); 
             }
         }
-        
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- SISTEMA TEMPO REAL SUPABASE ---
-        function iniciarEscutaRealtime() {
-            supabaseClient
-                .channel('mudancas-banco')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, payload => {
-                    carregarTarefasDB();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => {
-                    carregarCategoriasDB();
-                })
-                .subscribe();
-        }
-
-        // --- MOTOR DE ALERTAS ---
-        let tarefaAlertaAtual = null;
-
-        function motorDeAlertas() {
-            const agora = new Date();
-            const tarefasAtrasadas = tarefasGlobais.filter(t => {
-                if(t.status === 'Concluido') return false;
-                return new Date(t.data_agendamento) <= agora;
-            }).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); 
-
-            if(tarefasAtrasadas.length > 0) {
-                const proximaAlerta = tarefasAtrasadas[0];
-                if(!tarefaAlertaAtual || tarefaAlertaAtual.id !== proximaAlerta.id) {
-                    dispararAlertaGigante(proximaAlerta);
+        // --- SISTEMA DE EQUIPES MULTI-TENANT ---
+        async function carregarEquipe() {
+            minhaEquipe = null;
+            // 1. Tentar achar equipe onde eu sou o dono
+            let { data: eqDono } = await supabaseClient.from('equipes').select('*').eq('id_criador', currentUser.id).single();
+            if (eqDono) { minhaEquipe = eqDono; }
+            else {
+                // 2. Tentar achar equipe onde eu sou membro convidado
+                let { data: membro } = await supabaseClient.from('membros_equipe').select('id_equipe').eq('email', currentUser.email).single();
+                if (membro) {
+                    let { data: eqMembro } = await supabaseClient.from('equipes').select('*').eq('id', membro.id_equipe).single();
+                    minhaEquipe = eqMembro;
                 }
-            } else {
-                desligarAlertaGigante();
+            }
+
+            if (minhaEquipe) {
+                document.getElementById('container-tarefa-equipe').style.display = 'flex';
+                document.getElementById('container-cat-equipe').style.display = 'flex';
+                document.getElementById('panel-criar-equipe').style.display = 'none';
+                document.getElementById('panel-gerenciar-equipe').style.display = 'block';
+                document.getElementById('display-nome-equipe').innerText = `Equipe: ${minhaEquipe.nome}`;
+                carregarMembrosEquipe();
             }
         }
 
-        function dispararAlertaGigante(tarefa) {
-            tarefaAlertaAtual = tarefa;
-            
-            // Oculta o painel de notícias e exibe o alerta
-            document.getElementById('left-panel').style.display = 'none';
-            document.getElementById('alert-container').style.display = 'flex';
-
-            const cor = (categoriasGlobais.find(c => c.nome === tarefa.categoria) || {}).cor || '#F44336';
-            document.getElementById('giant-card').style.backgroundColor = cor;
-            document.getElementById('giant-title').innerText = tarefa.titulo;
-            
-            const hora = new Date(tarefa.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-            document.getElementById('giant-time').innerText = `${tarefa.categoria.toUpperCase()} | ${hora}`;
+        async function criarEquipe() {
+            const nome = document.getElementById('nome-equipe').value.trim();
+            if(!nome) return alert('Digite um nome para a equipe.');
+            const { error } = await supabaseClient.from('equipes').insert([{ nome: nome, id_criador: currentUser.id }]);
+            if(error) alert('Erro: ' + error.message); else { alert('Equipe criada!'); await carregarEquipe(); }
         }
 
-        function desligarAlertaGigante() {
-            tarefaAlertaAtual = null;
-            
-            // Oculta o alerta e devolve o controle do painel de notícias para o CSS
-            document.getElementById('alert-container').style.display = 'none';
-            document.getElementById('left-panel').style.display = ''; 
+        async function adicionarMembro() {
+            const email = document.getElementById('email-membro').value.trim().toLowerCase();
+            if(!email) return;
+            if(email === currentUser.email) return alert('Você já é o dono.');
+            const { error } = await supabaseClient.from('membros_equipe').insert([{ id_equipe: minhaEquipe.id, email: email }]);
+            if(error) alert('Erro: ' + error.message); else { document.getElementById('email-membro').value = ''; carregarMembrosEquipe(); }
         }
 
-        async function concluirTarefaGigante() {
-            if(!tarefaAlertaAtual) return;
-            const btn = document.querySelector('.btn-concluir-gigante'); btn.innerText = '...';
-            await concluirTarefaDB(tarefaAlertaAtual.id);
-            btn.innerText = '✓ CONCLUIR';
-            motorDeAlertas(); 
+        async function removerMembro(id) {
+            if(!confirm('Remover este parceiro da equipe?')) return;
+            await supabaseClient.from('membros_equipe').delete().eq('id', id);
+            carregarMembrosEquipe();
         }
 
-        async function adiarTarefaGigante() {
-            if(!tarefaAlertaAtual) return;
-            const btn = document.querySelector('.btn-adiar-gigante'); btn.innerText = '...';
-            await adiarTarefaDB(tarefaAlertaAtual.id, tarefaAlertaAtual.data_agendamento);
-            btn.innerText = '⏰ +10 MIN ADIAR';
-            motorDeAlertas(); 
+        async function carregarMembrosEquipe() {
+            const list = document.getElementById('lista-membros'); list.innerHTML = 'Carregando membros...';
+            const { data } = await supabaseClient.from('membros_equipe').select('*').eq('id_equipe', minhaEquipe.id);
+            list.innerHTML = '';
+            if(!data || data.length === 0) { list.innerHTML = '<span style="color:#777;font-size:0.9em;">Nenhum membro convidado.</span>'; return; }
+            data.forEach(m => {
+                list.innerHTML += `<div class="cat-list-item"><span>👥 ${m.email}</span><button class="t-btn btn-danger" onclick="removerMembro('${m.id}')">X</button></div>`;
+            });
         }
 
-        function editarTarefaGigante() {
-            if(!tarefaAlertaAtual) return;
-            abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade);
-        }
-
-        // --- INTEGRAÇÃO SUPABASE: CATEGORIAS E TAREFAS ---
+        // --- INTEGRAÇÃO SUPABASE: TAREFAS E CATEGORIAS COM FILTRO DE EQUIPE ---
         async function carregarCategoriasDB() {
-            const { data, error } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
-            if (error) { console.error('Erro ao buscar categorias:', error); return; }
+            // Busca as categorias criadas por mim ou criadas para a minha equipe
+            let queryStr = `id_usuario.eq.${currentUser.id}`;
+            if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
+            
+            const { data, error } = await supabaseClient.from('categorias').select('*').or(queryStr).order('nome', { ascending: true });
+            if (error) return;
             if (data.length === 0) {
                 const catPadrao = [{ id_usuario: currentUser.id, nome: 'Reunir', cor: '#FF9800' }, { id_usuario: currentUser.id, nome: 'Ligar', cor: '#00BCD4' }];
                 await supabaseClient.from('categorias').insert(catPadrao);
-                const { data: newData } = await supabaseClient.from('categorias').select('*').order('nome', { ascending: true });
-                categoriasGlobais = newData || [];
-            } else { categoriasGlobais = data; }
-            renderizarListaConfigCategorias(); renderizarSelectCategorias();
+                return carregarCategoriasDB();
+            }
+            categoriasGlobais = data; renderizarListaConfigCategorias(); renderizarSelectCategorias();
         }
 
         async function adicionarCategoriaDB() {
             const nome = document.getElementById('new-cat-name').value.trim(); const cor = document.getElementById('selected-color').value;
-            if(!nome) return alert('Digite o nome da categoria.');
-            if(categoriasGlobais.find(c => c.nome.toLowerCase() === nome.toLowerCase())) return alert('Categoria já existe.');
+            const isEquipe = document.getElementById('cat-is-equipe').checked;
+            if(!nome) return alert('Digite o nome.');
+            
+            let idEquipeInserir = null; let idUserInserir = currentUser.id;
+            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; idUserInserir = null; }
+
             document.getElementById('btn-add-cat').innerText = 'Salvando...';
-            const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, nome, cor }]);
+            const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: idUserInserir, id_equipe: idEquipeInserir, nome, cor }]);
             document.getElementById('btn-add-cat').innerText = 'Adicionar';
-            if(error) alert('Erro ao salvar: ' + error.message); else { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); renderizarTarefas(); }
+            if(!error) { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); }
         }
 
         async function removerCategoriaDB(id) {
-            if(categoriasGlobais.length <= 1) return alert('Você precisa ter pelo menos uma categoria.');
-            if(!confirm('Tem certeza que deseja excluir esta categoria?')) return;
-            const { error } = await supabaseClient.from('categorias').delete().eq('id', id);
-            if(error) alert('Erro ao excluir: ' + error.message); else { await carregarCategoriasDB(); renderizarTarefas(); }
+            if(!confirm('Tem certeza?')) return;
+            await supabaseClient.from('categorias').delete().eq('id', id);
+            await carregarCategoriasDB(); renderizarTarefas();
         }
 
         async function carregarTarefasDB() {
-            const { data, error } = await supabaseClient.from('tarefas').select('*').order('data_agendamento', { ascending: true });
-            if (error) return; 
-            tarefasGlobais = data;
-            renderizarTarefas();
-            motorDeAlertas(); 
+            // Puxa as tarefas minhas OU da minha equipe
+            let queryStr = `id_usuario.eq.${currentUser.id}`;
+            if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
+            
+            const { data, error } = await supabaseClient.from('tarefas').select('*').or(queryStr).order('data_agendamento', { ascending: true });
+            if (!error) tarefasGlobais = data;
+            renderizarTarefas(); motorDeAlertas(); 
         }
 
         async function salvarTarefaDB() {
@@ -530,30 +513,18 @@
             const titulo = document.getElementById('task-title-input').value;
             const categoria = document.getElementById('task-category-select').value;
             const status = document.getElementById('task-status').value;
-            const dataInput = document.getElementById('task-date').value;
+            const dataIso = new Date(document.getElementById('task-date').value).toISOString();
             const prioridade = document.getElementById('task-priority').checked;
+            const isEquipe = document.getElementById('task-is-equipe').checked;
             
-            if(!titulo || !dataInput) return alert('Preencha o que precisa ser feito e a data.');
-            
-            const dataSelecionada = new Date(dataInput);
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            const diaSelecionado = new Date(dataSelecionada);
-            diaSelecionado.setHours(0, 0, 0, 0);
-            
-            if (!id) {
-                if (diaSelecionado < hoje) return alert('⚠️ TRAVA DE SEGURANÇA: Não é possível incluir uma nova tarefa em um dia que já passou.');
-            } else {
-                if (diaSelecionado < hoje && status !== 'Concluido') {
-                    if (!confirm('⚠️ ATENÇÃO: Você está movendo esta tarefa para um dia no passado. Deseja continuar?')) return;
-                }
-            }
+            if(!titulo) return alert('Preencha o título.');
 
-            const dataIso = dataSelecionada.toISOString();
-            document.getElementById('btn-salvar-tarefa').innerText = 'Salvando...';
-            
-            if (id) await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade }).eq('id', id);
-            else await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
+            let idEquipeInserir = null; let idUserInserir = currentUser.id;
+            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; idUserInserir = null; }
+
+            document.getElementById('btn-salvar-tarefa').innerText = '...';
+            if (id) await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
+            else await supabaseClient.from('tarefas').insert([{ id_usuario: idUserInserir, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
             
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
             fecharModais(); await carregarTarefasDB(); 
@@ -561,56 +532,63 @@
 
         async function excluirTarefa() {
             const id = document.getElementById('task-id').value; if(!id) return;
-            if(!confirm('Tem certeza que deseja apagar?')) return;
-            document.getElementById('btn-excluir-tarefa').innerText = 'Excluindo...';
+            if(!confirm('Apagar tarefa?')) return;
             await supabaseClient.from('tarefas').delete().eq('id', id);
             fecharModais(); await carregarTarefasDB(); 
         }
-
-        async function concluirTarefaDB(id) {
-            document.getElementById('task-'+id).style.opacity = '0.3';
-            await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id);
-            await carregarTarefasDB(); 
-        }
-
-        async function adiarTarefaDB(id, dataAtualBanco) {
-            document.getElementById('task-'+id).style.opacity = '0.5';
-            const dataObj = new Date(dataAtualBanco); dataObj.setMinutes(dataObj.getMinutes() + 10);
-            await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id);
-            await carregarTarefasDB(); 
+        async function concluirTarefaDB(id) { await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id); await carregarTarefasDB(); }
+        async function adiarTarefaDB(id, dataAtual) {
+            const dataObj = new Date(dataAtual); dataObj.setMinutes(dataObj.getMinutes() + 10);
+            await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); await carregarTarefasDB(); 
         }
 
         function renderizarTarefas() {
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
-            let tarefasFiltradas = tarefasGlobais;
+            
+            // FILTRO 1: CRUZAMENTO DE CONTEXTO (VISÃO)
+            let tarefasFiltradas = tarefasGlobais.filter(t => {
+                if (filtroVisao === 'MINHAS') return !t.id_equipe;
+                if (filtroVisao === 'EQUIPE') return t.id_equipe !== null;
+                return true; // AMBAS
+            });
 
+            // FILTRO 2: PRAZOS E STATUS
             if (filtroAtual === 'VENCIDAS') {
-                tarefasFiltradas = tarefasGlobais.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
-            } else {
-                tarefasFiltradas = tarefasGlobais.filter(t => {
+                tarefasFiltradas = tarefasFiltradas.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
+            } else if (filtroAtual !== 'TODAS') {
+                tarefasFiltradas = tarefasFiltradas.filter(t => {
                     const d = new Date(t.data_agendamento);
                     return d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
                 });
                 if (filtroAtual === 'PRIORIDADES') tarefasFiltradas = tarefasFiltradas.filter(t => t.prioridade === true);
                 else if (filtroAtual === 'PENDENTES') tarefasFiltradas = tarefasFiltradas.filter(t => t.status === 'Pendente' || t.status === 'Em andamento');
+            } else {
+                tarefasFiltradas = tarefasFiltradas.filter(t => {
+                    const d = new Date(t.data_agendamento);
+                    return d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
+                });
             }
 
-            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Agenda limpa.</div>`; return; }
+            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return; }
 
             tarefasFiltradas.forEach(t => {
                 const cor = (categoriasGlobais.find(c => c.nome === t.categoria) || {}).cor || '#555';
                 const statusClass = t.status === 'Concluido' ? 'status-concluido' : (t.status === 'Em andamento' ? 'status-andamento' : 'status-pendente');
                 const dataFormatada = new Date(t.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                const prioridadeHTML = t.prioridade ? `<span class="priority-icon">⭐</span>` : '';
+                
+                let iconesExtra = '';
+                if(t.prioridade) iconesExtra += `<span class="priority-icon" title="Prioridade">⭐</span>`;
+                if(t.id_equipe) iconesExtra += `<span class="team-icon" title="Tarefa da Equipe">👥</span>`;
+                
                 const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
                 container.innerHTML += `
                     <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
-                        <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${prioridadeHTML} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
+                        <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
                         <div class="task-title">${t.titulo}</div>
                         <div class="task-actions">
-                            <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade})">✎ Editar</button>
+                            <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade}, ${t.id_equipe !== null})">✎ Editar</button>
                             <button class="t-btn snooze" onclick="adiarTarefaDB('${t.id}', '${t.data_agendamento}')">+10m Adiar</button>
                             <button class="t-btn done" onclick="concluirTarefaDB('${t.id}')">✓ Concluir</button>
                         </div>
@@ -619,55 +597,69 @@
             });
         }
 
-        // --- SISTEMA DE NOTÍCIAS ---
+        // --- SISTEMA TEMPO REAL SUPABASE ---
+        function iniciarEscutaRealtime() {
+            supabaseClient.channel('mudancas-banco')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, payload => { carregarTarefasDB(); })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => { carregarCategoriasDB(); })
+                .subscribe();
+        }
+
+        // --- MOTOR DE ALERTAS ---
+        let tarefaAlertaAtual = null;
+        function motorDeAlertas() {
+            const agora = new Date();
+            const tarefasAtrasadas = tarefasGlobais.filter(t => t.status !== 'Concluido' && new Date(t.data_agendamento) <= agora).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); 
+            if(tarefasAtrasadas.length > 0) {
+                if(!tarefaAlertaAtual || tarefaAlertaAtual.id !== tarefasAtrasadas[0].id) dispararAlertaGigante(tarefasAtrasadas[0]);
+            } else { desligarAlertaGigante(); }
+        }
+        function dispararAlertaGigante(tarefa) {
+            tarefaAlertaAtual = tarefa;
+            document.getElementById('left-panel').style.display = 'none'; document.getElementById('alert-container').style.display = 'flex';
+            const cor = (categoriasGlobais.find(c => c.nome === tarefa.categoria) || {}).cor || '#F44336';
+            document.getElementById('giant-card').style.backgroundColor = cor;
+            document.getElementById('giant-title').innerText = tarefa.titulo;
+            const hora = new Date(tarefa.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            let lblContexto = tarefa.id_equipe ? '👥 EQUIPE' : '👤 PESSOAL';
+            document.getElementById('giant-time').innerText = `${lblContexto} | ${tarefa.categoria.toUpperCase()} | ${hora}`;
+        }
+        function desligarAlertaGigante() {
+            tarefaAlertaAtual = null;
+            document.getElementById('alert-container').style.display = 'none'; document.getElementById('left-panel').style.display = ''; 
+        }
+
+        // --- MÓDULO DE NOTÍCIAS ---
         let noticiasGlobais = []; let indiceNoticiaAtual = 0; let loopNoticias;
         async function carregarNoticias() {
             try {
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/');
-                const data = await response.json();
-                noticiasGlobais = data.items.map(item => {
-                    let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
-                    if (!imgSrc) { const match = item.content.match(/<img[^>]+src="([^">]+)"/) || item.description.match(/<img[^>]+src="([^">]+)"/); if (match) imgSrc = match[1]; }
-                    return { titulo: item.title, imagem: imgSrc, dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR') };
-                });
-                if (noticiasGlobais.length > 0) {
-                    indiceNoticiaAtual = 0; renderizarNoticiaSlide();
-                    if(loopNoticias) clearInterval(loopNoticias); loopNoticias = setInterval(proximaNoticia, 15000);
-                }
-            } catch (error) { document.getElementById('news-container').innerHTML = '<p style="color:red;">Erro ao carregar radares.</p>'; }
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/'); const data = await response.json();
+                noticiasGlobais = data.items.map(item => { let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || ''; if (!imgSrc) { const match = item.content.match(/<img[^>]+src="([^">]+)"/); if (match) imgSrc = match[1]; } return { titulo: item.title, imagem: imgSrc, dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR') }; });
+                if (noticiasGlobais.length > 0) { indiceNoticiaAtual = 0; renderizarNoticiaSlide(); if(loopNoticias) clearInterval(loopNoticias); loopNoticias = setInterval(proximaNoticia, 15000); }
+            } catch (error) {}
         }
         function renderizarNoticiaSlide() {
-            if(tarefaAlertaAtual) return; 
-            const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
-            const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem destaque">` : '';
+            if(tarefaAlertaAtual) return; const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
+            const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem">` : '';
             container.innerHTML = `<div class="news-slide">${htmlImagem}<div class="news-title">${noticia.titulo}</div><div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div></div>`;
         }
         function proximaNoticia() { if(!tarefaAlertaAtual) { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); } }
 
         // --- WAKE LOCK ---
         let bloqueioDeTela = null;
-        async function ativarBloqueioDeTela() { try { if ('wakeLock' in navigator) { bloqueioDeTela = await navigator.wakeLock.request('screen'); } } catch (err) {} }
-        function liberarBloqueioDeTela() { if (bloqueioDeTela !== null) { bloqueioDeTela.release().then(() => { bloqueioDeTela = null; }); } }
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().then(() => { ativarBloqueioDeTela(); }).catch(err => { alert(`Erro: ${err.message}`); }); } 
-            else { document.exitFullscreen().then(() => { liberarBloqueioDeTela(); }); }
-        }
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && document.fullscreenElement) { ativarBloqueioDeTela(); } });
-
-        // --- UI AUXILIAR ---
-        function definirFiltro(tipo) { if (filtroAtual === tipo) filtroAtual = 'TODAS'; else filtroAtual = tipo; document.querySelectorAll('.header-left .nav-btn').forEach(btn => btn.classList.remove('active-filter')); if(filtroAtual !== 'TODAS') document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); renderizarTarefas(); }
+        async function ativarBloqueioDeTela() { try { if ('wakeLock' in navigator) bloqueioDeTela = await navigator.wakeLock.request('screen'); } catch (err) {} }
+        function liberarBloqueioDeTela() { if (bloqueioDeTela !== null) bloqueioDeTela.release().then(() => { bloqueioDeTela = null; }); }
+        function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(ativarBloqueioDeTela); else document.exitFullscreen().then(liberarBloqueioDeTela); }
+        
+        // --- UI AUXILIAR MODAIS ---
         function fecharModais() { document.getElementById('taskModal').style.display = 'none'; document.getElementById('configModal').style.display = 'none'; }
         
-        function formatarDataParaInputHTML(dataIsoString) {
-            if(!dataIsoString) {
-                const agora = new Date(); const d = new Date(dataPointer); d.setHours(agora.getHours(), agora.getMinutes());
-                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-            }
-            const data = new Date(dataIsoString);
-            return data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0') + '-' + String(data.getDate()).padStart(2, '0') + 'T' + String(data.getHours()).padStart(2, '0') + ':' + String(data.getMinutes()).padStart(2, '0');
+        function formatarDataParaInputHTML(dataIso) {
+            let d = dataIso ? new Date(dataIso) : (() => { let hd = new Date(dataPointer); hd.setHours(new Date().getHours(), new Date().getMinutes()); return hd; })();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        function abrirModalTarefa(id = '', titulo = '', categoria = categoriasGlobais[0]?.nome || '', status = 'Pendente', dataIso = '', prioridade = false) {
+        function abrirModalTarefa(id = '', titulo = '', categoria = categoriasGlobais[0]?.nome || '', status = 'Pendente', dataIso = '', prioridade = false, isEquipe = false) {
             document.getElementById('taskModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = id ? 'Editar Tarefa' : 'Nova Tarefa';
             document.getElementById('task-id').value = id;
@@ -675,13 +667,27 @@
             document.getElementById('task-status').value = status;
             document.getElementById('task-date').value = formatarDataParaInputHTML(dataIso);
             document.getElementById('task-priority').checked = prioridade;
+            document.getElementById('task-is-equipe').checked = isEquipe;
             document.getElementById('btn-excluir-tarefa').style.display = id ? 'block' : 'none'; 
             renderizarSelectCategorias(); document.getElementById('task-category-select').value = categoria;
         }
 
-        function abrirModalConfig() { document.getElementById('configModal').style.display = 'flex'; renderizarListaConfigCategorias(); }
-        function renderizarListaConfigCategorias() { const list = document.getElementById('categories-list'); list.innerHTML = ''; categoriasGlobais.forEach(cat => { list.innerHTML += `<div class="cat-list-item"><div><span class="cat-list-color" style="background-color: ${cat.cor};"></span><strong>${cat.nome}</strong></div><button class="t-btn" style="background: darkred;" onclick="removerCategoriaDB('${cat.id}')">Excluir</button></div>`; }); }
-        function renderizarSelectCategorias() { const select = document.getElementById('task-category-select'); select.innerHTML = ''; categoriasGlobais.forEach(cat => { select.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`; }); }
+        function abrirModalConfig() { document.getElementById('configModal').style.display = 'flex'; alternarAbaConfig('cat'); }
+        function alternarAbaConfig(aba) {
+            document.getElementById('tab-cat').classList.remove('active-visao'); document.getElementById('tab-eq').classList.remove('active-visao');
+            document.getElementById('aba-categorias').style.display = 'none'; document.getElementById('aba-equipe').style.display = 'none';
+            if(aba === 'cat') { document.getElementById('tab-cat').classList.add('active-visao'); document.getElementById('aba-categorias').style.display = 'block'; }
+            else { document.getElementById('tab-eq').classList.add('active-visao'); document.getElementById('aba-equipe').style.display = 'block'; }
+        }
+
+        function renderizarListaConfigCategorias() {
+            const list = document.getElementById('categories-list'); list.innerHTML = ''; 
+            categoriasGlobais.forEach(cat => { 
+                let icone = cat.id_equipe ? '👥 ' : '';
+                list.innerHTML += `<div class="cat-list-item"><div><span class="cat-list-color" style="background-color: ${cat.cor};"></span><strong>${icone}${cat.nome}</strong></div><button class="t-btn btn-danger" onclick="removerCategoriaDB('${cat.id}')">X</button></div>`; 
+            }); 
+        }
+        function renderizarSelectCategorias() { const select = document.getElementById('task-category-select'); select.innerHTML = ''; categoriasGlobais.forEach(cat => { let icone = cat.id_equipe ? '👥 ' : ''; select.innerHTML += `<option value="${cat.nome}">${icone}${cat.nome}</option>`; }); }
         function inicializarPaletaDeCores() { const picker = document.getElementById('color-picker'); picker.innerHTML = ''; defaultColors.forEach(cor => { const div = document.createElement('div'); div.className = 'color-swatch'; div.style.backgroundColor = cor; if(cor === '#F44336') div.classList.add('selected'); div.onclick = () => selecionarCor(div, cor); picker.appendChild(div); }); }
         function selecionarCor(elemento, cor) { document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected')); elemento.classList.add('selected'); document.getElementById('selected-color').value = cor; }
 
