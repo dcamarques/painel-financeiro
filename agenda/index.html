@@ -30,10 +30,11 @@
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
-        .header-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
         
-        .visao-group { background: #111; border: 1px solid #333; border-radius: 20px; padding: 4px; display: flex; gap: 5px; margin-right: 15px; }
+        .visao-group { background: #111; border: 1px solid #333; border-radius: 20px; padding: 4px; display: flex; gap: 5px; }
+        .filtro-group { display: flex; align-items: center; gap: 8px; }
 
         /* BOTÕES CLEAN */
         .nav-btn { 
@@ -171,10 +172,13 @@
                     <button class="nav-btn" id="btn-visao-equipe" onclick="definirVisao('EQUIPE')">👥 EQUIPE</button>
                     <button class="nav-btn" id="btn-visao-ambas" onclick="definirVisao('AMBAS')">🌐 AMBAS</button>
                 </div>
-                <button class="nav-btn active-filter" id="btn-filtro-todas" onclick="definirFiltro('TODAS')">TODAS</button>
-                <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
-                <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('PENDENTES')">PENDENTES</button>
-                <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
+                <!-- CAIXA INVISÍVEL AGRUPANDO OS FILTROS DE STATUS -->
+                <div class="filtro-group">
+                    <button class="nav-btn active-filter" id="btn-filtro-todas" onclick="definirFiltro('TODAS')">TODAS</button>
+                    <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
+                    <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('PENDENTES')">PENDENTES</button>
+                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('PRIORIDADES')">PRIORIDADES</button>
+                </div>
             </div>
             <div class="header-center">
                 <button class="nav-btn" onclick="mudarData(-1)">&lt;</button>
@@ -346,7 +350,7 @@
 
         function definirFiltro(tipo) { 
             filtroAtual = tipo; 
-            document.querySelectorAll('.header-left > .nav-btn').forEach(btn => btn.classList.remove('active-filter')); 
+            document.querySelectorAll('.filtro-group .nav-btn').forEach(btn => btn.classList.remove('active-filter')); 
             document.getElementById('btn-filtro-' + tipo.toLowerCase()).classList.add('active-filter'); 
             renderizarTarefas(); 
         }
