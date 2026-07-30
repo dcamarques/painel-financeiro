@@ -112,7 +112,7 @@
         .status-andamento { background-color: #FFEB3B; color: black; }
         .status-concluido { background-color: #4CAF50; color: white; }
 
-        /* MODAIS - ATUALIZADO Z-INDEX PARA 99999 PARA PASSAR POR CIMA DO ALERTA MOBILE */
+        /* MODAIS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 99999; }
         .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
         .modal-content h3 { margin-top: 0; margin-bottom: 15px; }
@@ -473,7 +473,7 @@
             });
         }
 
-        // --- TAREFAS E CATEGORIAS ---
+        // --- TAREFAS E CATEGORIAS CORRIGIDAS (NUNCA MAIS PERDE O ID DO USUÁRIO) ---
         async function carregarCategoriasDB() {
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
@@ -491,15 +491,22 @@
         async function adicionarCategoriaDB() {
             const nome = document.getElementById('new-cat-name').value.trim(); const cor = document.getElementById('selected-color').value;
             const isEquipe = document.getElementById('cat-is-equipe').checked;
-            if(!nome) return alert('Digite o nome.');
+            if(!nome) return alert('Digite o nome da categoria.');
             
-            let idEquipeInserir = null; let idUserInserir = currentUser.id;
-            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; idUserInserir = null; }
+            let idEquipeInserir = null; 
+            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; }
 
             document.getElementById('btn-add-cat').innerText = 'Salvando...';
-            const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: idUserInserir, id_equipe: idEquipeInserir, nome, cor }]);
+            // Correção Aplicada: Sempre mantemos o currentUser.id gravado como "pai"
+            const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, nome, cor }]);
             document.getElementById('btn-add-cat').innerText = 'Adicionar';
-            if(!error) { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); }
+            
+            if(error) { 
+                alert('Erro ao salvar no banco: ' + error.message); 
+            } else { 
+                document.getElementById('new-cat-name').value = ''; 
+                await carregarCategoriasDB(); 
+            }
         }
 
         async function removerCategoriaDB(id) {
@@ -526,14 +533,21 @@
             const prioridade = document.getElementById('task-priority').checked;
             const isEquipe = document.getElementById('task-is-equipe').checked;
             
-            if(!titulo) return alert('Preencha o título.');
+            if(!titulo) return alert('Preencha o título da tarefa.');
 
-            let idEquipeInserir = null; let idUserInserir = currentUser.id;
-            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; idUserInserir = null; }
+            let idEquipeInserir = null; 
+            if(isEquipe && minhaEquipe) { idEquipeInserir = minhaEquipe.id; }
 
             document.getElementById('btn-salvar-tarefa').innerText = '...';
-            if (id) await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
-            else await supabaseClient.from('tarefas').insert([{ id_usuario: idUserInserir, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
+            
+            if (id) {
+                const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
+                if (error) alert("Erro ao editar: " + error.message);
+            } else {
+                // Correção Aplicada: Sempre mantemos o currentUser.id gravado como "pai"
+                const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
+                if (error) alert("Erro ao salvar: " + error.message);
+            }
             
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
             fecharModais(); await carregarTarefasDB(); 
@@ -545,19 +559,16 @@
             await supabaseClient.from('tarefas').delete().eq('id', id);
             fecharModais(); await carregarTarefasDB(); 
         }
-
-        // --- ATUALIZAÇÕES COM TRAVA ANTI-BUG DO iOS (O SEGREDO ESTÁ NO 'if (el)') ---
+        
         async function concluirTarefaDB(id) { 
             let el = document.getElementById('task-'+id);
-            if(el) el.style.opacity = '0.3'; // Trava de segurança: só oculta se a tarefa estiver visível no filtro
-            
+            if(el) el.style.opacity = '0.3';
             await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id); 
             await carregarTarefasDB(); 
         }
         async function adiarTarefaDB(id, dataAtual) {
             let el = document.getElementById('task-'+id);
-            if(el) el.style.opacity = '0.5'; // Trava de segurança
-            
+            if(el) el.style.opacity = '0.5';
             const dataObj = new Date(dataAtual); dataObj.setMinutes(dataObj.getMinutes() + 10);
             await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); 
             await carregarTarefasDB(); 
@@ -666,7 +677,6 @@
 
         function editarTarefaGigante() {
             if(!tarefaAlertaAtual) return;
-            // Abre o modal com os dados da tarefa gigante
             abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null);
         }
 
