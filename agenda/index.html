@@ -14,6 +14,12 @@
     <meta property="og:url" content="https://tv.boonus.app.br/agenda/">
     <meta property="og:type" content="website">
 
+    <!-- TAGS DA APPLE (PWA) - Permite tela cheia ao "Adicionar à Tela de Início" no iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Agenda Boonus">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-color: #000000; --text-color: #ffffff; --primary: #4CAF50; --btn-dark: #222222; --card-bg: #2a2a2a; }
@@ -166,13 +172,13 @@
     <div id="painel">
         <div class="header">
             <div class="header-left">
-                <!-- NOVOS FILTROS DE VISÃO MULTI-TENANT -->
+                <!-- FILTROS DE VISÃO MULTI-TENANT -->
                 <div class="visao-group">
                     <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="definirVisao('MINHAS')">👤 MINHAS</button>
                     <button class="nav-btn" id="btn-visao-equipe" onclick="definirVisao('EQUIPE')">👥 EQUIPE</button>
                     <button class="nav-btn" id="btn-visao-ambas" onclick="definirVisao('AMBAS')">🌐 AMBAS</button>
                 </div>
-                <!-- CAIXA INVISÍVEL AGRUPANDO OS FILTROS DE STATUS -->
+                <!-- FILTROS DE STATUS -->
                 <div class="filtro-group">
                     <button class="nav-btn active-filter" id="btn-filtro-todas" onclick="definirFiltro('TODAS')">TODAS</button>
                     <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('VENCIDAS')">VENCIDAS</button>
@@ -188,7 +194,8 @@
             <div class="header-right">
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">NOVA TAREFA</button>
                 <button class="nav-btn" onclick="abrirModalConfig()">CONFIGURAÇÕES</button>
-                <button class="nav-btn" onclick="toggleFullScreen()">TELA CHEIA</button>
+                <!-- BOTÃO TELA CHEIA (Recebeu ID para ser oculto no iOS) -->
+                <button class="nav-btn" id="btn-tela-cheia" onclick="toggleFullScreen()">TELA CHEIA</button>
                 <button class="nav-btn btn-danger" onclick="fazerLogout()">SAIR</button>
             </div>
         </div>
@@ -239,7 +246,6 @@
                 <strong style="color: white; font-size: 0.9em;">Marcar como Prioridade Urgente</strong>
             </label>
 
-            <!-- NOVO: CONTEXTO DE EQUIPE NA TAREFA -->
             <label id="container-tarefa-equipe" style="display: none; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px; background: #000; padding: 10px; border-radius: 5px; border-left: 4px solid #2196F3;">
                 <input type="checkbox" id="task-is-equipe" style="width: 20px; height: 20px; margin: 0;">
                 <strong style="color: white; font-size: 0.9em;">Compartilhar com a Equipe 👥</strong>
@@ -292,7 +298,7 @@
                 <div id="panel-criar-equipe">
                     <p style="font-size: 0.9em; color:#aaa;">Você ainda não faz parte de nenhuma equipe. Crie a sua para compartilhar agenda.</p>
                     <label>Nome do Time / Escritório</label>
-                    <input type="text" id="nome-equipe" placeholder="Ex: Equipe1">
+                    <input type="text" id="nome-equipe" placeholder="Ex: Safra Niterói">
                     <button class="nav-btn btn-action" style="margin-top: 15px; width:100%;" onclick="criarEquipe()">Criar Equipe</button>
                 </div>
                 <!-- SE TIVER EQUIPE -->
@@ -316,15 +322,22 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let currentUser = null;
-        let minhaEquipe = null; // Guarda os dados da equipe se o usuário tiver
+        let minhaEquipe = null; 
         
-        let filtroAtual = 'TODAS'; // Prazos
-        let filtroVisao = 'MINHAS'; // Multi-tenant: MINHAS, EQUIPE, AMBAS
+        let filtroAtual = 'TODAS'; 
+        let filtroVisao = 'MINHAS'; 
         
         let tarefasGlobais = [];
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
         
+        // --- DETECÇÃO DE iOS (Esconde Botão Tela Cheia) ---
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        if (isIOS) {
+            const btnTelaCheia = document.getElementById('btn-tela-cheia');
+            if (btnTelaCheia) btnTelaCheia.style.display = 'none';
+        }
+
         // --- NAVEGAÇÃO DE DATAS ---
         let dataPointer = new Date();
         function atualizarDisplayData() {
@@ -387,7 +400,6 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 currentUser = session.user;
-                // Validação Catraca (Opcional, desativada se não existir na tabela perfis)
                 const { data: perfil } = await supabaseClient.from('perfis').select('data_vencimento').eq('id_usuario', currentUser.id).single();
                 if (perfil && perfil.data_vencimento && new Date(perfil.data_vencimento) < new Date()) {
                     document.getElementById('login-wrapper').style.display = 'none';
@@ -400,7 +412,7 @@
                 atualizarDisplayData(); inicializarPaletaDeCores(); carregarNoticias();
                 setInterval(carregarNoticias, 1800000); 
                 
-                await carregarEquipe(); // Carrega contexto da equipe antes
+                await carregarEquipe(); 
                 await carregarCategoriasDB();
                 await carregarTarefasDB(); 
                 
@@ -413,11 +425,9 @@
         // --- SISTEMA DE EQUIPES MULTI-TENANT ---
         async function carregarEquipe() {
             minhaEquipe = null;
-            // 1. Tentar achar equipe onde eu sou o dono
             let { data: eqDono } = await supabaseClient.from('equipes').select('*').eq('id_criador', currentUser.id).single();
             if (eqDono) { minhaEquipe = eqDono; }
             else {
-                // 2. Tentar achar equipe onde eu sou membro convidado
                 let { data: membro } = await supabaseClient.from('membros_equipe').select('id_equipe').eq('email', currentUser.email).single();
                 if (membro) {
                     let { data: eqMembro } = await supabaseClient.from('equipes').select('*').eq('id', membro.id_equipe).single();
@@ -468,7 +478,6 @@
 
         // --- INTEGRAÇÃO SUPABASE: TAREFAS E CATEGORIAS COM FILTRO DE EQUIPE ---
         async function carregarCategoriasDB() {
-            // Busca as categorias criadas por mim ou criadas para a minha equipe
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
             
@@ -503,7 +512,6 @@
         }
 
         async function carregarTarefasDB() {
-            // Puxa as tarefas minhas OU da minha equipe
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
             
@@ -550,14 +558,12 @@
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             
-            // FILTRO 1: CRUZAMENTO DE CONTEXTO (VISÃO)
             let tarefasFiltradas = tarefasGlobais.filter(t => {
                 if (filtroVisao === 'MINHAS') return !t.id_equipe;
                 if (filtroVisao === 'EQUIPE') return t.id_equipe !== null;
-                return true; // AMBAS
+                return true; 
             });
 
-            // FILTRO 2: PRAZOS E STATUS
             if (filtroAtual === 'VENCIDAS') {
                 tarefasFiltradas = tarefasFiltradas.filter(t => new Date(t.data_agendamento) < agora && t.status !== 'Concluido');
             } else if (filtroAtual !== 'TODAS') {
