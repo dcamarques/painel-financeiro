@@ -1,1 +1,146 @@
+/* Variáveis de cores - Estilo Analítico Dark */
+:root {
+    --bg-dark: #0B1120;
+    --bg-card: #1E293B;
+    --cyan-neon: #06B6D4;
+    --cyan-hover: #0891B2;
+    --green-neon: #10B981;
+    --green-hover: #059669;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-color: #334155;
+}
 
+/* Reset básico e configurações de página */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Contêiner principal do Login */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.login-card {
+    background-color: var(--bg-card);
+    padding: 40px 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* Tipografia da Marca */
+.brand-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    letter-spacing: -1px;
+}
+
+.brand-title span {
+    color: var(--cyan-neon);
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+}
+
+/* Controles de formulário */
+label {
+    display: block;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+input:focus {
+    border-color: var(--cyan-neon);
+}
+
+/* Botões */
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--cyan-neon);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: var(--cyan-hover);
+}
+
+.btn-success {
+    background-color: var(--green-neon);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: var(--green-hover);
+}
+
+.btn-text {
+    background-color: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 15px;
+    font-weight: 400;
+}
+
+.btn-text:hover {
+    color: var(--text-main);
+}
+
+/* Classes para o Javascript alternar os passos */
+.step-hidden {
+    display: none;
+}
+
+.step-active {
+    display: block;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
