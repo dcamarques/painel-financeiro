@@ -11,55 +11,43 @@
 
     <div class="login-container">
         <div class="login-card">
-            <!-- Título do App (pode ser substituído por uma logo no futuro) -->
+            <!-- Título do App -->
             <h1 class="brand-title">Fin<span>Sync</span></h1>
             <p class="subtitle">Gestão Patrimonial Inteligente</p>
 
-            <!-- Passo 1: Inserir Celular -->
-            <div id="step-phone" class="step-active">
-                <label for="celular">Número do WhatsApp</label>
-                <input type="tel" id="celular" placeholder="(DD) 90000-0000" autocomplete="off">
-                <button onclick="enviarCodigo()" class="btn-primary">Enviar Código de Acesso</button>
-            </div>
-
-            <!-- Passo 2: Inserir Código (Escondido inicialmente) -->
-            <div id="step-code" class="step-hidden">
-                <label for="codigo">Código recebido no WhatsApp</label>
-                <input type="text" id="codigo" placeholder="000000" maxlength="6" autocomplete="off" style="text-align: center; letter-spacing: 5px; font-size: 1.2rem;">
-                <button onclick="confirmarLogin()" class="btn-success">Acessar Painel</button>
-                <button onclick="voltar()" class="btn-text">Voltar e corrigir número</button>
+            <!-- Formulário de Login (Email e Senha) -->
+            <div id="login-form" class="step-active">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu@email.com" autocomplete="email">
+                
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+                
+                <button onclick="fazerLogin()" class="btn-primary">Entrar no Painel</button>
+                
+                <!-- Botões secundários (apenas visuais por enquanto) -->
+                <button class="btn-text" style="margin-top: 15px;">Esqueci minha senha</button>
+                <button class="btn-text" style="margin-top: 5px;">Criar uma nova conta</button>
             </div>
         </div>
     </div>
 
-    <!-- Script simples para simular a troca de telas -->
+    <!-- Script para verificar preenchimento e redirecionar -->
     <script>
-        function enviarCodigo() {
-            // Pega o valor do celular e verifica se não está vazio
-            const celular = document.getElementById('celular').value;
-            if(celular.length < 10) {
-                alert("Por favor, insira um número válido.");
-                return;
-            }
-            // Oculta o passo 1 e mostra o passo 2
-            document.getElementById('step-phone').className = 'step-hidden';
-            document.getElementById('step-code').className = 'step-active';
-        }
+        function fazerLogin() {
+            // Captura o que foi digitado
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
 
-        function voltar() {
-            // Volta para a tela de telefone
-            document.getElementById('step-phone').className = 'step-active';
-            document.getElementById('step-code').className = 'step-hidden';
-        }
-
-        function confirmarLogin() {
-            const codigo = document.getElementById('codigo').value;
-            if(codigo.length === 6) {
-                alert("Login confirmado! Aqui o sistema redirecionaria para o Dashboard.");
-                // No futuro, usaremos window.location.href = "dashboard.html";
-            } else {
-                alert("O código deve ter 6 dígitos.");
+            // Verifica se os campos não estão vazios
+            if (email === "" || senha === "") {
+                alert("Por favor, preencha o e-mail e a senha para acessar.");
+                return; // Para a execução se estiver vazio
             }
+
+            // Se estiver preenchido, redireciona para o Dashboard
+            // Nota: Certifique-se de que o arquivo dashboard.html já está na mesma pasta no GitHub
+            window.location.href = "dashboard.html";
         }
     </script>
 </body>
