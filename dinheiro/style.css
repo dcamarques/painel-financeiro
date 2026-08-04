@@ -416,3 +416,275 @@ input:checked + .slider:before {
         gap: 20px;
     }
 }
+/* Layout do Dashboard */
+body {
+    align-items: flex-start; /* Sobrescreve o center usado no login para o painel abrir no topo */
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-card);
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+}
+
+.sidebar .brand {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 40px;
+}
+.sidebar .brand span {
+    color: var(--cyan-neon);
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.menu-item {
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+    font-weight: 400;
+}
+
+.menu-item:hover, .menu-item.active {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: var(--cyan-neon);
+}
+
+.menu-item i {
+    font-size: 1.2rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.avatar {
+    font-size: 2rem;
+}
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+.user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.user-status {
+    font-size: 0.8rem;
+    color: var(--green-neon);
+}
+
+/* Área Principal */
+.main-content {
+    flex: 1;
+    padding: 30px 40px;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.topbar h2 {
+    font-weight: 400;
+}
+
+/* Toggle Switch (Meu/Nosso) */
+.view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: var(--bg-card);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--cyan-neon);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+    background-color: var(--green-neon);
+}
+
+/* Cards do Dashboard */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.card-header i {
+    font-size: 1.5rem;
+}
+
+.card-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+.card-value.success { color: var(--green-neon); }
+.card-value.danger { color: var(--red-alert); }
+
+/* Lançamentos Recentes */
+.recent-transactions {
+    background-color: var(--bg-card);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.recent-transactions h3 {
+    margin-bottom: 20px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.t-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.t-info i {
+    font-size: 1.5rem;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--red-alert);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.t-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.t-info span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.t-value {
+    font-weight: 600;
+}
+
+/* Responsividade Básica (Adaptação para Celulares) */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 15px;
+    }
+    .menu {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+}
