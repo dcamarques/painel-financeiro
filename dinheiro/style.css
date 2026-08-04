@@ -271,7 +271,6 @@ input:checked + .slider:before {
     background-color: var(--green-neon);
 }
 
-/* Nova Grade Flexível para os 4 Cartões */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
@@ -304,7 +303,6 @@ input:checked + .slider:before {
 .card-value.success { color: var(--green-neon); }
 .card-value.danger { color: var(--red-alert); }
 
-/* Estilo do container do Gráfico */
 .chart-container {
     background-color: var(--bg-card);
     padding: 25px;
@@ -335,20 +333,24 @@ input:checked + .slider:before {
     border: 1px solid var(--border-color);
 }
 
-.chart-nav button {
+/* Nova classe para botões de navegação pequenos e limpos */
+.btn-nav-small {
     background: none;
     border: none;
     color: var(--cyan-neon);
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: monospace; /* Garante que os símbolos << fiquem alinhados */
     cursor: pointer;
-    padding: 5px;
+    padding: 5px 10px;
     transition: 0.2s;
     width: auto;
+    letter-spacing: -1px;
 }
 
-.chart-nav button:hover {
+.btn-nav-small:hover {
     color: #fff;
-    transform: scale(1.2);
+    transform: scale(1.1);
 }
 
 .chart-nav span {
@@ -356,7 +358,6 @@ input:checked + .slider:before {
     font-weight: 600;
 }
 
-/* Lançamentos Recentes */
 .recent-transactions {
     background-color: var(--bg-card);
     padding: 25px;
@@ -415,7 +416,7 @@ input:checked + .slider:before {
 
 .t-value { font-weight: 600; }
 
-/* Responsividade Básica (Adaptação para Celulares) */
+/* Responsividade */
 @media (max-width: 768px) {
     body { flex-direction: column; }
     .sidebar {
