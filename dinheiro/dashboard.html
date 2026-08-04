@@ -6,8 +6,10 @@
     <title>Painel Financeiro - Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Ícones (Phosphor Icons - visual muito usado em fintechs e terminais) -->
+    <!-- Ícones (Phosphor Icons) -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js para o Gráfico de Projeção -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -43,24 +45,31 @@
                     <input type="checkbox" id="view-switch" onchange="toggleView()">
                     <span class="slider round"></span>
                 </label>
-                <!-- Visão conjunta -->
                 <span class="toggle-label" id="label-conjunta">Você e Cyntia</span>
             </div>
         </header>
 
-        <!-- Grade de Cartões (Dashboard) -->
+        <!-- Grade de Cartões (Dashboard - 4 Cartões) -->
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <span>Saldo Disponível</span>
-                    <i class="ph ph-wallet" style="color: var(--cyan-neon);"></i>
+                    <span>Patrimônio Acumulado</span>
+                    <i class="ph ph-bank" style="color: var(--cyan-neon);"></i>
+                </div>
+                <h3 class="card-value" id="patrimonio-valor">R$ 45.320,00</h3>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Saldo do Mês (Caixa)</span>
+                    <i class="ph ph-wallet" style="color: var(--text-main);"></i>
                 </div>
                 <h3 class="card-value" id="saldo-valor">R$ 4.250,00</h3>
             </div>
             
             <div class="card">
                 <div class="card-header">
-                    <span>Receitas do Mês</span>
+                    <span>Receitas (Mês)</span>
                     <i class="ph ph-trend-up" style="color: var(--green-neon);"></i>
                 </div>
                 <h3 class="card-value success">R$ 7.500,00</h3>
@@ -68,10 +77,25 @@
 
             <div class="card">
                 <div class="card-header">
-                    <span>Despesas do Mês</span>
+                    <span>Despesas (Mês)</span>
                     <i class="ph ph-trend-down" style="color: var(--red-alert);"></i>
                 </div>
                 <h3 class="card-value danger">R$ 3.250,00</h3>
+            </div>
+        </div>
+
+        <!-- Área do Gráfico de Projeção (Rolling Forecast) -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Evolução e Projeção Patrimonial</h3>
+                <div class="chart-nav">
+                    <button onclick="moverGrafico(-1)"><i class="ph ph-caret-left"></i></button>
+                    <span id="chart-period">mai26 a nov26</span>
+                    <button onclick="moverGrafico(1)"><i class="ph ph-caret-right"></i></button>
+                </div>
+            </div>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="fluxoCaixaChart"></canvas>
             </div>
         </div>
 
@@ -110,6 +134,7 @@
             const isConjunta = document.getElementById('view-switch').checked;
             const labelIndividual = document.getElementById('label-individual');
             const labelConjunta = document.getElementById('label-conjunta');
+            const patrimonioValor = document.getElementById('patrimonio-valor');
             const saldoValor = document.getElementById('saldo-valor');
 
             if (isConjunta) {
@@ -117,20 +142,75 @@
                 labelConjunta.style.opacity = '1';
                 labelConjunta.style.color = 'var(--cyan-neon)';
                 labelIndividual.style.color = 'var(--text-muted)';
-                // Simula atualização de valores para visão casal
+                // Atualização simulada para casal
+                patrimonioValor.innerText = 'R$ 115.800,00';
                 saldoValor.innerText = 'R$ 12.800,00';
             } else {
                 labelIndividual.style.opacity = '1';
                 labelConjunta.style.opacity = '0.5';
                 labelIndividual.style.color = 'var(--cyan-neon)';
                 labelConjunta.style.color = 'var(--text-muted)';
-                // Simula atualização de valores para visão individual
+                // Atualização simulada individual
+                patrimonioValor.innerText = 'R$ 45.320,00';
                 saldoValor.innerText = 'R$ 4.250,00';
             }
         }
         
         // Inicia ajustando as cores do toggle corretamente
         document.addEventListener("DOMContentLoaded", toggleView);
+
+        // Configuração do Gráfico Analítico (Chart.js)
+        const ctx = document.getElementById('fluxoCaixaChart').getContext('2d');
+        let fluxoCaixaChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                // Régua temporal centralizada no mês atual
+                labels: ['mai26', 'jun26', 'jul26', 'ago26', 'set26', 'out26', 'nov26'],
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Patrimônio Acumulado',
+                        data: [35000, 38000, 41070, 45320, 47000, 48500, 52000],
+                        borderColor: '#06B6D4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Resultado do Mês (Caixa)',
+                        data: [3000, 3000, 3070, 4250, 1680, 1500, 3500],
+                        backgroundColor: '#10B981',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#94A3B8' }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94A3B8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94A3B8' }
+                    }
+                }
+            }
+        });
+
+        // Função para simular a navegação pelas setas
+        function moverGrafico(direcao) {
+            console.log("Movimentação do gráfico solicitada: ", direcao > 0 ? "Avançar" : "Retroceder");
+        }
     </script>
 </body>
 </html>
