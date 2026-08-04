@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Financeiro - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Ícones (Phosphor Icons - visual muito usado em fintechs e terminais) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
 
+    <!-- Menu Lateral (Sidebar) -->
+    <aside class="sidebar">
+        <div class="brand">Fin<span>Sync</span></div>
+        <nav class="menu">
+            <a href="#" class="menu-item active"><i class="ph ph-squares-four"></i> Dashboard</a>
+            <a href="#" class="menu-item"><i class="ph ph-arrows-left-right"></i> Lançamentos</a>
+            <a href="#" class="menu-item"><i class="ph ph-credit-card"></i> Faturas</a>
+            <a href="#" class="menu-item"><i class="ph ph-handshake"></i> Acerto de Contas</a>
+            <a href="#" class="menu-item"><i class="ph ph-gear"></i> Configurações</a>
+        </nav>
+        <div class="user-profile">
+            <div class="avatar">👨🏻</div>
+            <div class="user-info">
+                <span class="user-name">Seu Perfil</span>
+                <span class="user-status">Online</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Área Principal -->
+    <main class="main-content">
+        
+        <!-- Cabeçalho com o Toggle de Visões -->
+        <header class="topbar">
+            <h2>Visão Geral</h2>
+            
+            <div class="view-toggle">
+                <span class="toggle-label" id="label-individual">Sua Visão</span>
+                <label class="switch">
+                    <input type="checkbox" id="view-switch" onchange="toggleView()">
+                    <span class="slider round"></span>
+                </label>
+                <!-- Visão conjunta -->
+                <span class="toggle-label" id="label-conjunta">Você e Cyntia</span>
+            </div>
+        </header>
+
+        <!-- Grade de Cartões (Dashboard) -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span>Saldo Disponível</span>
+                    <i class="ph ph-wallet" style="color: var(--cyan-neon);"></i>
+                </div>
+                <h3 class="card-value" id="saldo-valor">R$ 4.250,00</h3>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span>Receitas do Mês</span>
+                    <i class="ph ph-trend-up" style="color: var(--green-neon);"></i>
+                </div>
+                <h3 class="card-value success">R$ 7.500,00</h3>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Despesas do Mês</span>
+                    <i class="ph ph-trend-down" style="color: var(--red-alert);"></i>
+                </div>
+                <h3 class="card-value danger">R$ 3.250,00</h3>
+            </div>
+        </div>
+
+        <!-- Área de Lançamentos Recentes -->
+        <div class="recent-transactions">
+            <h3>Lançamentos Recentes</h3>
+            <div class="transaction-list">
+                <div class="transaction-item">
+                    <div class="t-info">
+                        <i class="ph ph-shopping-cart"></i>
+                        <div>
+                            <h4>Supermercado</h4>
+                            <span>Essencial • Cartão de Crédito</span>
+                        </div>
+                    </div>
+                    <div class="t-value danger">- R$ 450,00</div>
+                </div>
+                
+                <div class="transaction-item">
+                    <div class="t-info">
+                        <i class="ph ph-lightning"></i>
+                        <div>
+                            <h4>Conta de Luz</h4>
+                            <span>Essencial • Pix</span>
+                        </div>
+                    </div>
+                    <div class="t-value danger">- R$ 280,00</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Função para alternar entre visão Individual e Conjunta
+        function toggleView() {
+            const isConjunta = document.getElementById('view-switch').checked;
+            const labelIndividual = document.getElementById('label-individual');
+            const labelConjunta = document.getElementById('label-conjunta');
+            const saldoValor = document.getElementById('saldo-valor');
+
+            if (isConjunta) {
+                labelIndividual.style.opacity = '0.5';
+                labelConjunta.style.opacity = '1';
+                labelConjunta.style.color = 'var(--cyan-neon)';
+                labelIndividual.style.color = 'var(--text-muted)';
+                // Simula atualização de valores para visão casal
+                saldoValor.innerText = 'R$ 12.800,00';
+            } else {
+                labelIndividual.style.opacity = '1';
+                labelConjunta.style.opacity = '0.5';
+                labelIndividual.style.color = 'var(--cyan-neon)';
+                labelConjunta.style.color = 'var(--text-muted)';
+                // Simula atualização de valores para visão individual
+                saldoValor.innerText = 'R$ 4.250,00';
+            }
+        }
+        
+        // Inicia ajustando as cores do toggle corretamente
+        document.addEventListener("DOMContentLoaded", toggleView);
+    </script>
+</body>
+</html>
