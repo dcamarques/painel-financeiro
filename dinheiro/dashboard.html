@@ -49,20 +49,12 @@
             </div>
         </header>
 
-        <!-- Grade de Cartões (Dashboard - 4 Cartões) -->
+        <!-- Grade de Cartões (Dashboard - Caixa, Receitas, Despesas, Investimentos) -->
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <span>Patrimônio Acumulado</span>
-                    <i class="ph ph-bank" style="color: var(--cyan-neon);"></i>
-                </div>
-                <h3 class="card-value" id="patrimonio-valor">R$ 45.320,00</h3>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span>Saldo do Mês (Caixa)</span>
-                    <i class="ph ph-wallet" style="color: var(--text-main);"></i>
+                    <span>Caixa (Saldo Atual)</span>
+                    <i class="ph ph-wallet" style="color: var(--cyan-neon);"></i>
                 </div>
                 <h3 class="card-value" id="saldo-valor">R$ 4.250,00</h3>
             </div>
@@ -82,16 +74,25 @@
                 </div>
                 <h3 class="card-value danger">R$ 3.250,00</h3>
             </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Investimentos</span>
+                    <i class="ph ph-chart-line-up" style="color: var(--text-main);"></i>
+                </div>
+                <h3 class="card-value" id="invest-valor">R$ 41.070,00</h3>
+            </div>
         </div>
 
-        <!-- Área do Gráfico de Projeção (Rolling Forecast) -->
+        <!-- Área do Gráfico de Projeção -->
         <div class="chart-container">
             <div class="chart-header">
-                <h3>Evolução e Projeção Patrimonial</h3>
+                <h3>Evolução: Investimentos e Caixa</h3>
                 <div class="chart-nav">
-                    <button onclick="moverGrafico(-1)"><i class="ph ph-caret-left"></i></button>
+                    <!-- Botões de navegação compactos -->
+                    <button class="btn-nav-small" onclick="moverGrafico(-1)">&lt;&lt;</button>
                     <span id="chart-period">mai26 a nov26</span>
-                    <button onclick="moverGrafico(1)"><i class="ph ph-caret-right"></i></button>
+                    <button class="btn-nav-small" onclick="moverGrafico(1)">&gt;&gt;</button>
                 </div>
             </div>
             <div style="position: relative; height: 300px; width: 100%;">
@@ -134,7 +135,7 @@
             const isConjunta = document.getElementById('view-switch').checked;
             const labelIndividual = document.getElementById('label-individual');
             const labelConjunta = document.getElementById('label-conjunta');
-            const patrimonioValor = document.getElementById('patrimonio-valor');
+            const investValor = document.getElementById('invest-valor');
             const saldoValor = document.getElementById('saldo-valor');
 
             if (isConjunta) {
@@ -143,7 +144,7 @@
                 labelConjunta.style.color = 'var(--cyan-neon)';
                 labelIndividual.style.color = 'var(--text-muted)';
                 // Atualização simulada para casal
-                patrimonioValor.innerText = 'R$ 115.800,00';
+                investValor.innerText = 'R$ 103.000,00';
                 saldoValor.innerText = 'R$ 12.800,00';
             } else {
                 labelIndividual.style.opacity = '1';
@@ -151,7 +152,7 @@
                 labelIndividual.style.color = 'var(--cyan-neon)';
                 labelConjunta.style.color = 'var(--text-muted)';
                 // Atualização simulada individual
-                patrimonioValor.innerText = 'R$ 45.320,00';
+                investValor.innerText = 'R$ 41.070,00';
                 saldoValor.innerText = 'R$ 4.250,00';
             }
         }
@@ -169,7 +170,7 @@
                 datasets: [
                     {
                         type: 'line',
-                        label: 'Patrimônio Acumulado',
+                        label: 'Investimentos Acumulados',
                         data: [35000, 38000, 41070, 45320, 47000, 48500, 52000],
                         borderColor: '#06B6D4',
                         backgroundColor: 'rgba(6, 182, 212, 0.1)',
@@ -179,7 +180,7 @@
                     },
                     {
                         type: 'bar',
-                        label: 'Resultado do Mês (Caixa)',
+                        label: 'Caixa do Mês',
                         data: [3000, 3000, 3070, 4250, 1680, 1500, 3500],
                         backgroundColor: '#10B981',
                         borderRadius: 4
@@ -209,7 +210,7 @@
 
         // Função para simular a navegação pelas setas
         function moverGrafico(direcao) {
-            console.log("Movimentação do gráfico solicitada: ", direcao > 0 ? "Avançar" : "Retroceder");
+            console.log("Movimentação do gráfico solicitada: ", direcao > 0 ? "Avançar mês" : "Retroceder mês");
         }
     </script>
 </body>
