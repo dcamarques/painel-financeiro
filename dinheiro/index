@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Financeiro - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
 
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Título do App (pode ser substituído por uma logo no futuro) -->
+            <h1 class="brand-title">Fin<span>Sync</span></h1>
+            <p class="subtitle">Gestão Patrimonial Inteligente</p>
+
+            <!-- Passo 1: Inserir Celular -->
+            <div id="step-phone" class="step-active">
+                <label for="celular">Número do WhatsApp</label>
+                <input type="tel" id="celular" placeholder="(DD) 90000-0000" autocomplete="off">
+                <button onclick="enviarCodigo()" class="btn-primary">Enviar Código de Acesso</button>
+            </div>
+
+            <!-- Passo 2: Inserir Código (Escondido inicialmente) -->
+            <div id="step-code" class="step-hidden">
+                <label for="codigo">Código recebido no WhatsApp</label>
+                <input type="text" id="codigo" placeholder="000000" maxlength="6" autocomplete="off" style="text-align: center; letter-spacing: 5px; font-size: 1.2rem;">
+                <button onclick="confirmarLogin()" class="btn-success">Acessar Painel</button>
+                <button onclick="voltar()" class="btn-text">Voltar e corrigir número</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script simples para simular a troca de telas -->
+    <script>
+        function enviarCodigo() {
+            // Pega o valor do celular e verifica se não está vazio
+            const celular = document.getElementById('celular').value;
+            if(celular.length < 10) {
+                alert("Por favor, insira um número válido.");
+                return;
+            }
+            // Oculta o passo 1 e mostra o passo 2
+            document.getElementById('step-phone').className = 'step-hidden';
+            document.getElementById('step-code').className = 'step-active';
+        }
+
+        function voltar() {
+            // Volta para a tela de telefone
+            document.getElementById('step-phone').className = 'step-active';
+            document.getElementById('step-code').className = 'step-hidden';
+        }
+
+        function confirmarLogin() {
+            const codigo = document.getElementById('codigo').value;
+            if(codigo.length === 6) {
+                alert("Login confirmado! Aqui o sistema redirecionaria para o Dashboard.");
+                // No futuro, usaremos window.location.href = "dashboard.html";
+            } else {
+                alert("O código deve ter 6 dígitos.");
+            }
+        }
+    </script>
+</body>
+</html>
