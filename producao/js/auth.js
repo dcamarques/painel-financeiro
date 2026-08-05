@@ -1,4 +1,3 @@
-// Função para alternar entre as abas Login / Criar Equipe
 function switchTab(tab) {
     document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
@@ -6,7 +5,6 @@ function switchTab(tab) {
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
     
-    // Altera o visual da aba ativa
     if (tab === 'login') {
         tabLogin.className = "w-1/2 pb-2 text-slate-800 border-b-2 border-slate-800 font-semibold transition";
         tabRegister.className = "w-1/2 pb-2 text-gray-400 hover:text-slate-600 font-medium transition";
@@ -14,10 +12,9 @@ function switchTab(tab) {
         tabRegister.className = "w-1/2 pb-2 text-slate-800 border-b-2 border-slate-800 font-semibold transition";
         tabLogin.className = "w-1/2 pb-2 text-gray-400 hover:text-slate-600 font-medium transition";
     }
-    showMessage(''); // Limpa mensagens anteriores
+    showMessage('');
 }
 
-// Função para exibir alertas na tela
 function showMessage(msg, isError = false) {
     const box = document.getElementById('message-box');
     if (!msg) {
@@ -29,84 +26,118 @@ function showMessage(msg, isError = false) {
     box.innerText = msg;
 }
 
-// Motor de Login
-async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    
-    showMessage('Autenticando...');
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-        showMessage('E-mail ou senha incorretos.', true);
+function toggleButton(btn, isProcessing, originalText = '') {
+    if (isProcessing) {
+        btn.disabled = true;
+        btn.innerText = "Processando...";
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
     } else {
-        showMessage('Acesso liberado! Redirecionando...');
-        // O próximo arquivo que criaremos!
-        window.location.href = 'dashboard.html';
+        btn.disabled = false;
+        btn.innerText = originalText;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
     }
 }
 
-// Motor de Criação de Equipe (Onboarding do Master)
+async function handleLogin(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    toggleButton(btn, true);
+    showMessage('Autenticando...');
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+            showMessage('E-mail ou senha incorretos.', true);
+            toggleButton(btn, false, originalText);
+        } else {
+            showMessage('Acesso liberado! Redirecionando...');
+            window.location.href = 'dashboard.html';
+        }
+    } catch (err) {
+        showMessage(`Erro crítico: ${err.message}`, true);
+        toggleButton(btn, false, originalText);
+    }
+}
+
 async function handleRegister(e) {
     e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+
     const equipeNome = document.getElementById('reg-equipe').value;
     const usuarioNome = document.getElementById('reg-nome').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     
+    toggleButton(btn, true);
     showMessage('Iniciando ambiente da equipe...');
 
-    // 1. Cadastra o usuário no sistema de Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password
-    });
+    try {
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+            email,
+            password
+        });
 
-    if (authError) {
-        showMessage(authError.message, true);
-        return;
+        if (authError) {
+            showMessage(`Erro no cadastro: ${authError.message}`, true);
+            toggleButton(btn, false, originalText);
+            return;
+        }
+
+        if (!authData.user) {
+            showMessage('Erro: Este e-mail já está em uso ou foi bloqueado.', true);
+            toggleButton(btn, false, originalText);
+            return;
+        }
+
+        const userId = authData.user.id;
+        const dataVencimento = new Date();
+        dataVencimento.setDate(dataVencimento.getDate() + 30); 
+
+        const { data: equipeData, error: equipeError } = await supabaseClient
+            .from('equipes')
+            .insert([{ nome: equipeNome, data_vencimento_acesso: dataVencimento.toISOString() }])
+            .select()
+            .single();
+
+        if (equipeError) {
+            showMessage(`Erro no Banco (Equipe): ${equipeError.message}`, true);
+            toggleButton(btn, false, originalText);
+            return;
+        }
+
+        const { error: userError } = await supabaseClient
+            .from('usuarios')
+            .insert([{
+                id: userId,
+                equipe_id: equipeData.id,
+                nome_usuario: usuarioNome,
+                email: email,
+                nivel_acesso: 'Master'
+            }]);
+
+        if (userError) {
+            showMessage(`Erro no Banco (Usuário): ${userError.message}`, true);
+            toggleButton(btn, false, originalText);
+            return;
+        }
+
+        showMessage('Equipe criada com sucesso! Você já pode entrar com seu e-mail e senha.', false);
+        switchTab('login');
+        toggleButton(btn, false, originalText);
+
+    } catch (err) {
+        showMessage(`Falha estrutural: ${err.message}`, true);
+        toggleButton(btn, false, originalText);
     }
-
-    const userId = authData.user.id;
-
-    // 2. Regra de Negócio: Cria a Equipe no banco concedendo 30 dias de teste grátis
-    const dataVencimento = new Date();
-    dataVencimento.setDate(dataVencimento.getDate() + 30); 
-
-    const { data: equipeData, error: equipeError } = await supabase
-        .from('equipes')
-        .insert([{ nome: equipeNome, data_vencimento_acesso: dataVencimento.toISOString() }])
-        .select()
-        .single();
-
-    if (equipeError) {
-        showMessage("Erro ao registrar a equipe. Tente novamente.", true);
-        return;
-    }
-
-    // 3. Regra de Hierarquia: Registra quem acabou de entrar como 'Master'
-    const { error: userError } = await supabase
-        .from('usuarios')
-        .insert([{
-            id: userId,
-            equipe_id: equipeData.id,
-            nome_usuario: usuarioNome,
-            email: email,
-            nivel_acesso: 'Master'
-        }]);
-
-    if (userError) {
-        showMessage("Erro ao aplicar nível hierárquico.", true);
-        return;
-    }
-
-    showMessage('Equipe criada com sucesso! Você já pode entrar com seu e-mail e senha.', false);
-    switchTab('login');
 }
 
-// Motor de Recuperação de Senha
 async function handleForgotPassword() {
     const email = document.getElementById('login-email').value;
     if (!email) {
@@ -116,23 +147,28 @@ async function handleForgotPassword() {
     
     showMessage('Solicitando recuperação de senha...');
     
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/producao/dashboard.html',
-    });
-    
-    if (error) {
-        showMessage(error.message, true);
-    } else {
-        showMessage('Instruções enviadas! Verifique sua caixa de entrada.', false);
+    try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/producao/dashboard.html',
+        });
+        
+        if (error) {
+            showMessage(`Erro: ${error.message}`, true);
+        } else {
+            showMessage('Instruções enviadas! Verifique sua caixa de entrada.', false);
+        }
+    } catch (err) {
+        showMessage(`Erro crítico: ${err.message}`, true);
     }
 }
-// --- CÓDIGO A SER ADICIONADO NO FINAL DO AUTH.JS ---
 
-// Radar de Sessão: Verifica se o usuário já está logado ao abrir a página
 document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        // Se já tem sessão ativa, pula o login e vai pro painel
-        window.location.href = 'dashboard.html';
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            window.location.href = 'dashboard.html';
+        }
+    } catch (err) {
+        console.log("Nenhuma sessão ativa encontrada.");
     }
 });
