@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- Bloqueadores nativos de cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -15,12 +14,11 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center relative">
     
-    <!-- Container principal -->
     <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100 relative">
         
         <!-- INDICADOR DE VERSÃO -->
         <div class="absolute top-4 right-4 text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">
-            v1.1
+            v1.2
         </div>
 
         <div class="text-center mb-8 mt-4">
@@ -28,7 +26,6 @@
             <p class="text-sm text-gray-500 mt-1">Gestão de Performance</p>
         </div>
 
-        <!-- Toggle Login / Cadastro -->
         <div class="flex justify-center mb-6 border-b border-gray-200">
             <button id="tab-login" class="w-1/2 pb-2 text-slate-800 border-b-2 border-slate-800 font-semibold transition" onclick="switchTab('login')">Entrar</button>
             <button id="tab-register" class="w-1/2 pb-2 text-gray-400 hover:text-slate-600 font-medium transition" onclick="switchTab('register')">Criar Equipe</button>
@@ -52,7 +49,7 @@
             </form>
         </div>
 
-        <!-- Formulário de Cadastro (Master) -->
+        <!-- Formulário de Cadastro -->
         <div id="form-register" class="hidden">
             <form onsubmit="handleRegister(event)">
                 <div class="mb-4">
@@ -75,12 +72,11 @@
             </form>
         </div>
         
-        <!-- Caixa de Mensagens de Erro/Sucesso -->
         <div id="message-box" class="mt-5 text-center text-sm hidden p-3 rounded-lg"></div>
     </div>
 
-    <!-- Nossos Scripts com a técnica de Cache-Busting -->
-    <script src="js/supabase-client.js?v=1.1"></script>
-    <script src="js/auth.js?v=1.1"></script>
+    <!-- Scripts v1.2 -->
+    <script src="js/supabase-client.js?v=1.2"></script>
+    <script src="js/auth.js?v=1.2"></script>
 </body>
 </html>
