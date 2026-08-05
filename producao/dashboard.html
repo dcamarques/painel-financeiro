@@ -7,39 +7,46 @@
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus Produção | Dashboard</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans min-h-screen flex flex-col">
     
-    <!-- Barra Superior -->
+    <!-- Barra Superior Inteligente -->
     <nav class="bg-slate-900 text-white p-4 shadow-md flex justify-between items-center">
         <div class="text-xl font-bold tracking-wide">Boonus <span class="font-light text-slate-400">Performance</span></div>
-        <div class="flex items-center gap-5">
-            <span id="user-info" class="text-sm text-slate-300 font-medium">Carregando...</span>
-            <button onclick="handleLogout()" class="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-md text-sm font-medium transition duration-200">Sair</button>
+        <div class="flex items-center gap-4">
+            <!-- Container que agora receberá Nome, E-mail e Patente -->
+            <div id="user-info" class="text-sm text-slate-200 text-right">
+                <span class="animate-pulse">Autenticando perfil...</span>
+            </div>
+            <button onclick="handleLogout()" class="bg-slate-700 hover:bg-rose-700 px-4 py-1.5 rounded-md text-sm font-medium transition duration-200 border border-slate-600 hover:border-rose-600">Sair</button>
         </div>
     </nav>
 
-    <!-- Área Principal -->
     <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
         
-        <!-- Cabeçalho de Controle -->
+        <!-- Cabeçalho de Controle Duplo -->
         <div class="flex flex-col md:flex-row justify-between items-center bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-6 gap-4">
             <h2 class="text-xl font-bold text-slate-800">Resumo de Produção</h2>
             
-            <div class="flex items-center gap-4 bg-slate-50 border border-gray-200 rounded-lg p-1">
-                <button onclick="mudarMes(-1)" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-gray-200 rounded-md transition">&laquo;</button>
-                <span id="display-mes" class="font-semibold text-slate-700 min-w-[150px] text-center uppercase tracking-wider text-sm">CARREGANDO...</span>
-                <button onclick="mudarMes(1)" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-gray-200 rounded-md transition">&raquo;</button>
+            <div class="flex flex-col gap-2">
+                <!-- Navegação Mensal -->
+                <div class="flex items-center justify-between gap-2 bg-slate-50 border border-gray-200 rounded-lg p-1 shadow-inner">
+                    <button onclick="mudarMes(-1)" class="p-1.5 px-3 text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm rounded transition text-sm font-medium">&laquo; Mês</button>
+                    <span id="display-mes" class="font-bold text-slate-700 min-w-[140px] text-center uppercase tracking-wider text-sm">...</span>
+                    <button onclick="mudarMes(1)" class="p-1.5 px-3 text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm rounded transition text-sm font-medium">Mês &raquo;</button>
+                </div>
+                <!-- Navegação Diária -->
+                <div class="flex items-center justify-between gap-2 bg-slate-50 border border-gray-200 rounded-lg p-1 shadow-inner">
+                    <button onclick="mudarDia(-1)" class="p-1.5 px-3 text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm rounded transition text-sm font-medium">&laquo; Dia</button>
+                    <span id="display-dia" class="font-semibold text-slate-600 min-w-[140px] text-center tracking-wider text-sm">...</span>
+                    <button onclick="mudarDia(1)" class="p-1.5 px-3 text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm rounded transition text-sm font-medium">Dia &raquo;</button>
+                </div>
             </div>
         </div>
 
-        <!-- Container do Grid de Metas -->
         <div id="grid-container" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 min-h-[400px]">
-            <!-- O estado de carregamento será substituído pelo Javascript -->
             <div id="loading-state" class="flex flex-col items-center justify-center h-full mt-10">
                 <div class="animate-pulse flex flex-col items-center">
                     <div class="h-12 w-12 bg-slate-200 rounded-full mb-4"></div>
@@ -51,8 +58,8 @@
 
     </main>
 
-    <!-- Scripts Forçando a Versão 2.0 (Fura-Cache Definitivo) -->
-    <script src="js/supabase-client.js?v=2.0"></script>
-    <script src="js/app.js?v=2.0"></script>
+    <!-- Fura-Cache v2.1 -->
+    <script src="js/supabase-client.js?v=2.1"></script>
+    <script src="js/app.js?v=2.1"></script>
 </body>
 </html>
