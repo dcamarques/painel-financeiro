@@ -126,3 +126,13 @@ async function handleForgotPassword() {
         showMessage('Instruções enviadas! Verifique sua caixa de entrada.', false);
     }
 }
+// --- CÓDIGO A SER ADICIONADO NO FINAL DO AUTH.JS ---
+
+// Radar de Sessão: Verifica se o usuário já está logado ao abrir a página
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        // Se já tem sessão ativa, pula o login e vai pro painel
+        window.location.href = 'dashboard.html';
+    }
+});
