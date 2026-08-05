@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boonus Produção | Login</title>
+    <!-- Tailwind para um design elegante sem escrever CSS manual -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center">
+    
+    <!-- Container principal -->
+    <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-800">Boonus</h1>
+            <p class="text-sm text-gray-500 mt-1">Gestão de Performance</p>
+        </div>
 
+        <!-- Toggle Login / Cadastro -->
+        <div class="flex justify-center mb-6 border-b border-gray-200">
+            <button id="tab-login" class="w-1/2 pb-2 text-slate-800 border-b-2 border-slate-800 font-semibold transition" onclick="switchTab('login')">Entrar</button>
+            <button id="tab-register" class="w-1/2 pb-2 text-gray-400 hover:text-slate-600 font-medium transition" onclick="switchTab('register')">Criar Equipe</button>
+        </div>
+
+        <!-- Formulário de Login -->
+        <div id="form-login" class="block">
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                    <input type="email" id="login-email" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-gray-700">Senha</label>
+                        <a href="#" onclick="handleForgotPassword()" class="text-xs text-slate-600 hover:text-slate-800 hover:underline">Esqueci minha senha</a>
+                    </div>
+                    <input type="password" id="login-password" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Acessar Painel</button>
+            </form>
+        </div>
+
+        <!-- Formulário de Cadastro (Master) -->
+        <div id="form-register" class="hidden">
+            <form onsubmit="handleRegister(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Equipe</label>
+                    <input type="text" id="reg-equipe" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition" placeholder="Ex: Safra - Agência Icaraí">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome</label>
+                    <input type="text" id="reg-nome" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Corporativo</label>
+                    <input type="email" id="reg-email" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha (Mín. 6 caracteres)</label>
+                    <input type="password" id="reg-password" required minlength="6" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-emerald-700 transition duration-200">Criar Equipe e Iniciar</button>
+            </form>
+        </div>
+        
+        <!-- Caixa de Mensagens de Erro/Sucesso -->
+        <div id="message-box" class="mt-5 text-center text-sm hidden p-3 rounded-lg"></div>
+    </div>
+
+    <!-- Nossos Scripts (devem ficar na pasta /js/) -->
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
