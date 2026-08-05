@@ -1,48 +1,90 @@
-// Radar de Segurança: Protege a página de acessos não autorizados
-document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
-    // Se não houver sessão ativa, expulsa de volta para o login
-    if (!session) {
-        window.location.replace('index.html');
-        return;
-    }
+// Variável de controle global da data visualizada
+let dataAtual = new Date(); 
 
-    // Preenche o cabeçalho com o e-mail do usuário autenticado
-    document.getElementById('user-info').innerText = session.user.email;
-    
-    // Inicializa a data atual no display de meses (Ex: Agosto 2026)
-    inicializarData();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Utilizamos a variável correta: supabaseClient
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (!session) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        // Preenche o cabeçalho
+        document.getElementById('user-info').innerText = session.user.email;
+        
+        // Inicializa a interface
+        inicializarData();
+        renderizarGridVazio();
+
+    } catch (err) {
+        console.error("Falha ao carregar a sessão:", err);
+    }
 });
 
-// Função para encerrar a sessão
 async function handleLogout() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     window.location.replace('index.html');
 }
 
-// --- VARIÁVEIS DE ESTADO GLOBAL PARA O CONTROLE DE MESES ---
-let dataAtual = new Date(); // Inicia com a data de hoje
-
-// Função para formatar e exibir o mês na tela
 function atualizarDisplayMes() {
-    const opcoes = { month: 'long', year: 'numeric' };
-    const formato = dataAtual.toLocaleDateString('pt-BR', opcoes);
-    document.getElementById('display-mes').innerText = formato;
+    // Formata para o padrão "Agosto 2026" e joga para maiúsculo
+    const nomeMes = dataAtual.toLocaleDateString('pt-BR', { month: 'long' });
+    const ano = dataAtual.getFullYear();
+    document.getElementById('display-mes').innerText = `${nomeMes} ${ano}`.toUpperCase();
 }
 
-// Configura a data inicial ao carregar a página
 function inicializarData() {
     atualizarDisplayMes();
 }
 
-// Função disparada pelos botões << e >>
 function mudarMes(direcao) {
-    // Altera o mês atual com base na direção (-1 para voltar, 1 para avançar)
     dataAtual.setMonth(dataAtual.getMonth() + direcao);
     atualizarDisplayMes();
     
-    // NOTA DO SÓCIO: Aqui, no futuro, chamaremos a função que vai no Supabase
-    // buscar as produções do novo mês selecionado e remontar o Grid.
-    console.log("Mês alterado. Nova data base:", dataAtual);
+    // Simula o recarregamento do grid para dar feedback visual ao usuário
+    document.getElementById('grid-container').innerHTML = `<p class="text-center text-slate-400 mt-10">Buscando dados de ${document.getElementById('display-mes').innerText}...</p>`;
+    setTimeout(() => { renderizarGridVazio(); }, 400);
+}
+
+// Constrói o layout tabular de performance
+function renderizarGridVazio() {
+    const container = document.getElementById('grid-container');
+    container.innerHTML = `
+        <div class="w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-slate-800">Performance da Equipe</h3>
+                <button onclick="abrirModalLancamento()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition">
+                    + Lançar Produção
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-3 font-semibold rounded-tl-lg">Classe / Produto</th>
+                            <th class="p-3 font-semibold text-right">Realizado Hoje</th>
+                            <th class="p-3 font-semibold text-right">Meta Mês</th>
+                            <th class="p-3 font-semibold text-right">Realizado Mês</th>
+                            <th class="p-3 font-semibold text-right rounded-tr-lg">% Atingimento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        <!-- Linha de Estado Vazio -->
+                        <tr>
+                            <td colspan="5" class="p-10 text-center text-slate-500 text-sm">
+                                Nenhuma meta ou produção registrada para este período.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function abrirModalLancamento() {
+    alert("Próxima etapa: O modal de lançamento retroativo será aberto aqui.");
 }
