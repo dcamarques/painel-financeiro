@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boonus Produção | Dashboard</title>
     <!-- Tailwind CSS -->
@@ -11,7 +14,7 @@
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans min-h-screen flex flex-col">
     
-    <!-- Barra Superior (Navbar) -->
+    <!-- Barra Superior -->
     <nav class="bg-slate-900 text-white p-4 shadow-md flex justify-between items-center">
         <div class="text-xl font-bold tracking-wide">Boonus <span class="font-light text-slate-400">Performance</span></div>
         <div class="flex items-center gap-5">
@@ -20,27 +23,27 @@
         </div>
     </nav>
 
-    <!-- Área Principal de Conteúdo -->
+    <!-- Área Principal -->
     <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
         
-        <!-- Cabeçalho de Controle: Setas de Mês -->
+        <!-- Cabeçalho de Controle -->
         <div class="flex flex-col md:flex-row justify-between items-center bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-6 gap-4">
             <h2 class="text-xl font-bold text-slate-800">Resumo de Produção</h2>
             
             <div class="flex items-center gap-4 bg-slate-50 border border-gray-200 rounded-lg p-1">
                 <button onclick="mudarMes(-1)" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-gray-200 rounded-md transition">&laquo;</button>
-                <span id="display-mes" class="font-semibold text-slate-700 min-w-[140px] text-center uppercase tracking-wider text-sm">Carregando...</span>
+                <span id="display-mes" class="font-semibold text-slate-700 min-w-[150px] text-center uppercase tracking-wider text-sm">CARREGANDO...</span>
                 <button onclick="mudarMes(1)" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-gray-200 rounded-md transition">&raquo;</button>
             </div>
         </div>
 
-        <!-- Container do Grid de Metas (Será preenchido pelo JS futuramente) -->
-        <div id="grid-container" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 min-h-[400px] flex items-center justify-center">
-            <div class="text-center">
+        <!-- Container do Grid de Metas -->
+        <div id="grid-container" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 min-h-[400px]">
+            <!-- O estado de carregamento será substituído pelo Javascript -->
+            <div id="loading-state" class="flex flex-col items-center justify-center h-full mt-10">
                 <div class="animate-pulse flex flex-col items-center">
                     <div class="h-12 w-12 bg-slate-200 rounded-full mb-4"></div>
                     <div class="h-4 w-48 bg-slate-200 rounded mb-2"></div>
-                    <div class="h-3 w-32 bg-slate-100 rounded"></div>
                 </div>
                 <p class="text-slate-400 mt-4 text-sm font-medium">Estruturando matriz de dados...</p>
             </div>
@@ -48,8 +51,8 @@
 
     </main>
 
-    <!-- Nossos Scripts -->
-    <script src="js/supabase-client.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Scripts (Atenção para a ordem) -->
+    <script src="js/supabase-client.js?v=1.1"></script>
+    <script src="js/app.js?v=1.1"></script>
 </body>
 </html>
