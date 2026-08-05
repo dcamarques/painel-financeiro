@@ -1,9 +1,8 @@
-// Variável de controle global da data visualizada
+// Variável central unificada para controle de tempo
 let dataAtual = new Date(); 
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Utilizamos a variável correta: supabaseClient
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         
         if (!session) {
@@ -11,10 +10,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Preenche o cabeçalho
-        document.getElementById('user-info').innerText = session.user.email;
+        // Busca a identidade real do usuário na nossa tabela
+        const { data: userData, error: userError } = await supabaseClient
+            .from('usuarios')
+            .select('nome_usuario, nivel_acesso')
+            .eq('id', session.user.id)
+            .single();
+
+        const userInfoDiv = document.getElementById('user-info');
+
+        // Renderiza o cabeçalho dinâmico (Nome + Email + Badge de Hierarquia)
+        if (userData) {
+            userInfoDiv.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-semibold text-white tracking-wide">${userData.nome_usuario}</span>
+                        <span class="text-slate-400 text-xs">${session.user.email}</span>
+                    </div>
+                    <span class="ml-2 bg-emerald-900/50 text-emerald-400 border border-emerald-700/50 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                        ${userData.nivel_acesso}
+                    </span>
+                </div>
+            `;
+        } else {
+            // Fallback caso ocorra atraso na leitura do banco
+            userInfoDiv.innerText = session.user.email;
+        }
         
-        // Inicializa a interface
         inicializarData();
         renderizarGridVazio();
 
@@ -28,27 +50,44 @@ async function handleLogout() {
     window.location.replace('index.html');
 }
 
-function atualizarDisplayMes() {
-    // Formata para o padrão "Agosto 2026" e joga para maiúsculo
-    const nomeMes = dataAtual.toLocaleDateString('pt-BR', { month: 'long' });
-    const ano = dataAtual.getFullYear();
-    document.getElementById('display-mes').innerText = `${nomeMes} ${ano}`.toUpperCase();
+// --- MOTORES DE CALENDÁRIO ---
+
+function atualizarDisplaysDeData() {
+    // Atualiza o bloco do Mês (Ex: AGOSTO 2026)
+    const nomeMes = dataAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    document.getElementById('display-mes').innerText = nomeMes.toUpperCase();
+
+    // Atualiza o bloco do Dia (Ex: 05 de Ago)
+    const formatoDia = dataAtual.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    // Ajusta o "de ago." para um formato mais limpo "05 Ago"
+    document.getElementById('display-dia').innerText = formatoDia.replace(' de ', ' ').replace('.', '').toUpperCase();
 }
 
 function inicializarData() {
-    atualizarDisplayMes();
+    atualizarDisplaysDeData();
 }
 
 function mudarMes(direcao) {
+    // Adiciona ou subtrai 1 mês da data atual
     dataAtual.setMonth(dataAtual.getMonth() + direcao);
-    atualizarDisplayMes();
-    
-    // Simula o recarregamento do grid para dar feedback visual ao usuário
-    document.getElementById('grid-container').innerHTML = `<p class="text-center text-slate-400 mt-10">Buscando dados de ${document.getElementById('display-mes').innerText}...</p>`;
-    setTimeout(() => { renderizarGridVazio(); }, 400);
+    atualizarDisplaysDeData();
+    simularCarregamento();
 }
 
-// Constrói o layout tabular de performance
+function mudarDia(direcao) {
+    // Adiciona ou subtrai 1 dia da data atual
+    dataAtual.setDate(dataAtual.getDate() + direcao);
+    atualizarDisplaysDeData();
+    simularCarregamento();
+}
+
+function simularCarregamento() {
+    document.getElementById('grid-container').innerHTML = `<p class="text-center text-slate-400 mt-10">Buscando resultados para ${document.getElementById('display-dia').innerText}...</p>`;
+    setTimeout(() => { renderizarGridVazio(); }, 300);
+}
+
+// --- CONSTRUÇÃO DO GRID ---
+
 function renderizarGridVazio() {
     const container = document.getElementById('grid-container');
     container.innerHTML = `
@@ -72,7 +111,6 @@ function renderizarGridVazio() {
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo">
-                        <!-- Linha de Estado Vazio -->
                         <tr>
                             <td colspan="5" class="p-10 text-center text-slate-500 text-sm">
                                 Nenhuma meta ou produção registrada para este período.
@@ -86,5 +124,5 @@ function renderizarGridVazio() {
 }
 
 function abrirModalLancamento() {
-    alert("Próxima etapa: O modal de lançamento retroativo será aberto aqui.");
+    alert("O modal de lançamento será integrado à matriz de classes na próxima etapa.");
 }
