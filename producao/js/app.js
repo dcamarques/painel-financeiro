@@ -19,11 +19,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const userInfoDiv = document.getElementById('user-info');
 
-        // Renderiza o cabeçalho dinâmico (Nome + Email + Badge de Hierarquia)
+        // Renderiza o cabeçalho dinâmico e o botão do Master
         if (userData) {
+            let configButton = '';
+            
+            // A mágica acontece aqui: Injeta o botão apenas para o Master
+            if (userData.nivel_acesso === 'Master') {
+                configButton = `<a href="configuracoes.html" class="mr-4 text-slate-300 hover:text-white text-sm font-medium transition flex items-center gap-1">⚙️ Configurações</a>`;
+            }
+
             userInfoDiv.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <div class="flex flex-col leading-tight">
+                <div class="flex items-center">
+                    ${configButton}
+                    <div class="flex flex-col leading-tight mr-2 text-right">
                         <span class="font-semibold text-white tracking-wide">${userData.nome_usuario}</span>
                         <span class="text-slate-400 text-xs">${session.user.email}</span>
                     </div>
@@ -33,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
         } else {
-            // Fallback caso ocorra atraso na leitura do banco
             userInfoDiv.innerText = session.user.email;
         }
         
@@ -53,13 +60,10 @@ async function handleLogout() {
 // --- MOTORES DE CALENDÁRIO ---
 
 function atualizarDisplaysDeData() {
-    // Atualiza o bloco do Mês (Ex: AGOSTO 2026)
     const nomeMes = dataAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     document.getElementById('display-mes').innerText = nomeMes.toUpperCase();
 
-    // Atualiza o bloco do Dia (Ex: 05 de Ago)
     const formatoDia = dataAtual.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-    // Ajusta o "de ago." para um formato mais limpo "05 Ago"
     document.getElementById('display-dia').innerText = formatoDia.replace(' de ', ' ').replace('.', '').toUpperCase();
 }
 
@@ -68,14 +72,12 @@ function inicializarData() {
 }
 
 function mudarMes(direcao) {
-    // Adiciona ou subtrai 1 mês da data atual
     dataAtual.setMonth(dataAtual.getMonth() + direcao);
     atualizarDisplaysDeData();
     simularCarregamento();
 }
 
 function mudarDia(direcao) {
-    // Adiciona ou subtrai 1 dia da data atual
     dataAtual.setDate(dataAtual.getDate() + direcao);
     atualizarDisplaysDeData();
     simularCarregamento();
