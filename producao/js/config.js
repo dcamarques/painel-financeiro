@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Descobre a equipe do usuário logado
-        const { data: userData, error: userError } = await supabaseClient
+        const { data: userData } = await supabaseClient
             .from('usuarios')
             .select('equipe_id')
             .eq('id', session.user.id)
@@ -24,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- MOTOR DE CLASSES ---
+// --- MOTOR DE CLASSES (VISUALIZAR, CRIAR, EDITAR E EXCLUIR) ---
 
 async function criarNovaClasse() {
     const nomeClasse = prompt("Digite o nome da nova Classe (ex: Investimentos, Crédito, Câmbio):");
@@ -37,9 +36,40 @@ async function criarNovaClasse() {
     if (error) {
         alert("Erro ao criar classe: " + error.message);
     } else {
-        // Alerta visual confirmando a criação da classe
         alert(`A classe "${nomeClasse.trim()}" foi criada com sucesso!`);
-        carregarClasses(); // Atualiza a lista instantaneamente
+        carregarClasses(); 
+    }
+}
+
+async function editarClasse(id, nomeAtual) {
+    const novoNome = prompt("Editar nome da Classe:", nomeAtual);
+    if (!novoNome || novoNome.trim() === '' || novoNome === nomeAtual) return;
+
+    const { error } = await supabaseClient
+        .from('classes_produtos')
+        .update({ nome: novoNome.trim() })
+        .eq('id', id);
+
+    if (error) {
+        alert("Erro ao editar classe: " + error.message);
+    } else {
+        carregarClasses(); 
+    }
+}
+
+async function excluirClasse(id, nomeAtual) {
+    const confirmacao = confirm(`ATENÇÃO: Tem certeza que deseja excluir a classe "${nomeAtual}"?\n\nIsso apagará TODOS OS PRODUTOS atrelados a ela no catálogo. Esta ação não pode ser desfeita.`);
+    if (!confirmacao) return;
+
+    const { error } = await supabaseClient
+        .from('classes_produtos')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Erro ao excluir classe: " + error.message);
+    } else {
+        carregarClasses();
     }
 }
 
@@ -56,13 +86,47 @@ async function carregarClasses() {
     }
 
     const selectClasse = document.getElementById('prod-classe');
-    selectClasse.innerHTML = '<option value="">Selecione...</option>';
+    const listaCatalogo = document.getElementById('lista-catalogo');
     
+    // Limpa a gaveta e a tela principal
+    selectClasse.innerHTML = '<option value="">Selecione...</option>';
+    listaCatalogo.innerHTML = ''; 
+
+    if (data.length === 0) {
+        listaCatalogo.innerHTML = `
+            <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
+                <p class="text-slate-500 text-sm">Nenhuma classe ou produto cadastrado no catálogo.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Monta a tela com as classes puxadas do banco
     data.forEach(classe => {
+        // 1. Popula o Select (Caixinha) escondido na gaveta
         const option = document.createElement('option');
         option.value = classe.id;
         option.innerText = classe.nome;
         selectClasse.appendChild(option);
+
+        // 2. Popula os cards interativos na tela principal
+        const classeCard = document.createElement('div');
+        classeCard.className = "bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden";
+        classeCard.innerHTML = `
+            <div class="flex justify-between items-center p-4 bg-slate-50 border-b border-gray-200">
+                <h4 class="font-bold text-slate-800 text-md flex items-center gap-2">
+                    <span class="text-slate-400">📁</span> ${classe.nome}
+                </h4>
+                <div class="flex gap-4">
+                    <button onclick="editarClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition flex items-center gap-1">✏️ Editar</button>
+                    <button onclick="excluirClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-rose-600 text-sm font-medium transition flex items-center gap-1">🗑️ Excluir</button>
+                </div>
+            </div>
+            <div id="produtos-classe-${classe.id}" class="p-4 text-sm text-slate-500 bg-white">
+                <span class="italic text-xs">Os produtos vinculados a esta classe aparecerão listados aqui em breve...</span>
+            </div>
+        `;
+        listaCatalogo.appendChild(classeCard);
     });
 }
 
@@ -81,7 +145,6 @@ async function salvarProdutoNoBanco() {
         return;
     }
 
-    // Varre o HTML para montar o JSON de status inteligentemente
     const statusArray = [];
     const linhasStatus = document.querySelectorAll('.status-row');
     
@@ -95,7 +158,7 @@ async function salvarProdutoNoBanco() {
     });
 
     if (statusArray.length === 0) {
-        alert("Adicione pelo menos um status permitido (Ex: Realizado com peso 1).");
+        alert("Adicione pelo menos um status permitido.");
         return;
     }
 
@@ -117,9 +180,9 @@ async function salvarProdutoNoBanco() {
 
         alert("Produto cadastrado com sucesso!");
         document.getElementById('form-produto').reset();
-        togglePainelProduto(false); // Fecha a gaveta lateral
+        togglePainelProduto(false); 
         
-        // Aqui no futuro chamaremos uma função para atualizar a lista na tela principal
+        // Futura atualização para carregar os produtos abaixo da classe
         
     } catch (err) {
         alert("Falha ao salvar produto: " + err.message);
