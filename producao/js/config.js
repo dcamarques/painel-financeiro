@@ -37,6 +37,8 @@ async function criarNovaClasse() {
     if (error) {
         alert("Erro ao criar classe: " + error.message);
     } else {
+        // Alerta visual confirmando a criação da classe
+        alert(`A classe "${nomeClasse.trim()}" foi criada com sucesso!`);
         carregarClasses(); // Atualiza a lista instantaneamente
     }
 }
