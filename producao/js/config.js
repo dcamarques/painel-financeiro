@@ -1,27 +1,33 @@
 let equipeIdGlobal = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+// Função principal que roda imediatamente
+async function inicializarConfiguracoes() {
+    const listaCatalogo = document.getElementById('lista-catalogo');
     try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.replace('index.html');
             return;
         }
 
-        const { data: userData } = await supabaseClient
+        const { data: userData, error: userError } = await supabaseClient
             .from('usuarios')
             .select('equipe_id')
             .eq('id', session.user.id)
             .single();
 
+        if (userError) throw userError;
+
         if (userData) {
             equipeIdGlobal = userData.equipe_id;
-            carregarClasses();
+            await carregarClasses();
+        } else {
+            listaCatalogo.innerHTML = `<p class="text-rose-600 font-bold p-5">Erro: Usuário não encontrado no banco.</p>`;
         }
     } catch (err) {
-        console.error("Erro ao inicializar configurações:", err);
+        listaCatalogo.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-md text-sm"><b>Erro de Autenticação:</b> ${err.message}</div>`;
     }
-});
+}
 
 // --- MOTOR DE CLASSES (VISUALIZAR, CRIAR, EDITAR E EXCLUIR) ---
 
@@ -74,60 +80,57 @@ async function excluirClasse(id, nomeAtual) {
 }
 
 async function carregarClasses() {
-    const { data, error } = await supabaseClient
-        .from('classes_produtos')
-        .select('id, nome')
-        .eq('equipe_id', equipeIdGlobal)
-        .order('nome');
-
-    if (error) {
-        console.error("Erro ao buscar classes", error);
-        return;
-    }
-
     const selectClasse = document.getElementById('prod-classe');
     const listaCatalogo = document.getElementById('lista-catalogo');
     
-    // Limpa a gaveta e a tela principal
-    selectClasse.innerHTML = '<option value="">Selecione...</option>';
-    listaCatalogo.innerHTML = ''; 
+    try {
+        const { data, error } = await supabaseClient
+            .from('classes_produtos')
+            .select('id, nome')
+            .eq('equipe_id', equipeIdGlobal)
+            .order('nome');
 
-    if (data.length === 0) {
-        listaCatalogo.innerHTML = `
-            <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
-                <p class="text-slate-500 text-sm">Nenhuma classe ou produto cadastrado no catálogo.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // Monta a tela com as classes puxadas do banco
-    data.forEach(classe => {
-        // 1. Popula o Select (Caixinha) escondido na gaveta
-        const option = document.createElement('option');
-        option.value = classe.id;
-        option.innerText = classe.nome;
-        selectClasse.appendChild(option);
+        if (error) throw error;
 
-        // 2. Popula os cards interativos na tela principal
-        const classeCard = document.createElement('div');
-        classeCard.className = "bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden";
-        classeCard.innerHTML = `
-            <div class="flex justify-between items-center p-4 bg-slate-50 border-b border-gray-200">
-                <h4 class="font-bold text-slate-800 text-md flex items-center gap-2">
-                    <span class="text-slate-400">📁</span> ${classe.nome}
-                </h4>
-                <div class="flex gap-4">
-                    <button onclick="editarClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition flex items-center gap-1">✏️ Editar</button>
-                    <button onclick="excluirClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-rose-600 text-sm font-medium transition flex items-center gap-1">🗑️ Excluir</button>
+        selectClasse.innerHTML = '<option value="">Selecione...</option>';
+        listaCatalogo.innerHTML = ''; 
+
+        if (!data || data.length === 0) {
+            listaCatalogo.innerHTML = `
+                <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">Nenhuma classe ou produto cadastrado no catálogo.</p>
                 </div>
-            </div>
-            <div id="produtos-classe-${classe.id}" class="p-4 text-sm text-slate-500 bg-white">
-                <span class="italic text-xs">Os produtos vinculados a esta classe aparecerão listados aqui em breve...</span>
-            </div>
-        `;
-        listaCatalogo.appendChild(classeCard);
-    });
+            `;
+            return;
+        }
+        
+        data.forEach(classe => {
+            const option = document.createElement('option');
+            option.value = classe.id;
+            option.innerText = classe.nome;
+            selectClasse.appendChild(option);
+
+            const classeCard = document.createElement('div');
+            classeCard.className = "bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden";
+            classeCard.innerHTML = `
+                <div class="flex justify-between items-center p-4 bg-slate-50 border-b border-gray-200">
+                    <h4 class="font-bold text-slate-800 text-md flex items-center gap-2">
+                        <span class="text-slate-400">📁</span> ${classe.nome}
+                    </h4>
+                    <div class="flex gap-4">
+                        <button onclick="editarClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition flex items-center gap-1">✏️ Editar</button>
+                        <button onclick="excluirClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-rose-600 text-sm font-medium transition flex items-center gap-1">🗑️ Excluir</button>
+                    </div>
+                </div>
+                <div id="produtos-classe-${classe.id}" class="p-4 text-sm text-slate-500 bg-white">
+                    <span class="italic text-xs">Os produtos vinculados a esta classe aparecerão listados aqui em breve...</span>
+                </div>
+            `;
+            listaCatalogo.appendChild(classeCard);
+        });
+    } catch (err) {
+        listaCatalogo.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-md text-sm"><b>Erro no Banco de Dados:</b> ${err.message}</div>`;
+    }
 }
 
 // --- MOTOR DE PRODUTOS ---
@@ -182,8 +185,6 @@ async function salvarProdutoNoBanco() {
         document.getElementById('form-produto').reset();
         togglePainelProduto(false); 
         
-        // Futura atualização para carregar os produtos abaixo da classe
-        
     } catch (err) {
         alert("Falha ao salvar produto: " + err.message);
     } finally {
@@ -191,3 +192,6 @@ async function salvarProdutoNoBanco() {
         btnSalvar.disabled = false;
     }
 }
+
+// Dispara o motor principal na hora que o arquivo é lido!
+inicializarConfiguracoes();
