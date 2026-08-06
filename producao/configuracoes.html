@@ -12,7 +12,6 @@
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans min-h-screen flex flex-col overflow-x-hidden">
     
-    <!-- Barra Superior -->
     <nav class="bg-slate-900 text-white p-4 shadow-md flex justify-between items-center relative z-10">
         <div class="text-xl font-bold tracking-wide">Boonus <span class="font-light text-slate-400">Configurações</span></div>
         <div class="flex items-center gap-4">
@@ -23,7 +22,6 @@
     <main class="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full relative z-0">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             
-            <!-- Menu de Abas -->
             <div class="flex border-b border-gray-200 bg-slate-50">
                 <button onclick="mudarAba('equipe')" id="tab-equipe" class="flex-1 py-4 text-sm font-semibold text-slate-800 border-b-2 border-slate-800 transition">👥 Gestão da Equipe</button>
                 <button onclick="mudarAba('catalogo')" id="tab-catalogo" class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition">📦 Classes e Produtos</button>
@@ -46,13 +44,16 @@
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-slate-800">Catálogo de Produtos</h3>
                     <div class="flex gap-2">
-                        <!-- O Botão Nova Classe Agora Aciona a Criação Automática -->
-                        <button onclick="criarNovaClasse()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-md text-sm font-medium transition">+ Nova Classe</button>
+                        <button onclick="criarNovaClasse()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">+ Nova Classe</button>
                         <button onclick="togglePainelProduto(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">+ Novo Produto</button>
                     </div>
                 </div>
-                <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
-                    <p class="text-slate-500 text-sm">Nenhum produto cadastrado no catálogo.</p>
+                
+                <!-- CONTAINER DINÂMICO QUE RECEBERÁ AS CLASSES -->
+                <div id="lista-catalogo" class="space-y-4">
+                    <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
+                        <p class="text-slate-500 text-sm animate-pulse">Carregando catálogo do banco de dados...</p>
+                    </div>
                 </div>
             </div>
 
@@ -87,12 +88,9 @@
         </div>
     </main>
 
-    <!-- SOBREPOSIÇÃO ESCURA (BACKDROP) -->
     <div id="backdrop" onclick="togglePainelProduto(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0"></div>
 
-    <!-- PAINEL LATERAL DESLIZANTE (DRAWER) -->
     <div id="painel-produto" class="fixed top-0 right-0 h-full w-full md:w-[500px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-        
         <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-slate-50">
             <h3 class="text-lg font-bold text-slate-800">Parametrizar Produto</h3>
             <button onclick="togglePainelProduto(false)" class="text-slate-400 hover:text-rose-600 font-bold text-xl p-1">&times;</button>
@@ -110,7 +108,6 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
                         <select id="prod-classe" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
                             <option value="">Selecione...</option>
-                            <!-- Será populado via banco -->
                         </select>
                     </div>
                     <div>
@@ -128,10 +125,8 @@
                         <button type="button" onclick="adicionarLinhaStatus()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md font-medium transition">+ Adicionar Status</button>
                     </div>
                     <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                        Defina as opções de funil para este produto. Use Peso <b>1</b> para bater meta, <b>0</b> para Pipeline (apenas registro) e <b>-1</b> para subtrair.
+                        Defina as opções de funil para este produto. Use Peso <b>1</b> para bater meta, <b>0</b> para Pipeline e <b>-1</b> para subtrair.
                     </p>
-                    
-                    <!-- Container Dinâmico de Status -->
                     <div id="container-status" class="space-y-3">
                         <div class="flex gap-2 items-center status-row">
                             <input type="text" placeholder="Ex: Realizado" value="Realizado" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
@@ -147,14 +142,12 @@
         </div>
 
         <div class="p-6 border-t border-gray-200 bg-slate-50">
-            <!-- Botão Salvar conectado com a função inteligente do JS -->
             <button type="button" onclick="salvarProdutoNoBanco()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition">
                 Salvar Produto no Catálogo
             </button>
         </div>
     </div>
 
-    <!-- Scripts de Interface -->
     <script>
         function mudarAba(abaSelecionada) {
             const abas = ['equipe', 'catalogo', 'metas'];
@@ -169,7 +162,6 @@
             });
         }
 
-        // Lógica do Painel Deslizante
         function togglePainelProduto(abrir) {
             const painel = document.getElementById('painel-produto');
             const backdrop = document.getElementById('backdrop');
@@ -189,7 +181,6 @@
             }
         }
 
-        // Adicionar novas linhas de Status Dinâmicos
         function adicionarLinhaStatus() {
             const container = document.getElementById('container-status');
             const novaLinha = document.createElement('div');
@@ -203,8 +194,8 @@
         }
     </script>
 
-    <!-- INJEÇÃO DOS SCRIPTS E MOTORES DE BANCO DE DADOS (v4.0) -->
-    <script src="js/supabase-client.js?v=4.0"></script>
-    <script src="js/config.js?v=4.0"></script>
+    <!-- Fura-Cache v5.0 -->
+    <script src="js/supabase-client.js?v=5.0"></script>
+    <script src="js/config.js?v=5.0"></script>
 </body>
 </html>
