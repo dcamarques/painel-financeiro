@@ -4,7 +4,7 @@ let equipeIdGlobal = null;
 async function inicializarConfiguracoes() {
     const listaCatalogo = document.getElementById('lista-catalogo');
     try {
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.replace('index.html');
             return;
@@ -20,7 +20,7 @@ async function inicializarConfiguracoes() {
 
         if (userData) {
             equipeIdGlobal = userData.equipe_id;
-            await carregarClasses();
+            await carregarClassesEProdutos();
         } else {
             listaCatalogo.innerHTML = `<p class="text-rose-600 font-bold p-5">Erro: Usuário não encontrado no banco.</p>`;
         }
@@ -29,7 +29,7 @@ async function inicializarConfiguracoes() {
     }
 }
 
-// --- MOTOR DE CLASSES (VISUALIZAR, CRIAR, EDITAR E EXCLUIR) ---
+// --- MOTOR DE CLASSES ---
 
 async function criarNovaClasse() {
     const nomeClasse = prompt("Digite o nome da nova Classe (ex: Investimentos, Crédito, Câmbio):");
@@ -42,8 +42,7 @@ async function criarNovaClasse() {
     if (error) {
         alert("Erro ao criar classe: " + error.message);
     } else {
-        alert(`A classe "${nomeClasse.trim()}" foi criada com sucesso!`);
-        carregarClasses(); 
+        carregarClassesEProdutos(); 
     }
 }
 
@@ -59,7 +58,7 @@ async function editarClasse(id, nomeAtual) {
     if (error) {
         alert("Erro ao editar classe: " + error.message);
     } else {
-        carregarClasses(); 
+        carregarClassesEProdutos(); 
     }
 }
 
@@ -75,27 +74,40 @@ async function excluirClasse(id, nomeAtual) {
     if (error) {
         alert("Erro ao excluir classe: " + error.message);
     } else {
-        carregarClasses();
+        carregarClassesEProdutos();
     }
 }
 
-async function carregarClasses() {
+// --- MOTOR PRINCIPAL: CARREGA CLASSES E SEUS PRODUTOS ---
+
+async function carregarClassesEProdutos() {
     const selectClasse = document.getElementById('prod-classe');
     const listaCatalogo = document.getElementById('lista-catalogo');
     
     try {
-        const { data, error } = await supabaseClient
+        // 1. Busca todas as Classes
+        const { data: classes, error: erroClasses } = await supabaseClient
             .from('classes_produtos')
             .select('id, nome')
             .eq('equipe_id', equipeIdGlobal)
             .order('nome');
 
-        if (error) throw error;
+        if (erroClasses) throw erroClasses;
 
+        // 2. Busca todos os Produtos
+        const { data: produtos, error: erroProdutos } = await supabaseClient
+            .from('produtos')
+            .select('*')
+            .eq('equipe_id', equipeIdGlobal)
+            .order('nome');
+
+        if (erroProdutos) throw erroProdutos;
+
+        // Limpa a tela
         selectClasse.innerHTML = '<option value="">Selecione...</option>';
         listaCatalogo.innerHTML = ''; 
 
-        if (!data || data.length === 0) {
+        if (!classes || classes.length === 0) {
             listaCatalogo.innerHTML = `
                 <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
                     <p class="text-slate-500 text-sm">Nenhuma classe ou produto cadastrado no catálogo.</p>
@@ -104,12 +116,47 @@ async function carregarClasses() {
             return;
         }
         
-        data.forEach(classe => {
+        // Monta a estrutura visual
+        classes.forEach(classe => {
+            // Popula a caixinha do formulário
             const option = document.createElement('option');
             option.value = classe.id;
             option.innerText = classe.nome;
             selectClasse.appendChild(option);
 
+            // Filtra apenas os produtos que pertencem a esta classe
+            const produtosDestaClasse = produtos.filter(p => p.classe_id === classe.id);
+            
+            let htmlProdutos = '';
+            
+            if (produtosDestaClasse.length === 0) {
+                htmlProdutos = `<div class="p-4 text-sm text-slate-500 bg-white"><span class="italic text-xs">Nenhum produto cadastrado nesta classe.</span></div>`;
+            } else {
+                htmlProdutos = `<div class="divide-y divide-gray-100 bg-white">`;
+                produtosDestaClasse.forEach(prod => {
+                    // Monta as tags visuais (badges) para cada status que o produto tem
+                    let badgesStatus = '';
+                    if(prod.status_permitidos && Array.isArray(prod.status_permitidos)){
+                        prod.status_permitidos.forEach(st => {
+                            let corBg = st.peso > 0 ? 'bg-emerald-100 text-emerald-700' : (st.peso < 0 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600');
+                            badgesStatus += `<span class="${corBg} text-[10px] px-2 py-0.5 rounded-full font-medium ml-1">${st.nome} (${st.peso})</span>`;
+                        });
+                    }
+
+                    htmlProdutos += `
+                        <div class="p-4 flex justify-between items-center hover:bg-slate-50 transition">
+                            <div>
+                                <div class="font-medium text-slate-700 text-sm mb-1">${prod.nome} <span class="ml-2 text-xs text-slate-400 border border-slate-200 rounded px-1">${prod.unidade_medida}</span></div>
+                                <div class="flex flex-wrap gap-1">${badgesStatus}</div>
+                            </div>
+                            <button onclick="excluirProduto('${prod.id}', '${prod.nome}')" class="text-slate-400 hover:text-rose-600 text-xs font-medium transition px-2 py-1">Excluir</button>
+                        </div>
+                    `;
+                });
+                htmlProdutos += `</div>`;
+            }
+
+            // Monta o Card da Classe com os produtos dentro
             const classeCard = document.createElement('div');
             classeCard.className = "bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden";
             classeCard.innerHTML = `
@@ -118,13 +165,11 @@ async function carregarClasses() {
                         <span class="text-slate-400">📁</span> ${classe.nome}
                     </h4>
                     <div class="flex gap-4">
-                        <button onclick="editarClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition flex items-center gap-1">✏️ Editar</button>
-                        <button onclick="excluirClasse('${classe.id}', '${classe.nome}')" class="text-slate-500 hover:text-rose-600 text-sm font-medium transition flex items-center gap-1">🗑️ Excluir</button>
+                        <button onclick="editarClasse('${classe.id}', '${classe.nome}')" class="text-slate-400 hover:text-blue-600 text-xs font-medium transition uppercase tracking-wide">Editar Classe</button>
+                        <button onclick="excluirClasse('${classe.id}', '${classe.nome}')" class="text-slate-400 hover:text-rose-600 text-xs font-medium transition uppercase tracking-wide">Excluir Classe</button>
                     </div>
                 </div>
-                <div id="produtos-classe-${classe.id}" class="p-4 text-sm text-slate-500 bg-white">
-                    <span class="italic text-xs">Os produtos vinculados a esta classe aparecerão listados aqui em breve...</span>
-                </div>
+                ${htmlProdutos}
             `;
             listaCatalogo.appendChild(classeCard);
         });
@@ -134,6 +179,22 @@ async function carregarClasses() {
 }
 
 // --- MOTOR DE PRODUTOS ---
+
+async function excluirProduto(id, nomeAtual) {
+    const confirmacao = confirm(`Deseja excluir o produto "${nomeAtual}" do catálogo?`);
+    if (!confirmacao) return;
+
+    const { error } = await supabaseClient
+        .from('produtos')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Erro ao excluir produto: " + error.message);
+    } else {
+        carregarClassesEProdutos();
+    }
+}
 
 async function salvarProdutoNoBanco() {
     const btnSalvar = document.querySelector('button[onclick="salvarProdutoNoBanco()"]');
@@ -181,9 +242,12 @@ async function salvarProdutoNoBanco() {
 
         if (error) throw error;
 
-        alert("Produto cadastrado com sucesso!");
+        // Limpa a tela e fecha a gaveta
         document.getElementById('form-produto').reset();
         togglePainelProduto(false); 
+        
+        // Atualiza a tela instantaneamente para mostrar o produto criado!
+        carregarClassesEProdutos();
         
     } catch (err) {
         alert("Falha ao salvar produto: " + err.message);
@@ -193,5 +257,4 @@ async function salvarProdutoNoBanco() {
     }
 }
 
-// Dispara o motor principal na hora que o arquivo é lido!
 inicializarConfiguracoes();
