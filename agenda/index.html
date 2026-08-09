@@ -126,8 +126,6 @@
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
         /* --- ADAPTAÇÃO INTELIGENTE PARA TELAS MENORES E MOBILE --- */
-        
-        /* 1. Tablet e Mobile Geral (Garante que Notícias somem) */
         @media (max-width: 1024px) {
             .left-panel { display: none !important; }
             .tasks-panel { width: 100%; }
@@ -138,7 +136,6 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
-        /* 2. Celular na Vertical (Em pé) */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-center { order: -1; margin-bottom: 5px; }
@@ -147,25 +144,15 @@
             .filtro-group { justify-content: center; flex-wrap: wrap; }
         }
 
-        /* 3. Celular na Horizontal (Deitado) - O Segredo da Otimização Vertical */
         @media (max-height: 500px) and (orientation: landscape) {
-            .header { 
-                padding: 5px 10px; 
-                flex-wrap: nowrap; /* Não pula de linha */
-                overflow-x: auto;  /* Permite deslizar para os lados */
-                -ms-overflow-style: none; scrollbar-width: none; 
-            }
+            .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
             .nav-btn { padding: 4px 10px; font-size: 0.7rem; }
             .visao-group { margin-right: 8px; padding: 2px; }
             .header-center h3 { font-size: 0.85rem; padding: 0 5px; }
-            
-            /* Ajustes do alerta gigante para caber deitado */
             .giant-actions { flex-direction: row; }
             .giant-btn { width: auto; font-size: 0.9em; padding: 10px 15px; }
             .giant-title { font-size: 1.5em; margin-bottom: 15px; }
-            
-            /* Ajusta a lista de tarefas para otimizar espaço */
             .tasks-panel { padding: 10px; gap: 10px; }
             .task-card { padding: 10px; }
             .task-title { margin-bottom: 8px; font-size: 1rem; }
@@ -204,11 +191,10 @@
     <div id="painel">
         <div class="header">
             <div class="header-left">
-                <!-- FILTROS DE VISÃO MULTI-TENANT -->
+                <!-- FILTROS DE VISÃO MULTI-TENANT (Liga/Desliga - Ambas ligadas por padrão) -->
                 <div class="visao-group">
-                    <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="definirVisao('MINHAS')">👤 MINHAS</button>
-                    <button class="nav-btn" id="btn-visao-equipe" onclick="definirVisao('EQUIPE')">👥 EQUIPE</button>
-                    <button class="nav-btn" id="btn-visao-ambas" onclick="definirVisao('AMBAS')">🌐 AMBAS</button>
+                    <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="toggleVisao('minhas')">👤 MINHAS</button>
+                    <button class="nav-btn active-visao" id="btn-visao-equipe" onclick="toggleVisao('equipe')">👥 EQUIPE</button>
                 </div>
                 <!-- FILTROS DE STATUS (LIGA/DESLIGA) -->
                 <div class="filtro-group">
@@ -223,7 +209,6 @@
                 <button class="nav-btn" onclick="mudarData(1)">&gt;</button>
             </div>
             <div class="header-right">
-                <!-- Textos Encurtados para melhor navegação horizontal -->
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">➕ TAREFA</button>
                 <button class="nav-btn" onclick="abrirModalConfig()">⚙️ CONFIG</button>
                 <button class="nav-btn" id="btn-tela-cheia" onclick="toggleFullScreen()">⛶ TELA CHEIA</button>
@@ -355,7 +340,8 @@
         
         // --- LÓGICA DE FILTROS (Toggles) ---
         let filtrosAtivos = { vencidas: false, pendentes: false, prioridades: false };
-        let filtroVisao = 'MINHAS'; 
+        // Ambos ligados por padrão
+        let filtrosVisao = { minhas: true, equipe: true }; 
         
         let tarefasGlobais = [];
         let categoriasGlobais = [];
@@ -371,11 +357,13 @@
         // --- NAVEGAÇÃO DE DATAS ---
         let dataPointer = new Date();
         function atualizarDisplayData() {
-            const hoje = new Date();
-            const isHoje = dataPointer.getDate() === hoje.getDate() && dataPointer.getMonth() === hoje.getMonth() && dataPointer.getFullYear() === hoje.getFullYear();
-            const opcoes = { day: 'numeric', month: 'long', year: isHoje ? undefined : 'numeric' };
-            const textoData = dataPointer.toLocaleDateString('pt-BR', opcoes).toUpperCase();
-            document.getElementById('display-data').innerText = isHoje ? `HOJE, ${textoData}` : textoData;
+            // Formato DD-MMM-AA
+            const dia = String(dataPointer.getDate()).padStart(2, '0');
+            const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+            const mes = meses[dataPointer.getMonth()];
+            const ano = String(dataPointer.getFullYear()).slice(-2);
+            
+            document.getElementById('display-data').innerText = `${dia}-${mes}-${ano}`;
         }
         function mudarData(acao) {
             if (acao === 'hoje') dataPointer = new Date(); else dataPointer.setDate(dataPointer.getDate() + acao);
@@ -383,11 +371,15 @@
         }
 
         // --- FILTROS DE VISÃO E LIGA/DESLIGA ---
-        function definirVisao(visao) {
-            if(!minhaEquipe && visao !== 'MINHAS') return alert("Você precisa configurar uma equipe para usar esta visão.");
-            filtroVisao = visao;
-            document.querySelectorAll('.visao-group .nav-btn').forEach(btn => btn.classList.remove('active-visao'));
-            document.getElementById('btn-visao-' + visao.toLowerCase()).classList.add('active-visao');
+        function toggleVisao(tipo) {
+            if(!minhaEquipe && tipo === 'equipe') return alert("Você precisa configurar uma equipe para usar este filtro.");
+            
+            filtrosVisao[tipo] = !filtrosVisao[tipo];
+            const btn = document.getElementById('btn-visao-' + tipo);
+            
+            if(filtrosVisao[tipo]) btn.classList.add('active-visao');
+            else btn.classList.remove('active-visao');
+            
             renderizarTarefas();
         }
 
@@ -476,6 +468,12 @@
                 document.getElementById('panel-gerenciar-equipe').style.display = 'block';
                 document.getElementById('display-nome-equipe').innerText = `Equipe: ${minhaEquipe.nome}`;
                 carregarMembrosEquipe();
+            } else {
+                // FALLBACK: Se o usuário não tiver equipe, desliga o filtro EQUIPE e deixa só o MINHAS para não ver tela vazia
+                filtrosVisao.equipe = false;
+                filtrosVisao.minhas = true;
+                document.getElementById('btn-visao-equipe').classList.remove('active-visao');
+                document.getElementById('btn-visao-minhas').classList.add('active-visao');
             }
         }
 
@@ -483,7 +481,7 @@
             const nome = document.getElementById('nome-equipe').value.trim();
             if(!nome) return alert('Digite um nome para a equipe.');
             const { error } = await supabaseClient.from('equipes').insert([{ nome: nome, id_criador: currentUser.id }]);
-            if(error) alert('Erro: ' + error.message); else { alert('Equipe criada!'); await carregarEquipe(); }
+            if(error) alert('Erro: ' + error.message); else { alert('Equipe criada!'); await carregarEquipe(); renderizarTarefas(); }
         }
 
         async function adicionarMembro() {
@@ -614,9 +612,12 @@
             const agora = new Date();
             
             let tarefasFiltradas = tarefasGlobais.filter(t => {
-                if (filtroVisao === 'MINHAS') return !t.id_equipe;
-                if (filtroVisao === 'EQUIPE') return t.id_equipe !== null;
-                return true; 
+                const isMinha = !t.id_equipe;
+                const isEquipe = t.id_equipe !== null;
+                
+                if (filtrosVisao.minhas && isMinha) return true;
+                if (filtrosVisao.equipe && isEquipe) return true;
+                return false; 
             });
 
             tarefasFiltradas = tarefasFiltradas.filter(t => {
