@@ -201,11 +201,11 @@
                     <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="toggleVisao('minhas')">👤 MINHAS</button>
                     <button class="nav-btn active-visao" id="btn-visao-equipe" onclick="toggleVisao('equipe')">👥 EQUIPE</button>
                 </div>
-                <!-- FILTROS DE STATUS (LIGA/DESLIGA) -->
+                <!-- FILTROS DE STATUS (LIGA/DESLIGA) - PENDENTES ON POR PADRÃO E PRIORIDADES REDUZIDO -->
                 <div class="filtro-group">
                     <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('vencidas')">VENCIDAS</button>
-                    <button class="nav-btn" id="btn-filtro-pendentes" onclick="definirFiltro('pendentes')">PENDENTES</button>
-                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('prioridades')">PRIORIDADES</button>
+                    <button class="nav-btn active-filter" id="btn-filtro-pendentes" onclick="definirFiltro('pendentes')">PENDENTES</button>
+                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('prioridades')">PRIORID</button>
                 </div>
             </div>
             <div class="header-center">
@@ -344,7 +344,8 @@
         let minhaEquipe = null; 
         
         // --- LÓGICA DE FILTROS (Toggles) ---
-        let filtrosAtivos = { vencidas: false, pendentes: false, prioridades: false };
+        // PENDENTES LIGADO POR PADRÃO
+        let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
         // Ambos ligados por padrão
         let filtrosVisao = { minhas: true, equipe: true }; 
         
@@ -649,7 +650,7 @@
                 return true; 
             });
 
-            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada.</div>`; return; }
+            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return; }
 
             tarefasFiltradas.forEach(t => {
                 const cor = (categoriasGlobais.find(c => c.nome === t.categoria) || {}).cor || '#555';
