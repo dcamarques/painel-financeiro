@@ -51,7 +51,7 @@
         .nav-btn { 
             background: transparent; color: #a0a0a0; border: 1px solid #444; padding: 6px 14px; 
             border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; 
-            letter-spacing: 0.5px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;
+            letter-spacing: 0.5px; transition: all 0.2s ease; white-space: nowrap;
         }
         .nav-btn:hover { background: #222; color: #fff; border-color: #666; }
         
@@ -141,32 +141,14 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
-        /* Celular Vertical */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-center { order: -1; margin-bottom: 5px; }
-            
-            /* Nova arquitetura: Carrossel Horizontal para os Filtros */
-            .header-left { 
-                width: 100%; 
-                justify-content: flex-start; 
-                flex-wrap: nowrap; 
-                overflow-x: auto; 
-                -ms-overflow-style: none; 
-                scrollbar-width: none; 
-                padding-bottom: 2px;
-                gap: 8px;
-            }
-            .header-left::-webkit-scrollbar { display: none; }
-            
-            .header-right { justify-content: center; width: 100%; flex-wrap: wrap; }
-            
-            /* Borda da Visão agora fica ajustada apenas aos botões e desliza junto */
-            .visao-group { margin: 0; width: auto; flex-shrink: 0; }
-            .filtro-group { justify-content: flex-start; flex-wrap: nowrap; flex-shrink: 0; gap: 8px; }
+            .header-left, .header-right { justify-content: center; width: 100%; }
+            .visao-group { margin-right: 0; margin-bottom: 8px; justify-content: center; width: 100%; }
+            .filtro-group { justify-content: center; flex-wrap: wrap; }
         }
 
-        /* Celular Horizontal */
         @media (max-height: 500px) and (orientation: landscape) {
             .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
@@ -623,10 +605,21 @@
             await supabaseClient.from('tarefas').update({ status: 'Concluido' }).eq('id', id); 
             await carregarTarefasDB(); 
         }
+        
         async function adiarTarefaDB(id, dataAtual) {
             let el = document.getElementById('task-'+id);
             if(el) el.style.opacity = '0.5';
-            const dataObj = new Date(dataAtual); dataObj.setMinutes(dataObj.getMinutes() + 10);
+            
+            const agora = new Date();
+            let dataObj = new Date(dataAtual);
+            
+            // Nova Regra de Ouro: Se a tarefa já está no passado, o '+10 min' conta a partir de AGORA
+            if (dataObj < agora) {
+                dataObj = new Date(agora);
+            }
+            
+            dataObj.setMinutes(dataObj.getMinutes() + 10);
+            
             await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); 
             await carregarTarefasDB(); 
         }
