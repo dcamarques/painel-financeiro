@@ -93,7 +93,6 @@
 <body>
 
     <div class="header">
-        <!-- Correção Mobile: Removido o onerror que escondia a imagem durante o carregamento 3G/4G -->
         <div class="logo"><img id="header-logo" src="logo.png" alt="Logo"></div>
         <div class="clocks-container">
             <div class="clock-box"><div class="label">Brasília</div><div id="br-time" class="time">--:--:--</div></div>
@@ -162,11 +161,12 @@
         <div class="sidebar-qr" onclick="toggleFullScreen()">
             <div class="qr-section">
                 <div class="qr-box">
-                    <img id="qr-sidebar-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521981976661" alt="QR Code">
+                    <!-- QR Code atualizado apontando para o e-mail -->
+                    <img id="qr-sidebar-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=mailto:contato@boonus.app.br" alt="QR Code">
                 </div>
                 <div class="qr-text" id="qr-sidebar-text">DÚVIDAS? ESCANEIE<br>FALE COM O ASSESSOR</div>
             </div>
-            <div class="version-tag">v: 1.8.9</div>
+            <div class="version-tag">v: 1.8.10</div>
         </div>
     </div>
 
@@ -189,7 +189,7 @@
             document.documentElement.style.setProperty('--neon-color', '#C29B0C'); 
             const logoEl = document.getElementById('header-logo');
             logoEl.src = 'logo-safra.png';
-            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
+            logoEl.style.display = 'block'; 
             
             publiImages = ['safra-publi1.png', 'safra-publi2.png', 'safra-publi3.png'];
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRligWQ9c9JMzqTchd606jk1VGqTgpHjaQpEhqjMlG_3ecYbSZeuviFiFT6TAg9o7YmXdwRI16DI8cv/pub?gid=0&single=true&output=csv';
@@ -201,7 +201,7 @@
             document.documentElement.style.setProperty('--neon-color', '#00d2ff'); 
             const logoEl = document.getElementById('header-logo');
             logoEl.src = 'logo-btg.png';
-            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
+            logoEl.style.display = 'block'; 
             
             publiImages = ['btg-publi1.png', 'btg-publi2.png', 'btg-publi3.png'];
             URL_OPORTUNIDADES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPJE572HfEwmYWjjVAn3nE4mkP_YAzTM7UNad5sb8W1uZO7NsHQqZGY2AOTObqYDgc0f_oU0ulSL82/pub?gid=0&single=true&output=csv';
@@ -214,7 +214,7 @@
             
             const logoEl = document.getElementById('header-logo');
             logoEl.src = 'logo-darioporto.png?v=2';
-            logoEl.style.display = 'block'; // Força a exibição da logo no mobile
+            logoEl.style.display = 'block'; 
             
             document.getElementById('qr-sidebar-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/5521971213845';
             
