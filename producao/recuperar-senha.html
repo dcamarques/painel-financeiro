@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boonus | Recuperar Senha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
+    
+    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200 w-full max-w-md relative overflow-hidden">
+        <!-- Barra de topo decorativa -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
 
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Boonus<span class="font-light text-slate-500">.app</span></h1>
+            <p id="titulo-form" class="text-sm text-slate-500 mt-2">Recuperação de Acesso</p>
+        </div>
+
+        <!-- ESTÁGIO 1: PEDIR E-MAIL -->
+        <div id="estagio-email">
+            <p class="text-sm text-slate-600 mb-6 text-center">
+                Digite o e-mail associado à sua conta. Enviaremos um link seguro para você redefinir sua senha.
+            </p>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <input type="email" id="email-recuperacao" placeholder="seu@email.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
+            <button onclick="enviarEmailRecuperacao()" id="btn-enviar" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition mb-4">
+                Enviar link de recuperação
+            </button>
+            <div class="text-center">
+                <a href="index.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Voltar para o Login</a>
+            </div>
+        </div>
+
+        <!-- ESTÁGIO 2: DIGITAR NOVA SENHA (Oculto por padrão) -->
+        <div id="estagio-senha" class="hidden">
+            <p class="text-sm text-slate-600 mb-6 text-center">
+                Link validado com sucesso! Crie uma nova senha segura para o seu acesso.
+            </p>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                <input type="password" id="nova-senha" placeholder="Mínimo de 6 caracteres" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
+            <button onclick="salvarNovaSenha()" id="btn-salvar" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition mb-4">
+                Redefinir Senha e Entrar
+            </button>
+        </div>
+
+        <div id="mensagem" class="mt-4 text-center text-sm font-medium hidden rounded-md p-3"></div>
+    </div>
+
+    <!-- Importa o nosso cliente Supabase -->
+    <script src="js/supabase-client.js"></script>
+    <script>
+        // Função para mostrar mensagens de erro/sucesso
+        function mostrarMensagem(texto, tipo) {
+            const div = document.getElementById('mensagem');
+            div.innerText = texto;
+            div.className = `mt-4 text-center text-sm font-medium rounded-md p-3 block ${tipo === 'erro' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`;
+        }
+
+        // Verifica se a URL tem o token de recuperação (O usuário clicou no e-mail)
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash && hash.includes('type=recovery')) {
+                document.getElementById('estagio-email').classList.add('hidden');
+                document.getElementById('estagio-senha').classList.remove('hidden');
+                document.getElementById('titulo-form').innerText = "Criar Nova Senha";
+            }
+        });
+
+        // 1. Enviar o e-mail
+        async function enviarEmailRecuperacao() {
+            const email = document.getElementById('email-recuperacao').value.trim();
+            const btn = document.getElementById('btn-enviar');
+
+            if (!email) {
+                mostrarMensagem("Por favor, digite seu e-mail.", "erro");
+                return;
+            }
+
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+
+            // Envia o e-mail e diz para o Supabase voltar para esta mesma página
+            const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://tv.boonus.app.br/producao/recuperar-senha.html'
+            });
+
+            if (error) {
+                mostrarMensagem("Erro: " + error.message, "erro");
+                btn.innerText = "Enviar link de recuperação";
+                btn.disabled = false;
+            } else {
+                mostrarMensagem("E-mail enviado! Verifique sua caixa de entrada e SPAM.", "sucesso");
+                btn.style.display = 'none';
+            }
+        }
+
+        // 2. Salvar a nova senha
+        async function salvarNovaSenha() {
+            const novaSenha = document.getElementById('nova-senha').value;
+            const btn = document.getElementById('btn-salvar');
+
+            if (novaSenha.length < 6) {
+                mostrarMensagem("A senha deve ter no mínimo 6 caracteres.", "erro");
+                return;
+            }
+
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            const { data, error } = await supabaseClient.auth.updateUser({
+                password: novaSenha
+            });
+
+            if (error) {
+                mostrarMensagem("Erro ao redefinir: " + error.message, "erro");
+                btn.innerText = "Redefinir Senha e Entrar";
+                btn.disabled = false;
+            } else {
+                mostrarMensagem("Senha redefinida com sucesso! Redirecionando...", "sucesso");
+                setTimeout(() => {
+                    window.location.replace('dashboard.html');
+                }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
