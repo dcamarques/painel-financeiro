@@ -2,81 +2,81 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boonus Produção | Login</title>
-    <!-- Tailwind -->
+    <title>Boonus | Acesso ao Sistema</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase Client -->
+    <!-- Importação do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center relative">
+<body class="bg-slate-50 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
     
-    <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100 relative">
-        
-        <!-- INDICADOR DE VERSÃO -->
-        <div class="absolute top-4 right-4 text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">
-            v1.2
+    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200 w-full max-w-md relative overflow-hidden">
+        <!-- Barra de topo decorativa -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Boonus<span class="font-light text-slate-500">.app</span></h1>
+            <p class="text-sm text-slate-500 mt-2">Acesse sua conta para continuar</p>
         </div>
 
-        <div class="text-center mb-8 mt-4">
-            <h1 class="text-3xl font-bold text-slate-800">Boonus</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestão de Performance</p>
-        </div>
+        <form id="login-form" onsubmit="event.preventDefault(); fazerLogin();">
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <input type="email" id="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="seu@email.com">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <input type="password" id="senha" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="••••••••">
+            </div>
 
-        <div class="flex justify-center mb-6 border-b border-gray-200">
-            <button id="tab-login" class="w-1/2 pb-2 text-slate-800 border-b-2 border-slate-800 font-semibold transition" onclick="switchTab('login')">Entrar</button>
-            <button id="tab-register" class="w-1/2 pb-2 text-gray-400 hover:text-slate-600 font-medium transition" onclick="switchTab('register')">Criar Equipe</button>
-        </div>
+            <button type="submit" id="btn-entrar" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition">
+                Entrar
+            </button>
+            
+            <!-- AQUI ESTÁ O SEU NOVO LINK INTEGRADO -->
+            <div class="mt-5 text-center">
+                <a href="recuperar-senha.html" class="text-sm text-slate-500 hover:text-emerald-600 font-medium transition">
+                    Esqueci minha senha
+                </a>
+            </div>
+        </form>
 
-        <!-- Formulário de Login -->
-        <div id="form-login" class="block">
-            <form onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                    <input type="email" id="login-email" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
-                </div>
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-medium text-gray-700">Senha</label>
-                        <a href="#" onclick="handleForgotPassword()" class="text-xs text-slate-600 hover:text-slate-800 hover:underline">Esqueci minha senha</a>
-                    </div>
-                    <input type="password" id="login-password" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
-                </div>
-                <button type="submit" class="w-full bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Acessar Painel</button>
-            </form>
-        </div>
-
-        <!-- Formulário de Cadastro -->
-        <div id="form-register" class="hidden">
-            <form onsubmit="handleRegister(event)">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Equipe</label>
-                    <input type="text" id="reg-equipe" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition" placeholder="Ex: Escritório Principal">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome</label>
-                    <input type="text" id="reg-nome" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                    <input type="email" id="reg-email" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha (Mín. 6 caracteres)</label>
-                    <input type="password" id="reg-password" required minlength="6" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition">
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-emerald-700 transition duration-200">Criar Equipe e Iniciar</button>
-            </form>
-        </div>
-        
-        <div id="message-box" class="mt-5 text-center text-sm hidden p-3 rounded-lg"></div>
+        <!-- Div para mensagens de erro -->
+        <div id="mensagem-login" class="mt-4 text-center text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-md p-3 hidden"></div>
     </div>
 
-    <!-- Scripts v1.2 -->
-    <script src="js/supabase-client.js?v=1.2"></script>
-    <script src="js/auth.js?v=1.2"></script>
+    <!-- Importa a conexão com o seu banco de dados -->
+    <script src="js/supabase-client.js"></script>
+    
+    <!-- Lógica de Autenticação -->
+    <script>
+        async function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const btn = document.getElementById('btn-entrar');
+            const msg = document.getElementById('mensagem-login');
+
+            btn.innerText = "Autenticando...";
+            btn.disabled = true;
+            msg.classList.add('hidden');
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: senha
+            });
+
+            if (error) {
+                msg.innerText = (error.message === "Invalid login credentials") 
+                    ? "E-mail ou senha incorretos." 
+                    : "Erro: " + error.message;
+                msg.classList.remove('hidden');
+                btn.innerText = "Entrar";
+                btn.disabled = false;
+            } else {
+                window.location.replace('dashboard.html');
+            }
+        }
+    </script>
 </body>
 </html>
