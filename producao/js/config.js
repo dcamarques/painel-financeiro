@@ -1,7 +1,6 @@
 let equipeIdGlobal = null;
 
 async function inicializarConfiguracoes() {
-    const listaCatalogo = document.getElementById('lista-catalogo');
     try {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return window.location.replace('index.html');
@@ -10,12 +9,92 @@ async function inicializarConfiguracoes() {
 
         if (userData) {
             equipeIdGlobal = userData.equipe_id;
+            await carregarEquipe(); 
             await carregarClassesEProdutos();
         }
     } catch (err) {
         console.error("Erro na inicialização", err);
     }
 }
+
+// --- MÓDULO: GESTÃO DE EQUIPE ---
+
+async function carregarEquipe() {
+    const container = document.getElementById('lista-equipe-container');
+    try {
+        const { data: usuarios, error } = await supabaseClient.from('usuarios').select('*').eq('equipe_id', equipeIdGlobal).order('nome');
+        if (error) throw error;
+
+        if (!usuarios || usuarios.length === 0) {
+            container.innerHTML = `<div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg"><p class="text-slate-500 text-sm">Sua equipe está vazia.</p></div>`;
+            return;
+        }
+
+        let html = `<div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-50 border-b border-gray-200 text-slate-700"><tr><th class="p-4">Consultor</th><th class="p-4">E-mail Corporativo</th><th class="p-4 text-center">Status</th></tr></thead><tbody class="divide-y divide-gray-100">`;
+        
+        usuarios.forEach(u => {
+            const nome = u.nome || 'Sem Nome';
+            const ehVoce = u.email === 'contato@boonus.app.br' ? '<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold shadow-sm">Admin</span>' : '<span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full font-bold shadow-sm">Ativo</span>';
+            
+            html += `<tr class="hover:bg-slate-50 transition">
+                <td class="p-4 font-bold text-slate-800">${nome}</td>
+                <td class="p-4 text-slate-600">${u.email}</td>
+                <td class="p-4 text-center">${ehVoce}</td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = `<p class="text-rose-500 p-4 font-medium">Erro ao carregar equipe: ${err.message}</p>`;
+    }
+}
+
+async function salvarMembroEquipe() {
+    const nome = document.getElementById('eq-nome').value.trim();
+    const email = document.getElementById('eq-email').value.trim();
+    const btn = document.getElementById('btn-salvar-membro');
+
+    if (!nome || !email) return alert("Preencha o Nome e o E-mail.");
+
+    btn.innerText = "Disparando Convite via Zoho...";
+    btn.disabled = true;
+
+    try {
+        // Dispara o Link Mágico. Se o usuário for novo, cria a conta e envia o link.
+        // O Gatilho no banco (SQL) vai interceptar esse pacote e salvar na matriz de metas.
+        const { error } = await supabaseClient.auth.signInWithOtp({
+            email: email,
+            options: {
+                data: {
+                    nome: nome,
+                    equipe_id: equipeIdGlobal
+                }
+            }
+        });
+
+        if (error) throw error;
+
+        alert("Convite enviado com sucesso para " + email);
+        document.getElementById('form-equipe').reset();
+        togglePainelEquipe(false);
+        
+        // Aguarda 1s para o robô do banco sincronizar os dados e atualiza a tela
+        setTimeout(() => {
+            carregarEquipe();
+            if(document.getElementById('conteudo-metas').style.display === 'block') carregarGradeMetas();
+        }, 1000);
+
+    } catch (err) {
+        alert("Falha ao enviar convite: " + err.message);
+    } finally {
+        btn.innerText = "Disparar Convite Oficial";
+        btn.disabled = false;
+    }
+}
+
+
+// --- MÓDULO: CATÁLOGO ---
 
 async function criarNovaClasse() {
     const nomeClasse = prompt("Digite o nome da nova Classe:");
@@ -109,6 +188,36 @@ async function carregarClassesEProdutos() {
     }
 }
 
+function atualizarStatusPadrao() {
+    const select = document.getElementById('prod-classe');
+    const container = document.getElementById('container-status');
+    if (!select.value) return;
+
+    const nomeClasse = select.options[select.selectedIndex].text.toLowerCase();
+    let html = '';
+    
+    const criarLinha = (nome, peso) => `
+        <div class="flex gap-2 items-center status-row">
+            <input type="text" value="${nome}" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
+            <input type="number" value="${peso}" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2 text-lg hover:bg-rose-50 rounded">&times;</button>
+        </div>`;
+
+    if (nomeClasse.includes('investimento')) {
+        html += criarLinha('Captação', 1);
+        html += criarLinha('Resgate', -1);
+    } else {
+        html += criarLinha('Realizado', 1);
+    }
+    
+    html += criarLinha('Pipeline Q', 0);
+    html += criarLinha('Pipeline M', 0);
+    html += criarLinha('Pipeline F', 0);
+    html += criarLinha('Sem Sucesso', 0);
+
+    container.innerHTML = html;
+}
+
 async function salvarProdutoNoBanco() {
     const nome = document.getElementById('prod-nome').value;
     const classeId = document.getElementById('prod-classe').value;
@@ -143,7 +252,8 @@ async function salvarProdutoNoBanco() {
     }
 }
 
-// --- MOTOR DE METAS BLINDADO COM RAIO-X ---
+
+// --- MÓDULO: METAS BLINDADO ---
 
 async function carregarGradeMetas() {
     const mesSelecionado = document.getElementById('mes-alvo').value;
@@ -154,7 +264,6 @@ async function carregarGradeMetas() {
     corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-slate-500 animate-pulse">Carregando matriz de produtos e equipe...</td></tr>';
 
     try {
-        // Busca com verificação de erro explícita (Raio-X)
         const { data: usuarios, error: errUsu } = await supabaseClient.from('usuarios').select('id, nome, email').eq('equipe_id', equipeIdGlobal);
         if (errUsu) throw new Error(`Erro na Tabela Usuários: ${errUsu.message}`);
 
@@ -170,7 +279,6 @@ async function carregarGradeMetas() {
             return;
         }
 
-        // 1. Monta as Colunas (Produtos)
         let trCabecalho = `<tr><th class="p-4 bg-slate-100 border-b border-gray-200">Colaborador</th>`;
         produtos.forEach(p => {
             const nomeCurto = p.nome.length > 15 ? p.nome.substring(0, 15) + '...' : p.nome;
@@ -179,18 +287,16 @@ async function carregarGradeMetas() {
         trCabecalho += `</tr>`;
         cabecalho.innerHTML = trCabecalho;
 
-        // Se não houver usuários, avisa na tela
         if (!usuarios || usuarios.length === 0) {
             corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-rose-500 font-medium">Nenhum colaborador encontrado na sua equipe.</td></tr>';
             divSalvar.classList.add('hidden');
             return;
         }
 
-        // 2. Monta as Linhas (Usuários)
         corpo.innerHTML = '';
         usuarios.forEach(user => {
             const nomeExibicao = user.nome || (user.email ? user.email.split('@')[0] : 'Membro sem nome');
-            let tr = `<tr class="hover:bg-slate-50 transition"><td class="p-4 font-medium text-slate-700 whitespace-nowrap border-b border-gray-100">${nomeExibicao}</td>`;
+            let tr = `<tr class="hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-800 whitespace-nowrap border-b border-gray-100 shadow-sm">${nomeExibicao}</td>`;
             
             produtos.forEach(p => {
                 const metaExiste = (metasSalvas || []).find(m => m.usuario_id === user.id && m.produto_id === p.id);
@@ -202,7 +308,7 @@ async function carregarGradeMetas() {
                            data-produto="${p.id}" 
                            value="${valorAtual}"
                            placeholder="0" 
-                           class="w-24 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none meta-input">
+                           class="w-24 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none meta-input font-medium text-slate-700">
                 </td>`;
             });
             tr += `</tr>`;
@@ -213,7 +319,6 @@ async function carregarGradeMetas() {
 
     } catch (err) {
         console.error(err);
-        // Agora o erro EXATO será escrito na tabela em vermelho!
         corpo.innerHTML = `<tr><td colspan="100%" class="p-4 text-center text-rose-600 font-bold bg-rose-50 border border-rose-200">Falha ao gerar matriz:<br><span class="text-sm font-normal">${err.message}</span></td></tr>`;
         divSalvar.classList.add('hidden');
     }
@@ -258,40 +363,5 @@ async function salvarMetas() {
     }
 }
 
+// Inicia o sistema
 inicializarConfiguracoes();
-// --- AUTOPREENCHIMENTO INTELIGENTE DE STATUS ---
-function atualizarStatusPadrao() {
-    const select = document.getElementById('prod-classe');
-    const container = document.getElementById('container-status');
-    
-    // Se o usuário voltar para "Selecione...", não faz nada
-    if (!select.value) return;
-
-    // Captura o texto que está escrito na categoria (ex: "Investimentos")
-    const nomeClasse = select.options[select.selectedIndex].text.toLowerCase();
-    let html = '';
-    
-    // Função auxiliar para desenhar as linhas do funil de forma rápida e limpa
-    const criarLinha = (nome, peso) => `
-        <div class="flex gap-2 items-center status-row">
-            <input type="text" value="${nome}" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
-            <input type="number" value="${peso}" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
-            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2 text-lg hover:bg-rose-50 rounded">&times;</button>
-        </div>`;
-
-    // Aplica as regras de negócio
-    if (nomeClasse.includes('investimento')) {
-        html += criarLinha('Captação', 1);
-        html += criarLinha('Resgate', -1);
-    } else {
-        html += criarLinha('Realizado', 1);
-    }
-    
-    html += criarLinha('Pipeline Q', 0);
-    html += criarLinha('Pipeline M', 0);
-    html += criarLinha('Pipeline F', 0);
-    html += criarLinha('Sem Sucesso', 0);
-
-    // Renderiza a estrutura na tela
-    container.innerHTML = html;
-}
