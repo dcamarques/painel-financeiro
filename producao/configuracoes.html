@@ -35,7 +35,7 @@
                     <button class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">+ Convidar Usuário</button>
                 </div>
                 <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg">
-                    <p class="text-slate-500">Módulo de equipe será ativado aqui.</p>
+                    <p class="text-slate-500">Módulo de equipe será ativado em breve.</p>
                 </div>
             </div>
 
@@ -48,11 +48,9 @@
                         <button onclick="togglePainelProduto(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">+ Novo Produto</button>
                     </div>
                 </div>
-                
-                <!-- CONTAINER DINÂMICO QUE RECEBERÁ AS CLASSES -->
                 <div id="lista-catalogo" class="space-y-4">
                     <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-slate-50/50">
-                        <p class="text-slate-500 text-sm animate-pulse">Carregando catálogo do banco de dados...</p>
+                        <p class="text-slate-500 text-sm animate-pulse">Carregando catálogo...</p>
                     </div>
                 </div>
             </div>
@@ -63,88 +61,98 @@
                     <h3 class="text-lg font-bold text-slate-800">Distribuição de Metas</h3>
                     <div class="flex gap-3 items-center">
                         <label class="text-sm font-medium text-slate-600">Mês Alvo:</label>
-                        <select class="border border-gray-300 bg-white rounded-md px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-slate-500 shadow-sm">
-                            <option>Agosto 2026</option>
+                        <select id="mes-alvo" onchange="carregarGradeMetas()" class="border border-gray-300 bg-white rounded-md px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-slate-500 shadow-sm cursor-pointer">
+                            <option value="2026-08">Agosto 2026</option>
+                            <option value="2026-09">Setembro 2026</option>
                         </select>
                     </div>
                 </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-lg flex flex-col justify-between shadow-sm hover:shadow transition">
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-lg flex flex-col justify-between shadow-sm">
                         <div>
                             <h4 class="font-bold text-slate-700 mb-1 flex items-center gap-2">🔄 Replicar Metas</h4>
-                            <p class="text-xs text-slate-500 leading-relaxed mb-4">Copia a grade exata do mês anterior para o mês alvo selecionado.</p>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-4">Copia a grade exata do mês anterior para o mês alvo.</p>
                         </div>
                         <button class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-md text-sm font-medium transition w-full">Replicar do Mês Anterior</button>
                     </div>
-                    <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-lg flex flex-col justify-between shadow-sm hover:shadow transition">
+                    <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-lg flex flex-col justify-between shadow-sm">
                         <div>
-                            <h4 class="font-bold text-emerald-800 mb-1 flex items-center gap-2">⚡ Carregar Grade Padrão</h4>
-                            <p class="text-xs text-emerald-600/80 leading-relaxed mb-4">Aplica a tabela de Metas Padrão para todos os membros no mês alvo.</p>
+                            <h4 class="font-bold text-emerald-800 mb-1 flex items-center gap-2">⚡ Carregar Padrão</h4>
+                            <p class="text-xs text-emerald-600/80 leading-relaxed mb-4">Aplica a tabela de Metas Padrão para todos da equipe.</p>
                         </div>
                         <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-md text-sm font-medium transition w-full shadow-sm">Carregar Metas Padrão</button>
                     </div>
                 </div>
+
+                <!-- GRADE DE METAS (MATRIZ) -->
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-gray-200" id="cabecalho-metas">
+                            <tr>
+                                <th class="p-4">Membro da Equipe</th>
+                                <!-- Colunas de produtos entram aqui via JS -->
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="corpo-metas">
+                            <tr>
+                                <td class="p-4 text-center text-slate-500 italic" colspan="100%">Selecione a aba para carregar a matriz...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex justify-end hidden" id="div-salvar-metas">
+                    <button onclick="salvarMetas()" id="btn-salvar-metas" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg text-sm font-bold transition shadow-md">
+                        Salvar Grade de Metas
+                    </button>
+                </div>
+
             </div>
         </div>
     </main>
 
+    <!-- PAINEL PRODUTO (Oculto) -->
     <div id="backdrop" onclick="togglePainelProduto(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0"></div>
-
     <div id="painel-produto" class="fixed top-0 right-0 h-full w-full md:w-[500px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-slate-50">
             <h3 class="text-lg font-bold text-slate-800">Parametrizar Produto</h3>
             <button onclick="togglePainelProduto(false)" class="text-slate-400 hover:text-rose-600 font-bold text-xl p-1">&times;</button>
         </div>
-
         <div class="p-6 flex-1 overflow-y-auto">
             <form id="form-produto">
                 <div class="mb-5">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
-                    <input type="text" id="prod-nome" placeholder="Ex: Cartão de Crédito Black" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <input type="text" id="prod-nome" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
-                        <select id="prod-classe" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="">Selecione...</option>
-                        </select>
+                        <select id="prod-classe" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none"><option value="">Selecione...</option></select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
-                        <select id="prod-unidade" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <select id="prod-unidade" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
                             <option value="R$">Volume (R$)</option>
                             <option value="Qtd">Quantidade (Qtd)</option>
                         </select>
                     </div>
                 </div>
-
                 <div class="border-t border-gray-200 pt-6 mb-2">
                     <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-slate-700 text-sm">Status Permitidos e Multiplicadores</h4>
-                        <button type="button" onclick="adicionarLinhaStatus()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md font-medium transition">+ Adicionar Status</button>
+                        <h4 class="font-bold text-slate-700 text-sm">Status e Multiplicadores</h4>
+                        <button type="button" onclick="adicionarLinhaStatus()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-md font-medium">+ Status</button>
                     </div>
-                    <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                        Defina as opções de funil para este produto. Use Peso <b>1</b> para bater meta, <b>0</b> para Pipeline e <b>-1</b> para subtrair.
-                    </p>
                     <div id="container-status" class="space-y-3">
                         <div class="flex gap-2 items-center status-row">
-                            <input type="text" placeholder="Ex: Realizado" value="Realizado" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
-                            <input type="number" placeholder="Peso" value="1" class="w-1/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
-                        </div>
-                        <div class="flex gap-2 items-center status-row">
-                            <input type="text" placeholder="Ex: Pipeline Q" value="Pipeline Q" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
-                            <input type="number" placeholder="Peso" value="0" class="w-1/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
+                            <input type="text" value="Realizado" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
+                            <input type="number" value="1" class="w-1/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
                         </div>
                     </div>
                 </div>
             </form>
         </div>
-
         <div class="p-6 border-t border-gray-200 bg-slate-50">
-            <button type="button" onclick="salvarProdutoNoBanco()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition">
-                Salvar Produto no Catálogo
-            </button>
+            <button type="button" onclick="salvarProdutoNoBanco()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg">Salvar Produto</button>
         </div>
     </div>
 
@@ -156,6 +164,8 @@
                 const tabBtn = document.getElementById(`tab-${aba}`);
                 if (aba === abaSelecionada) {
                     tabBtn.className = "flex-1 py-4 text-sm font-semibold text-slate-800 border-b-2 border-slate-800 transition";
+                    // Se clicou na aba Metas, manda renderizar a grade!
+                    if(aba === 'metas' && typeof carregarGradeMetas === 'function') carregarGradeMetas();
                 } else {
                     tabBtn.className = "flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition";
                 }
@@ -165,19 +175,12 @@
         function togglePainelProduto(abrir) {
             const painel = document.getElementById('painel-produto');
             const backdrop = document.getElementById('backdrop');
-            
             if (abrir) {
                 backdrop.classList.remove('hidden');
-                setTimeout(() => {
-                    backdrop.classList.remove('opacity-0');
-                    painel.classList.remove('translate-x-full');
-                }, 10);
+                setTimeout(() => { backdrop.classList.remove('opacity-0'); painel.classList.remove('translate-x-full'); }, 10);
             } else {
-                backdrop.classList.add('opacity-0');
-                painel.classList.add('translate-x-full');
-                setTimeout(() => {
-                    backdrop.classList.add('hidden');
-                }, 300);
+                backdrop.classList.add('opacity-0'); painel.classList.add('translate-x-full');
+                setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
             }
         }
 
@@ -186,16 +189,16 @@
             const novaLinha = document.createElement('div');
             novaLinha.className = "flex gap-2 items-center status-row";
             novaLinha.innerHTML = `
-                <input type="text" placeholder="Nome do Status" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-emerald-500 status-nome">
-                <input type="number" placeholder="Peso" value="0" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-emerald-500 status-peso">
-                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 font-bold px-2">&times;</button>
+                <input type="text" placeholder="Nome do Status" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
+                <input type="number" placeholder="Peso" value="0" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
+                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2">&times;</button>
             `;
             container.appendChild(novaLinha);
         }
     </script>
 
-    <!-- Fura-Cache v5.0 -->
-    <script src="js/supabase-client.js?v=5.0"></script>
-    <script src="js/config.js?v=5.0"></script>
+    <!-- Fura-Cache v7.0 -->
+    <script src="js/supabase-client.js?v=7.0"></script>
+    <script src="js/config.js?v=7.0"></script>
 </body>
 </html>
