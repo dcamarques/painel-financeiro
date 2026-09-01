@@ -24,18 +24,20 @@
             
             <div class="flex border-b border-gray-200 bg-slate-50">
                 <button onclick="mudarAba('equipe')" id="tab-equipe" class="flex-1 py-4 text-sm font-semibold text-slate-800 border-b-2 border-slate-800 transition">👥 Gestão da Equipe</button>
-                <button onclick="mudarAba('catalogo')" id="tab-catalogo" class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition">📦 Classes e Produtos</button>
-                <button onclick="mudarAba('metas')" id="tab-metas" class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition">🎯 Distribuição de Metas</button>
+                <button onclick="mudarAba('catalogo')" id="tab-catalogo" class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition border-b-2 border-transparent">📦 Classes e Produtos</button>
+                <button onclick="mudarAba('metas')" id="tab-metas" class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition border-b-2 border-transparent">🎯 Distribuição de Metas</button>
             </div>
 
             <!-- Conteúdo: Equipe -->
             <div id="conteudo-equipe" class="p-8 block">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-slate-800">Membros da Equipe</h3>
-                    <button class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">+ Convidar Usuário</button>
+                    <button onclick="togglePainelEquipe(true)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">+ Convidar Consultor</button>
                 </div>
-                <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg">
-                    <p class="text-slate-500">Módulo de equipe será ativado em breve.</p>
+                <div id="lista-equipe-container">
+                    <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg">
+                        <p class="text-slate-500 animate-pulse text-sm">Carregando membros da equipe...</p>
+                    </div>
                 </div>
             </div>
 
@@ -85,19 +87,13 @@
                     </div>
                 </div>
 
-                <!-- GRADE DE METAS (MATRIZ) -->
                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-gray-200" id="cabecalho-metas">
-                            <tr>
-                                <th class="p-4">Membro da Equipe</th>
-                                <!-- Colunas de produtos entram aqui via JS -->
-                            </tr>
+                            <tr><th class="p-4">Membro da Equipe</th></tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100" id="corpo-metas">
-                            <tr>
-                                <td class="p-4 text-center text-slate-500 italic" colspan="100%">Selecione a aba para carregar a matriz...</td>
-                            </tr>
+                            <tr><td class="p-4 text-center text-slate-500 italic" colspan="100%">Selecione a aba para carregar a matriz...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -106,13 +102,14 @@
                         Salvar Grade de Metas
                     </button>
                 </div>
-
             </div>
         </div>
     </main>
 
-    <!-- PAINEL PRODUTO (Oculto) -->
-    <div id="backdrop" onclick="togglePainelProduto(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0"></div>
+    <!-- BACKDROP COMPARTILHADO -->
+    <div id="backdrop" onclick="togglePainelProduto(false); togglePainelEquipe(false);" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0"></div>
+    
+    <!-- PAINEL PRODUTO -->
     <div id="painel-produto" class="fixed top-0 right-0 h-full w-full md:w-[500px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-slate-50">
             <h3 class="text-lg font-bold text-slate-800">Parametrizar Produto</h3>
@@ -156,6 +153,35 @@
         </div>
     </div>
 
+    <!-- PAINEL CONVITE EQUIPE -->
+    <div id="painel-equipe" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-slate-50">
+            <h3 class="text-lg font-bold text-slate-800">Convidar Novo Consultor</h3>
+            <button onclick="togglePainelEquipe(false)" class="text-slate-400 hover:text-rose-600 font-bold text-xl p-1">&times;</button>
+        </div>
+        <div class="p-6 flex-1 overflow-y-auto">
+            <form id="form-equipe">
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                    <input type="text" id="eq-nome" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Ex: João Silva">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Corporativo</label>
+                    <input type="email" id="eq-email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="consultor@boonus.app.br">
+                </div>
+                <div class="bg-sky-50 border border-sky-100 p-4 rounded-lg flex items-start gap-3">
+                    <div class="text-sky-600 text-xl mt-1">📧</div>
+                    <p class="text-sm text-sky-800 leading-relaxed">
+                        <strong>Link Mágico:</strong> O sistema criará o acesso e enviará um link seguro para o consultor através da sua conta do Zoho. Ao clicar, ele entra no Boonus sem precisar de senha!
+                    </p>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-gray-200 bg-slate-50">
+            <button type="button" onclick="salvarMembroEquipe()" id="btn-salvar-membro" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 px-4 rounded-lg shadow-md transition">Disparar Convite Oficial</button>
+        </div>
+    </div>
+
     <script>
         function mudarAba(abaSelecionada) {
             const abas = ['equipe', 'catalogo', 'metas'];
@@ -164,7 +190,6 @@
                 const tabBtn = document.getElementById(`tab-${aba}`);
                 if (aba === abaSelecionada) {
                     tabBtn.className = "flex-1 py-4 text-sm font-semibold text-slate-800 border-b-2 border-slate-800 transition";
-                    // Se clicou na aba Metas, manda renderizar a grade!
                     if(aba === 'metas' && typeof carregarGradeMetas === 'function') carregarGradeMetas();
                 } else {
                     tabBtn.className = "flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition";
@@ -179,8 +204,26 @@
                 backdrop.classList.remove('hidden');
                 setTimeout(() => { backdrop.classList.remove('opacity-0'); painel.classList.remove('translate-x-full'); }, 10);
             } else {
-                backdrop.classList.add('opacity-0'); painel.classList.add('translate-x-full');
-                setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
+                if(document.getElementById('painel-equipe').classList.contains('translate-x-full')){
+                    backdrop.classList.add('opacity-0');
+                    setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
+                }
+                painel.classList.add('translate-x-full');
+            }
+        }
+
+        function togglePainelEquipe(abrir) {
+            const painel = document.getElementById('painel-equipe');
+            const backdrop = document.getElementById('backdrop');
+            if (abrir) {
+                backdrop.classList.remove('hidden');
+                setTimeout(() => { backdrop.classList.remove('opacity-0'); painel.classList.remove('translate-x-full'); }, 10);
+            } else {
+                if(document.getElementById('painel-produto').classList.contains('translate-x-full')){
+                    backdrop.classList.add('opacity-0');
+                    setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
+                }
+                painel.classList.add('translate-x-full');
             }
         }
 
@@ -191,14 +234,13 @@
             novaLinha.innerHTML = `
                 <input type="text" placeholder="Nome do Status" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
                 <input type="number" placeholder="Peso" value="0" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
-                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2">&times;</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2 text-lg hover:bg-rose-50 rounded">&times;</button>
             `;
             container.appendChild(novaLinha);
         }
     </script>
 
-    <!-- Fura-Cache v7.0 -->
-    <script src="js/supabase-client.js?v=7.0"></script>
-    <script src="js/config.js?v=7.0"></script>
+    <script src="js/supabase-client.js?v=10.0"></script>
+    <script src="js/config.js?v=10.0"></script>
 </body>
 </html>
