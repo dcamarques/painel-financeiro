@@ -259,3 +259,39 @@ async function salvarMetas() {
 }
 
 inicializarConfiguracoes();
+// --- AUTOPREENCHIMENTO INTELIGENTE DE STATUS ---
+function atualizarStatusPadrao() {
+    const select = document.getElementById('prod-classe');
+    const container = document.getElementById('container-status');
+    
+    // Se o usuário voltar para "Selecione...", não faz nada
+    if (!select.value) return;
+
+    // Captura o texto que está escrito na categoria (ex: "Investimentos")
+    const nomeClasse = select.options[select.selectedIndex].text.toLowerCase();
+    let html = '';
+    
+    // Função auxiliar para desenhar as linhas do funil de forma rápida e limpa
+    const criarLinha = (nome, peso) => `
+        <div class="flex gap-2 items-center status-row">
+            <input type="text" value="${nome}" class="w-2/3 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-nome">
+            <input type="number" value="${peso}" class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none status-peso">
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 font-bold px-2 text-lg hover:bg-rose-50 rounded">&times;</button>
+        </div>`;
+
+    // Aplica as regras de negócio
+    if (nomeClasse.includes('investimento')) {
+        html += criarLinha('Captação', 1);
+        html += criarLinha('Resgate', -1);
+    } else {
+        html += criarLinha('Realizado', 1);
+    }
+    
+    html += criarLinha('Pipeline Q', 0);
+    html += criarLinha('Pipeline M', 0);
+    html += criarLinha('Pipeline F', 0);
+    html += criarLinha('Sem Sucesso', 0);
+
+    // Renderiza a estrutura na tela
+    container.innerHTML = html;
+}
