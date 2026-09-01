@@ -17,24 +17,26 @@ async function inicializarConfiguracoes() {
     }
 }
 
-// ... [As funções criarNovaClasse, editarClasse, excluirClasse permanecem idênticas]
 async function criarNovaClasse() {
     const nomeClasse = prompt("Digite o nome da nova Classe:");
     if (!nomeClasse || nomeClasse.trim() === '') return;
     await supabaseClient.from('classes_produtos').insert([{ equipe_id: equipeIdGlobal, nome: nomeClasse.trim() }]);
     carregarClassesEProdutos(); 
 }
+
 async function editarClasse(id, nomeAtual) {
     const novoNome = prompt("Editar nome da Classe:", nomeAtual);
     if (!novoNome || novoNome.trim() === '' || novoNome === nomeAtual) return;
     await supabaseClient.from('classes_produtos').update({ nome: novoNome.trim() }).eq('id', id);
     carregarClassesEProdutos(); 
 }
+
 async function excluirClasse(id, nomeAtual) {
     if (!confirm(`Excluir a classe "${nomeAtual}" e TODOS os produtos dela?`)) return;
     await supabaseClient.from('classes_produtos').delete().eq('id', id);
     carregarClassesEProdutos();
 }
+
 async function excluirProduto(id, nomeAtual) {
     if (!confirm(`Excluir o produto "${nomeAtual}"?`)) return;
     await supabaseClient.from('produtos').delete().eq('id', id);
@@ -141,7 +143,7 @@ async function salvarProdutoNoBanco() {
     }
 }
 
-// --- NOVO MOTOR: GERAÇÃO DA MATRIZ DE METAS ---
+// --- MOTOR DE METAS BLINDADO COM RAIO-X ---
 
 async function carregarGradeMetas() {
     const mesSelecionado = document.getElementById('mes-alvo').value;
@@ -152,15 +154,18 @@ async function carregarGradeMetas() {
     corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-slate-500 animate-pulse">Carregando matriz de produtos e equipe...</td></tr>';
 
     try {
-        // Busca a equipe (Por enquanto será só você)
-        const { data: usuarios } = await supabaseClient.from('usuarios').select('id, nome, email').eq('equipe_id', equipeIdGlobal);
-        // Busca os produtos criados no catálogo
-        const { data: produtos } = await supabaseClient.from('produtos').select('id, nome, unidade_medida').eq('equipe_id', equipeIdGlobal).order('nome');
-        // Busca metas que já foram salvas neste mês
-        const { data: metasSalvas } = await supabaseClient.from('metas').select('*').eq('equipe_id', equipeIdGlobal).eq('mes', mesSelecionado);
+        // Busca com verificação de erro explícita (Raio-X)
+        const { data: usuarios, error: errUsu } = await supabaseClient.from('usuarios').select('id, nome, email').eq('equipe_id', equipeIdGlobal);
+        if (errUsu) throw new Error(`Erro na Tabela Usuários: ${errUsu.message}`);
+
+        const { data: produtos, error: errProd } = await supabaseClient.from('produtos').select('id, nome, unidade_medida').eq('equipe_id', equipeIdGlobal).order('nome');
+        if (errProd) throw new Error(`Erro na Tabela Produtos: ${errProd.message}`);
+
+        const { data: metasSalvas, error: errMetas } = await supabaseClient.from('metas').select('*').eq('equipe_id', equipeIdGlobal).eq('mes', mesSelecionado);
+        if (errMetas) throw new Error(`Erro na Tabela Metas: ${errMetas.message}`);
 
         if (!produtos || produtos.length === 0) {
-            corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-rose-500">Cadastre pelo menos 1 produto no catálogo para habilitar a matriz de metas.</td></tr>';
+            corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-rose-500 font-medium">Cadastre pelo menos 1 produto no catálogo para habilitar a matriz de metas.</td></tr>';
             divSalvar.classList.add('hidden');
             return;
         }
@@ -168,17 +173,23 @@ async function carregarGradeMetas() {
         // 1. Monta as Colunas (Produtos)
         let trCabecalho = `<tr><th class="p-4 bg-slate-100 border-b border-gray-200">Colaborador</th>`;
         produtos.forEach(p => {
-            // Corta o nome se for muito longo para não quebrar a tabela
             const nomeCurto = p.nome.length > 15 ? p.nome.substring(0, 15) + '...' : p.nome;
             trCabecalho += `<th class="p-4 bg-slate-100 border-b border-gray-200 text-center" title="${p.nome}">${nomeCurto} <br><span class="text-xs text-slate-400 font-normal">(${p.unidade_medida})</span></th>`;
         });
         trCabecalho += `</tr>`;
         cabecalho.innerHTML = trCabecalho;
 
+        // Se não houver usuários, avisa na tela
+        if (!usuarios || usuarios.length === 0) {
+            corpo.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-rose-500 font-medium">Nenhum colaborador encontrado na sua equipe.</td></tr>';
+            divSalvar.classList.add('hidden');
+            return;
+        }
+
         // 2. Monta as Linhas (Usuários)
         corpo.innerHTML = '';
         usuarios.forEach(user => {
-            const nomeExibicao = user.nome || user.email.split('@')[0];
+            const nomeExibicao = user.nome || (user.email ? user.email.split('@')[0] : 'Membro sem nome');
             let tr = `<tr class="hover:bg-slate-50 transition"><td class="p-4 font-medium text-slate-700 whitespace-nowrap border-b border-gray-100">${nomeExibicao}</td>`;
             
             produtos.forEach(p => {
@@ -202,7 +213,9 @@ async function carregarGradeMetas() {
 
     } catch (err) {
         console.error(err);
-        corpo.innerHTML = `<tr><td colspan="100%" class="p-4 text-center text-rose-500">Erro ao carregar matriz.</td></tr>`;
+        // Agora o erro EXATO será escrito na tabela em vermelho!
+        corpo.innerHTML = `<tr><td colspan="100%" class="p-4 text-center text-rose-600 font-bold bg-rose-50 border border-rose-200">Falha ao gerar matriz:<br><span class="text-sm font-normal">${err.message}</span></td></tr>`;
+        divSalvar.classList.add('hidden');
     }
 }
 
@@ -228,17 +241,15 @@ async function salvarMetas() {
 
     if (metasParaSalvar.length === 0) return alert("Preencha pelo menos um valor maior que zero.");
 
-    btnSalvar.innerText = "Salvando no Banco...";
+    btnSalvar.innerText = "Salvando...";
     btnSalvar.disabled = true;
 
     try {
-        // Upsert inteligente: Atualiza se já existir, insere se for novo (usando as chaves que criamos no SQL)
         const { error } = await supabaseClient.from('metas').upsert(metasParaSalvar, { onConflict: 'usuario_id, produto_id, mes' });
-        
         if (error) throw error;
         
         alert("Grade de metas salva com sucesso!");
-        carregarGradeMetas(); // Recarrega a tabela para confirmar visualmente
+        carregarGradeMetas();
     } catch (err) {
         alert("Erro ao salvar metas: " + err.message);
     } finally {
