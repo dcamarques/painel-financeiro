@@ -61,8 +61,16 @@ async function salvarMembroEquipe() {
     btn.disabled = true;
 
     try {
-        // Dispara o Link Mágico. Se o usuário for novo, cria a conta e envia o link.
-        // O Gatilho no banco (SQL) vai interceptar esse pacote e salvar na matriz de metas.
+        // 1. TRATATIVA DE RESGATE: Verifica e vincula se o e-mail já existir no banco
+        const { data: jaExistia, error: errRpc } = await supabaseClient.rpc('vincular_membro_existente', { 
+            email_convidado: email, 
+            equipe_id_nova: equipeIdGlobal,
+            nome_convidado: nome
+        });
+
+        if (errRpc) console.warn("Aviso na checagem:", errRpc);
+
+        // 2. Dispara o Link Mágico (serve tanto para criar conta nova quanto para enviar login para quem já existe)
         const { error } = await supabaseClient.auth.signInWithOtp({
             email: email,
             options: {
@@ -75,11 +83,17 @@ async function salvarMembroEquipe() {
 
         if (error) throw error;
 
-        alert("Convite enviado com sucesso para " + email);
+        // 3. Avisa você do que aconteceu nos bastidores
+        if (jaExistia) {
+            alert(`O e-mail ${email} já tinha registro no sistema e foi vinculado à sua equipe com sucesso! Um link de login foi enviado para ele.`);
+        } else {
+            alert("Conta criada e convite enviado com sucesso para " + email);
+        }
+        
         document.getElementById('form-equipe').reset();
         togglePainelEquipe(false);
         
-        // Aguarda 1s para o robô do banco sincronizar os dados e atualiza a tela
+        // Aguarda 1 segundo e recarrega as listas
         setTimeout(() => {
             carregarEquipe();
             if(document.getElementById('conteudo-metas').style.display === 'block') carregarGradeMetas();
@@ -92,7 +106,6 @@ async function salvarMembroEquipe() {
         btn.disabled = false;
     }
 }
-
 
 // --- MÓDULO: CATÁLOGO ---
 
@@ -251,7 +264,6 @@ async function salvarProdutoNoBanco() {
         btnSalvar.disabled = false;
     }
 }
-
 
 // --- MÓDULO: METAS BLINDADO ---
 
