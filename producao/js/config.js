@@ -61,7 +61,6 @@ async function salvarMembroEquipe() {
     btn.disabled = true;
 
     try {
-        // 1. TRATATIVA DE RESGATE: Verifica e vincula se o e-mail já existir no banco
         const { data: jaExistia, error: errRpc } = await supabaseClient.rpc('vincular_membro_existente', { 
             email_convidado: email, 
             equipe_id_nova: equipeIdGlobal,
@@ -70,10 +69,11 @@ async function salvarMembroEquipe() {
 
         if (errRpc) console.warn("Aviso na checagem:", errRpc);
 
-        // 2. Dispara o Link Mágico (serve tanto para criar conta nova quanto para enviar login para quem já existe)
+        // Dispara o Link Mágico forçando o redirecionamento exato para a sua pasta de produção
         const { error } = await supabaseClient.auth.signInWithOtp({
             email: email,
             options: {
+                emailRedirectTo: 'https://tv.boonus.app.br/producao/index.html',
                 data: {
                     nome: nome,
                     equipe_id: equipeIdGlobal
@@ -83,9 +83,8 @@ async function salvarMembroEquipe() {
 
         if (error) throw error;
 
-        // 3. Avisa você do que aconteceu nos bastidores
         if (jaExistia) {
-            alert(`O e-mail ${email} já tinha registro no sistema e foi vinculado à sua equipe com sucesso! Um link de login foi enviado para ele.`);
+            alert(`O e-mail ${email} já tinha registro no sistema e foi vinculado à sua equipe! Um link de login foi enviado.`);
         } else {
             alert("Conta criada e convite enviado com sucesso para " + email);
         }
@@ -93,7 +92,6 @@ async function salvarMembroEquipe() {
         document.getElementById('form-equipe').reset();
         togglePainelEquipe(false);
         
-        // Aguarda 1 segundo e recarrega as listas
         setTimeout(() => {
             carregarEquipe();
             if(document.getElementById('conteudo-metas').style.display === 'block') carregarGradeMetas();
