@@ -41,21 +41,18 @@
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
-        .header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
         
-        .visao-group { background: #111; border: 1px solid #333; border-radius: 20px; padding: 4px; display: flex; gap: 5px; }
-        .filtro-group { display: flex; align-items: center; gap: 8px; }
+        .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
 
         /* BOTÕES CLEAN */
         .nav-btn { 
             background: transparent; color: #a0a0a0; border: 1px solid #444; padding: 6px 14px; 
             border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; 
-            letter-spacing: 0.5px; transition: all 0.2s ease; white-space: nowrap;
+            letter-spacing: 0.5px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;
         }
         .nav-btn:hover { background: #222; color: #fff; border-color: #666; }
         
-        .nav-btn.active-filter { background: rgba(76, 175, 80, 0.15); border-color: var(--primary); color: var(--primary); box-shadow: none; }
+        /* Cor de Ativação mantida para as abas do Modal */
         .nav-btn.active-visao { background: #333; color: #fff; border-color: #555; }
         
         .btn-action { background: rgba(0, 120, 215, 0.15); border-color: #0078D7; color: #4da6ff; }
@@ -141,19 +138,18 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
+        /* Celular Vertical: Layout Extremamente Limpo */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
-            .header-center { order: -1; margin-bottom: 5px; }
-            .header-left, .header-right { justify-content: center; width: 100%; }
-            .visao-group { margin-right: 0; margin-bottom: 8px; justify-content: center; width: 100%; }
-            .filtro-group { justify-content: center; flex-wrap: wrap; }
+            .header-center { margin-bottom: 5px; width: 100%; justify-content: center; }
+            .header-right { justify-content: center; width: 100%; flex-wrap: wrap; gap: 8px;}
         }
 
+        /* Celular Horizontal */
         @media (max-height: 500px) and (orientation: landscape) {
             .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
             .nav-btn { padding: 4px 10px; font-size: 0.7rem; }
-            .visao-group { margin-right: 8px; padding: 2px; }
             .header-center h3 { font-size: 0.85rem; padding: 0 5px; }
             .giant-actions { flex-direction: row; }
             .giant-btn { width: auto; font-size: 0.9em; padding: 10px 15px; }
@@ -192,22 +188,9 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL -->
+    <!-- TELA PRINCIPAL (HEADER OTIMIZADO) -->
     <div id="painel">
         <div class="header">
-            <div class="header-left">
-                <!-- FILTROS DE VISÃO MULTI-TENANT (Liga/Desliga - Ambas ligadas por padrão) -->
-                <div class="visao-group">
-                    <button class="nav-btn active-visao" id="btn-visao-minhas" onclick="toggleVisao('minhas')">👤 MINHAS</button>
-                    <button class="nav-btn active-visao" id="btn-visao-equipe" onclick="toggleVisao('equipe')">👥 EQUIPE</button>
-                </div>
-                <!-- FILTROS DE STATUS (LIGA/DESLIGA) - PENDENTES ON POR PADRÃO E PRIORIDADES REDUZIDO -->
-                <div class="filtro-group">
-                    <button class="nav-btn" id="btn-filtro-vencidas" onclick="definirFiltro('vencidas')">VENCIDAS</button>
-                    <button class="nav-btn active-filter" id="btn-filtro-pendentes" onclick="definirFiltro('pendentes')">PENDENTES</button>
-                    <button class="nav-btn" id="btn-filtro-prioridades" onclick="definirFiltro('prioridades')">PRIORID</button>
-                </div>
-            </div>
             <div class="header-center">
                 <button class="nav-btn" onclick="mudarData(-1)">&lt;</button>
                 <h3 id="display-data" onclick="mudarData('hoje')" title="Clique para voltar para Hoje"></h3>
@@ -285,15 +268,45 @@
     <!-- MODAL DE CONFIGURAÇÕES -->
     <div class="modal-overlay" id="configModal">
         <div class="modal-content" style="padding-top: 15px;">
+            
             <!-- ABAS -->
-            <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-                <button class="nav-btn active-visao" onclick="alternarAbaConfig('cat')" id="tab-cat">Categorias</button>
+            <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none;">
+                <button class="nav-btn active-visao" onclick="alternarAbaConfig('filtro')" id="tab-filtro">Filtros</button>
+                <button class="nav-btn" onclick="alternarAbaConfig('cat')" id="tab-cat">Categorias</button>
                 <button class="nav-btn" onclick="alternarAbaConfig('eq')" id="tab-eq">Minha Equipe</button>
                 <button class="nav-btn" style="margin-left: auto; border:none;" onclick="fecharModais()">✖</button>
             </div>
 
+            <!-- ABA DE FILTROS -->
+            <div id="aba-filtros">
+                <h4 style="margin-top: 0; color: #aaa;">Visão do Contexto</h4>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
+                    <input type="checkbox" id="chk-visao-minhas" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
+                    <strong style="color: white; font-size: 0.9em;">👤 MINHAS TAREFAS</strong>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 20px;">
+                    <input type="checkbox" id="chk-visao-equipe" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
+                    <strong style="color: white; font-size: 0.9em;">👥 TAREFAS DA EQUIPE</strong>
+                </label>
+
+                <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #aaa;">Status e Prazos</h4>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
+                    <input type="checkbox" id="chk-filtro-pendentes" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
+                    <strong style="color: white; font-size: 0.9em;">⏳ PENDENTES</strong>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
+                    <input type="checkbox" id="chk-filtro-prioridades" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
+                    <strong style="color: white; font-size: 0.9em;">⭐ PRIORIDADES</strong>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
+                    <input type="checkbox" id="chk-filtro-vencidas" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
+                    <strong style="color: white; font-size: 0.9em;">⚠️ VENCIDAS</strong>
+                </label>
+            </div>
+
             <!-- ABA CATEGORIAS -->
-            <div id="aba-categorias">
+            <div id="aba-categorias" style="display: none;">
                 <div id="categories-list" style="margin-bottom: 20px;"></div>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
                 <h4>Criar Nova Categoria</h4>
@@ -343,15 +356,63 @@
         let currentUser = null;
         let minhaEquipe = null; 
         
-        // --- LÓGICA DE FILTROS (Toggles) ---
-        // PENDENTES LIGADO POR PADRÃO
-        let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
-        // Ambos ligados por padrão
-        let filtrosVisao = { minhas: true, equipe: true }; 
-        
         let tarefasGlobais = [];
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
+
+        // --- GESTÃO DE ESTADO (LOCALSTORAGE) ---
+        let filtrosVisao = { minhas: true, equipe: true }; 
+        let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
+
+        function carregarFiltrosLocal() {
+            let salvo = localStorage.getItem('boonus_filtros');
+            if (salvo) {
+                let config = JSON.parse(salvo);
+                filtrosVisao.minhas = config.minhas;
+                filtrosVisao.equipe = config.equipe;
+                filtrosAtivos.vencidas = config.vencidas;
+                filtrosAtivos.pendentes = config.pendentes;
+                filtrosAtivos.prioridades = config.prioridades;
+            }
+        }
+        carregarFiltrosLocal(); // Puxa a memória instantaneamente ao abrir
+
+        function salvarFiltrosLocal() {
+            localStorage.setItem('boonus_filtros', JSON.stringify({
+                minhas: filtrosVisao.minhas,
+                equipe: filtrosVisao.equipe,
+                vencidas: filtrosAtivos.vencidas,
+                pendentes: filtrosAtivos.pendentes,
+                prioridades: filtrosAtivos.prioridades
+            }));
+        }
+
+        // --- CONTROLE DOS FILTROS DENTRO DO MODAL CONFIG ---
+        function atualizarFiltrosModal() {
+            // Trava de Segurança: Se não tiver equipe, não deixa marcar "EQUIPE"
+            if (document.getElementById('chk-visao-equipe').checked && !minhaEquipe) {
+                alert("Você precisa criar ou entrar em uma equipe primeiro para ativar esta visão.");
+                document.getElementById('chk-visao-equipe').checked = false;
+            }
+
+            filtrosVisao.minhas = document.getElementById('chk-visao-minhas').checked;
+            filtrosVisao.equipe = document.getElementById('chk-visao-equipe').checked;
+            
+            filtrosAtivos.vencidas = document.getElementById('chk-filtro-vencidas').checked;
+            filtrosAtivos.pendentes = document.getElementById('chk-filtro-pendentes').checked;
+            filtrosAtivos.prioridades = document.getElementById('chk-filtro-prioridades').checked;
+
+            salvarFiltrosLocal();
+            renderizarTarefas();
+        }
+
+        function sincronizarChecksModal() {
+            document.getElementById('chk-visao-minhas').checked = filtrosVisao.minhas;
+            document.getElementById('chk-visao-equipe').checked = filtrosVisao.equipe;
+            document.getElementById('chk-filtro-vencidas').checked = filtrosAtivos.vencidas;
+            document.getElementById('chk-filtro-pendentes').checked = filtrosAtivos.pendentes;
+            document.getElementById('chk-filtro-prioridades').checked = filtrosAtivos.prioridades;
+        }
         
         // --- DETECÇÃO DE iOS ---
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -363,41 +424,15 @@
         // --- NAVEGAÇÃO DE DATAS ---
         let dataPointer = new Date();
         function atualizarDisplayData() {
-            // Formato DD-MMM-AA
             const dia = String(dataPointer.getDate()).padStart(2, '0');
             const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
             const mes = meses[dataPointer.getMonth()];
             const ano = String(dataPointer.getFullYear()).slice(-2);
-            
             document.getElementById('display-data').innerText = `${dia}-${mes}-${ano}`;
         }
         function mudarData(acao) {
             if (acao === 'hoje') dataPointer = new Date(); else dataPointer.setDate(dataPointer.getDate() + acao);
             atualizarDisplayData(); renderizarTarefas();
-        }
-
-        // --- FILTROS DE VISÃO E LIGA/DESLIGA ---
-        function toggleVisao(tipo) {
-            if(!minhaEquipe && tipo === 'equipe') return alert("Você precisa configurar uma equipe para usar este filtro.");
-            
-            filtrosVisao[tipo] = !filtrosVisao[tipo];
-            const btn = document.getElementById('btn-visao-' + tipo);
-            
-            if(filtrosVisao[tipo]) btn.classList.add('active-visao');
-            else btn.classList.remove('active-visao');
-            
-            renderizarTarefas();
-        }
-
-        function definirFiltro(tipo) { 
-            filtrosAtivos[tipo] = !filtrosAtivos[tipo]; 
-            const btn = document.getElementById('btn-filtro-' + tipo);
-            if (filtrosAtivos[tipo]) {
-                btn.classList.add('active-filter');
-            } else {
-                btn.classList.remove('active-filter');
-            }
-            renderizarTarefas(); 
         }
 
         // --- AUTENTICAÇÃO ---
@@ -452,7 +487,13 @@
                 iniciarEscutaRealtime(); 
             }
         }
-        async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
+        
+        async function fazerLogout() { 
+            // Limpa os filtros da memória para voltar ao padrão no próximo login
+            localStorage.removeItem('boonus_filtros');
+            await supabaseClient.auth.signOut(); 
+            window.location.reload(); 
+        }
 
         // --- SISTEMA DE EQUIPES ---
         async function carregarEquipe() {
@@ -475,11 +516,10 @@
                 document.getElementById('display-nome-equipe').innerText = `Equipe: ${minhaEquipe.nome}`;
                 carregarMembrosEquipe();
             } else {
-                // FALLBACK: Se o usuário não tiver equipe, desliga o filtro EQUIPE e deixa só o MINHAS para não ver tela vazia
+                // FALLBACK: Desliga o filtro EQUIPE e deixa só o MINHAS automaticamente
                 filtrosVisao.equipe = false;
                 filtrosVisao.minhas = true;
-                document.getElementById('btn-visao-equipe').classList.remove('active-visao');
-                document.getElementById('btn-visao-minhas').classList.add('active-visao');
+                salvarFiltrosLocal();
             }
         }
 
@@ -613,7 +653,6 @@
             const agora = new Date();
             let dataObj = new Date(dataAtual);
             
-            // Nova Regra de Ouro: Se a tarefa já está no passado, o '+10 min' conta a partir de AGORA
             if (dataObj < agora) {
                 dataObj = new Date(agora);
             }
@@ -628,7 +667,7 @@
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             
-            // Passo 1: Filtrar Contexto (Minhas / Equipe)
+            // Passo 1: Filtrar Contexto
             let tarefasFiltradas = tarefasGlobais.filter(t => {
                 const isMinha = !t.id_equipe;
                 const isEquipe = t.id_equipe !== null;
@@ -638,7 +677,7 @@
                 return false; 
             });
 
-            // Passo 2: O Cruzamento Inteligente dos Botões Liga/Desliga de Prazos
+            // Passo 2: Filtrar Status
             tarefasFiltradas = tarefasFiltradas.filter(t => {
                 const d = new Date(t.data_agendamento);
                 const isHoje = d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
@@ -784,11 +823,23 @@
             renderizarSelectCategorias(); document.getElementById('task-category-select').value = categoria;
         }
 
-        function abrirModalConfig() { document.getElementById('configModal').style.display = 'flex'; alternarAbaConfig('cat'); }
+        function abrirModalConfig() { 
+            document.getElementById('configModal').style.display = 'flex'; 
+            alternarAbaConfig('filtro'); // Abre os filtros primeiro
+            sincronizarChecksModal(); // Atualiza os botões visuais
+        }
+
         function alternarAbaConfig(aba) {
-            document.getElementById('tab-cat').classList.remove('active-visao'); document.getElementById('tab-eq').classList.remove('active-visao');
-            document.getElementById('aba-categorias').style.display = 'none'; document.getElementById('aba-equipe').style.display = 'none';
-            if(aba === 'cat') { document.getElementById('tab-cat').classList.add('active-visao'); document.getElementById('aba-categorias').style.display = 'block'; }
+            document.getElementById('tab-filtro').classList.remove('active-visao');
+            document.getElementById('tab-cat').classList.remove('active-visao');
+            document.getElementById('tab-eq').classList.remove('active-visao');
+            
+            document.getElementById('aba-filtros').style.display = 'none';
+            document.getElementById('aba-categorias').style.display = 'none';
+            document.getElementById('aba-equipe').style.display = 'none';
+            
+            if(aba === 'filtro') { document.getElementById('tab-filtro').classList.add('active-visao'); document.getElementById('aba-filtros').style.display = 'block'; }
+            else if(aba === 'cat') { document.getElementById('tab-cat').classList.add('active-visao'); document.getElementById('aba-categorias').style.display = 'block'; }
             else { document.getElementById('tab-eq').classList.add('active-visao'); document.getElementById('aba-equipe').style.display = 'block'; }
         }
 
