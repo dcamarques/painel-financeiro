@@ -41,7 +41,6 @@
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
-        
         .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
 
         /* BOTÕES CLEAN */
@@ -51,8 +50,6 @@
             letter-spacing: 0.5px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;
         }
         .nav-btn:hover { background: #222; color: #fff; border-color: #666; }
-        
-        /* Cor de Ativação mantida para as abas do Modal */
         .nav-btn.active-visao { background: #333; color: #fff; border-color: #555; }
         
         .btn-action { background: rgba(0, 120, 215, 0.15); border-color: #0078D7; color: #4da6ff; }
@@ -75,6 +72,11 @@
         .news-image { max-width: 100%; max-height: 40vh; border-radius: 12px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
         .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
+
+        /* ESTILO DA TABELA DE RESUMO */
+        .summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 1.2em; text-align: left; }
+        .summary-table th { padding: 12px; border-bottom: 2px solid #444; color: #aaa; font-weight: 600; text-transform: uppercase; }
+        .summary-table td { padding: 15px 12px; border-bottom: 1px solid #333; font-weight: bold; }
 
         /* CONTAINER ALERTA */
         #alert-container { display: none; width: 60%; padding: 30px; border-right: 1px solid #222; flex-direction: column; justify-content: center; align-items: center; animation: pulseRed 2s infinite; }
@@ -138,14 +140,12 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
-        /* Celular Vertical: Layout Extremamente Limpo */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-center { margin-bottom: 5px; width: 100%; justify-content: center; }
             .header-right { justify-content: center; width: 100%; flex-wrap: wrap; gap: 8px;}
         }
 
-        /* Celular Horizontal */
         @media (max-height: 500px) and (orientation: landscape) {
             .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
@@ -188,7 +188,7 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL (HEADER OTIMIZADO) -->
+    <!-- TELA PRINCIPAL -->
     <div id="painel">
         <div class="header">
             <div class="header-center">
@@ -206,7 +206,7 @@
 
         <div class="main-content">
             <div class="left-panel" id="left-panel">
-                <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
+                <h2 id="left-panel-title">RADAR E ESTATÍSTICAS</h2>
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
             </div>
 
@@ -269,7 +269,6 @@
     <div class="modal-overlay" id="configModal">
         <div class="modal-content" style="padding-top: 15px;">
             
-            <!-- ABAS -->
             <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none;">
                 <button class="nav-btn active-visao" onclick="alternarAbaConfig('filtro')" id="tab-filtro">Filtros</button>
                 <button class="nav-btn" onclick="alternarAbaConfig('cat')" id="tab-cat">Categorias</button>
@@ -375,7 +374,7 @@
                 filtrosAtivos.prioridades = config.prioridades;
             }
         }
-        carregarFiltrosLocal(); // Puxa a memória instantaneamente ao abrir
+        carregarFiltrosLocal(); 
 
         function salvarFiltrosLocal() {
             localStorage.setItem('boonus_filtros', JSON.stringify({
@@ -389,7 +388,6 @@
 
         // --- CONTROLE DOS FILTROS DENTRO DO MODAL CONFIG ---
         function atualizarFiltrosModal() {
-            // Trava de Segurança: Se não tiver equipe, não deixa marcar "EQUIPE"
             if (document.getElementById('chk-visao-equipe').checked && !minhaEquipe) {
                 alert("Você precisa criar ou entrar em uma equipe primeiro para ativar esta visão.");
                 document.getElementById('chk-visao-equipe').checked = false;
@@ -432,7 +430,8 @@
         }
         function mudarData(acao) {
             if (acao === 'hoje') dataPointer = new Date(); else dataPointer.setDate(dataPointer.getDate() + acao);
-            atualizarDisplayData(); renderizarTarefas();
+            atualizarDisplayData(); 
+            renderizarTarefas();
         }
 
         // --- AUTENTICAÇÃO ---
@@ -477,7 +476,6 @@
                 document.getElementById('painel').style.display = 'flex';
                 
                 atualizarDisplayData(); inicializarPaletaDeCores(); carregarNoticias();
-                setInterval(carregarNoticias, 1800000); 
                 
                 await carregarEquipe(); 
                 await carregarCategoriasDB();
@@ -489,7 +487,6 @@
         }
         
         async function fazerLogout() { 
-            // Limpa os filtros da memória para voltar ao padrão no próximo login
             localStorage.removeItem('boonus_filtros');
             await supabaseClient.auth.signOut(); 
             window.location.reload(); 
@@ -516,7 +513,6 @@
                 document.getElementById('display-nome-equipe').innerText = `Equipe: ${minhaEquipe.nome}`;
                 carregarMembrosEquipe();
             } else {
-                // FALLBACK: Desliga o filtro EQUIPE e deixa só o MINHAS automaticamente
                 filtrosVisao.equipe = false;
                 filtrosVisao.minhas = true;
                 salvarFiltrosLocal();
@@ -653,10 +649,7 @@
             const agora = new Date();
             let dataObj = new Date(dataAtual);
             
-            if (dataObj < agora) {
-                dataObj = new Date(agora);
-            }
-            
+            if (dataObj < agora) { dataObj = new Date(agora); }
             dataObj.setMinutes(dataObj.getMinutes() + 10);
             
             await supabaseClient.from('tarefas').update({ data_agendamento: dataObj.toISOString() }).eq('id', id); 
@@ -667,17 +660,14 @@
             const container = document.getElementById('tasks-container'); container.innerHTML = '';
             const agora = new Date();
             
-            // Passo 1: Filtrar Contexto
             let tarefasFiltradas = tarefasGlobais.filter(t => {
                 const isMinha = !t.id_equipe;
                 const isEquipe = t.id_equipe !== null;
-                
                 if (filtrosVisao.minhas && isMinha) return true;
                 if (filtrosVisao.equipe && isEquipe) return true;
                 return false; 
             });
 
-            // Passo 2: Filtrar Status
             tarefasFiltradas = tarefasFiltradas.filter(t => {
                 const d = new Date(t.data_agendamento);
                 const isHoje = d.getDate() === dataPointer.getDate() && d.getMonth() === dataPointer.getMonth() && d.getFullYear() === dataPointer.getFullYear();
@@ -700,31 +690,38 @@
                 return true; 
             });
 
-            if(tarefasFiltradas.length === 0) { container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; return; }
+            if(tarefasFiltradas.length === 0) { 
+                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px;">Nenhuma tarefa encontrada neste filtro.</div>`; 
+            } else {
+                tarefasFiltradas.forEach(t => {
+                    const cor = (categoriasGlobais.find(c => c.nome === t.categoria) || {}).cor || '#555';
+                    const statusClass = t.status === 'Concluido' ? 'status-concluido' : (t.status === 'Em andamento' ? 'status-andamento' : 'status-pendente');
+                    const dataFormatada = new Date(t.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                    
+                    let iconesExtra = '';
+                    if(t.prioridade) iconesExtra += `<span class="priority-icon" title="Prioridade">⭐</span>`;
+                    if(t.id_equipe) iconesExtra += `<span class="team-icon" title="Tarefa da Equipe">👥</span>`;
+                    
+                    const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
-            tarefasFiltradas.forEach(t => {
-                const cor = (categoriasGlobais.find(c => c.nome === t.categoria) || {}).cor || '#555';
-                const statusClass = t.status === 'Concluido' ? 'status-concluido' : (t.status === 'Em andamento' ? 'status-andamento' : 'status-pendente');
-                const dataFormatada = new Date(t.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                
-                let iconesExtra = '';
-                if(t.prioridade) iconesExtra += `<span class="priority-icon" title="Prioridade">⭐</span>`;
-                if(t.id_equipe) iconesExtra += `<span class="team-icon" title="Tarefa da Equipe">👥</span>`;
-                
-                const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
-
-                container.innerHTML += `
-                    <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
-                        <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
-                        <div class="task-title">${t.titulo}</div>
-                        <div class="task-actions">
-                            <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade}, ${t.id_equipe !== null})">✎ Editar</button>
-                            <button class="t-btn snooze" onclick="adiarTarefaDB('${t.id}', '${t.data_agendamento}')">+10m Adiar</button>
-                            <button class="t-btn done" onclick="concluirTarefaDB('${t.id}')">✓ Concluir</button>
+                    container.innerHTML += `
+                        <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
+                            <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
+                            <div class="task-title">${t.titulo}</div>
+                            <div class="task-actions">
+                                <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade}, ${t.id_equipe !== null})">✎ Editar</button>
+                                <button class="t-btn snooze" onclick="adiarTarefaDB('${t.id}', '${t.data_agendamento}')">+10m Adiar</button>
+                                <button class="t-btn done" onclick="concluirTarefaDB('${t.id}')">✓ Concluir</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }
+
+            // Atualiza a tabela de resumo instantaneamente se ela estiver na tela
+            if (typeof mostrandoResumo !== 'undefined' && mostrandoResumo) {
+                renderizarResumoSlide();
+            }
         }
 
         // --- SISTEMA TEMPO REAL SUPABASE ---
@@ -780,21 +777,115 @@
             abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null);
         }
 
-        // --- MÓDULO DE NOTÍCIAS ---
+        // --- CÁLCULO DE ESTATÍSTICAS (NOVO) ---
+        function calcularResumoDoDia() {
+            const ano = dataPointer.getFullYear();
+            const mes = dataPointer.getMonth();
+            const dia = dataPointer.getDate();
+
+            let tarefasDoDia = tarefasGlobais.filter(t => {
+                const isMinha = !t.id_equipe;
+                const isEquipe = t.id_equipe !== null;
+                if (!filtrosVisao.minhas && isMinha) return false;
+                if (!filtrosVisao.equipe && isEquipe) return false;
+
+                const d = new Date(t.data_agendamento);
+                return d.getFullYear() === ano && d.getMonth() === mes && d.getDate() === dia;
+            });
+
+            let resumo = {};
+            tarefasDoDia.forEach(t => {
+                if (!resumo[t.categoria]) {
+                    resumo[t.categoria] = { total: 0, pendentes: 0, cor: '#555' };
+                    let catObj = categoriasGlobais.find(c => c.nome === t.categoria);
+                    if(catObj) resumo[t.categoria].cor = catObj.cor;
+                }
+                resumo[t.categoria].total++;
+                if (t.status !== 'Concluido') { 
+                    resumo[t.categoria].pendentes++;
+                }
+            });
+            return resumo;
+        }
+
+        function renderizarResumoSlide() {
+            if(tarefaAlertaAtual) return;
+            const container = document.getElementById('news-container');
+            const resumo = calcularResumoDoDia();
+            const categoriasKeys = Object.keys(resumo);
+
+            if (categoriasKeys.length === 0) {
+                container.innerHTML = `<div class="news-slide"><div class="news-meta" style="margin-bottom:15px; font-size: 1.2em;">📊 STATUS DO DIA</div><div style="color: #aaa; font-size: 1.2em;">Nenhuma tarefa agendada para o dia selecionado.</div></div>`;
+                return;
+            }
+
+            let htmlResumo = `<div class="news-slide" style="width: 100%; max-width: 600px;">
+                                <div class="news-meta" style="margin-bottom: 15px; font-size: 1.2em;">📊 STATUS DA AGENDA</div>
+                                <table class="summary-table">
+                                    <tr>
+                                        <th>CATEGORIA</th>
+                                        <th style="text-align: center;">TOTAL</th>
+                                        <th style="text-align: center;">PENDENTES</th>
+                                    </tr>`;
+
+            categoriasKeys.forEach(cat => {
+                const r = resumo[cat];
+                const pendenteColor = r.pendentes > 0 ? '#FFEB3B' : '#4CAF50';
+                htmlResumo += `
+                    <tr>
+                        <td style="color: ${r.cor};">${cat.toUpperCase()}</td>
+                        <td style="text-align: center; color: white;">${r.total}</td>
+                        <td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td>
+                    </tr>
+                `;
+            });
+
+            htmlResumo += `</table></div>`;
+            container.innerHTML = htmlResumo;
+        }
+
+        // --- MÓDULO DE NOTÍCIAS E ALTERNÂNCIA (PING-PONG) ---
         let noticiasGlobais = []; let indiceNoticiaAtual = 0; let loopNoticias;
+        let mostrandoResumo = false; 
+
         async function carregarNoticias() {
             try {
                 const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/'); const data = await response.json();
                 noticiasGlobais = data.items.map(item => { let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || ''; if (!imgSrc) { const match = item.content.match(/<img[^>]+src="([^">]+)"/); if (match) imgSrc = match[1]; } return { titulo: item.title, imagem: imgSrc, dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR') }; });
-                if (noticiasGlobais.length > 0) { indiceNoticiaAtual = 0; renderizarNoticiaSlide(); if(loopNoticias) clearInterval(loopNoticias); loopNoticias = setInterval(proximaNoticia, 15000); }
-            } catch (error) {}
+                
+                if (noticiasGlobais.length > 0) { 
+                    indiceNoticiaAtual = 0; 
+                    renderizarNoticiaSlide(); 
+                    mostrandoResumo = false;
+                    if(loopNoticias) clearInterval(loopNoticias); 
+                    loopNoticias = setInterval(proximaNoticia, 15000); 
+                }
+            } catch (error) {
+                if(loopNoticias) clearInterval(loopNoticias);
+                loopNoticias = setInterval(() => { if(!tarefaAlertaAtual) renderizarResumoSlide(); }, 15000);
+                renderizarResumoSlide();
+            }
         }
+        
         function renderizarNoticiaSlide() {
             if(tarefaAlertaAtual) return; const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
             const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem">` : '';
             container.innerHTML = `<div class="news-slide">${htmlImagem}<div class="news-title">${noticia.titulo}</div><div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div></div>`;
         }
-        function proximaNoticia() { if(!tarefaAlertaAtual) { indiceNoticiaAtual++; if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; renderizarNoticiaSlide(); } }
+        
+        function proximaNoticia() { 
+            if(!tarefaAlertaAtual) { 
+                if (!mostrandoResumo) {
+                    renderizarResumoSlide();
+                    mostrandoResumo = true;
+                } else {
+                    indiceNoticiaAtual++; 
+                    if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; 
+                    renderizarNoticiaSlide(); 
+                    mostrandoResumo = false;
+                }
+            } 
+        }
 
         // --- WAKE LOCK ---
         let bloqueioDeTela = null;
@@ -825,8 +916,8 @@
 
         function abrirModalConfig() { 
             document.getElementById('configModal').style.display = 'flex'; 
-            alternarAbaConfig('filtro'); // Abre os filtros primeiro
-            sincronizarChecksModal(); // Atualiza os botões visuais
+            alternarAbaConfig('filtro'); 
+            sincronizarChecksModal(); 
         }
 
         function alternarAbaConfig(aba) {
