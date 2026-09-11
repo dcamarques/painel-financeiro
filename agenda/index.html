@@ -41,7 +41,11 @@
         /* --- DASHBOARD --- */
         #painel { display: none; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; background-color: var(--bg-color); }
-        .header-right, .header-center { display: flex; align-items: center; gap: 8px; }
+        
+        /* Nova Estrutura do Cabeçalho */
+        .header-top-mobile { display: flex; align-items: center; gap: 15px; }
+        .header-center { display: flex; align-items: center; gap: 8px; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
 
         /* BOTÕES CLEAN */
         .nav-btn { 
@@ -73,11 +77,6 @@
         .news-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; color: #fff; line-height: 1.3; }
         .news-meta { font-size: 1em; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
 
-        /* ESTILO DA TABELA DE RESUMO */
-        .summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 1.2em; text-align: left; }
-        .summary-table th { padding: 12px; border-bottom: 2px solid #444; color: #aaa; font-weight: 600; text-transform: uppercase; }
-        .summary-table td { padding: 15px 12px; border-bottom: 1px solid #333; font-weight: bold; }
-
         /* CONTAINER ALERTA */
         #alert-container { display: none; width: 60%; padding: 30px; border-right: 1px solid #222; flex-direction: column; justify-content: center; align-items: center; animation: pulseRed 2s infinite; }
         #alert-panel-title { margin-top: 0; margin-bottom: 30px; font-weight: bold; text-align: center; font-size: 1.5em; letter-spacing: 1px; color: #F44336; }
@@ -94,7 +93,7 @@
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes pulseRed { 0% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } 50% { box-shadow: inset 0 0 50px rgba(244, 67, 54, 0.2); } 100% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } }
 
-        /* TAREFAS */
+        /* TAREFAS E TABELA RESUMO */
         .tasks-panel { width: 40%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; -ms-overflow-style: none; scrollbar-width: none; }
         .tasks-panel::-webkit-scrollbar { display: none; } 
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
@@ -109,6 +108,10 @@
         .t-btn:hover { background: #555; }
         .t-btn.done { background: var(--primary); color: white;}
         .t-btn.snooze { background: #ff9800; color: #000; }
+
+        .summary-table { width: 100%; background: var(--card-bg); border-radius: 8px; border-collapse: collapse; overflow: hidden; font-size: 1.1em; }
+        .summary-table th { padding: 15px; text-align: left; color: #aaa; background: #222; font-weight: bold; text-transform: uppercase; }
+        .summary-table td { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; }
 
         /* STATUS BADGE */
         .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -140,12 +143,14 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
+        /* Celular Vertical: SAIR + Data em cima, resto embaixo */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
-            .header-center { margin-bottom: 5px; width: 100%; justify-content: center; }
+            .header-top-mobile { width: 100%; justify-content: space-between; gap: 5px; }
             .header-right { justify-content: center; width: 100%; flex-wrap: wrap; gap: 8px;}
         }
 
+        /* Celular Horizontal */
         @media (max-height: 500px) and (orientation: landscape) {
             .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
@@ -188,25 +193,31 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL -->
+    <!-- TELA PRINCIPAL (HEADER OTIMIZADO) -->
     <div id="painel">
         <div class="header">
-            <div class="header-center">
-                <button class="nav-btn" onclick="mudarData(-1)">&lt;</button>
-                <h3 id="display-data" onclick="mudarData('hoje')" title="Clique para voltar para Hoje"></h3>
-                <button class="nav-btn" onclick="mudarData(1)">&gt;</button>
+            <!-- Bloco 1: O Botão Sair lado a lado com a Data -->
+            <div class="header-top-mobile">
+                <button class="nav-btn btn-danger" onclick="fazerLogout()">🚪 SAIR</button>
+                <div class="header-center">
+                    <button class="nav-btn" onclick="mudarData(-1)">&lt;</button>
+                    <h3 id="display-data" onclick="mudarData('hoje')" title="Clique para voltar para Hoje"></h3>
+                    <button class="nav-btn" onclick="mudarData(1)">&gt;</button>
+                </div>
             </div>
+            
+            <!-- Bloco 2: Os Botões de Ação -->
             <div class="header-right">
                 <button class="nav-btn btn-action" onclick="abrirModalTarefa()">➕ TAREFA</button>
                 <button class="nav-btn" onclick="abrirModalConfig()">⚙️ CONFIG</button>
+                <button class="nav-btn" id="btn-resumo" onclick="toggleResumo()">📊 RESUMO</button>
                 <button class="nav-btn" id="btn-tela-cheia" onclick="toggleFullScreen()">⛶ TELA CHEIA</button>
-                <button class="nav-btn btn-danger" onclick="fazerLogout()">🚪 SAIR</button>
             </div>
         </div>
 
         <div class="main-content">
             <div class="left-panel" id="left-panel">
-                <h2 id="left-panel-title">RADAR E ESTATÍSTICAS</h2>
+                <h2 id="left-panel-title">RADAR DE NOTÍCIAS</h2>
                 <div id="news-container"><p style="text-align:center; color:#555;">Sintonizando radares...</p></div>
             </div>
 
@@ -223,7 +234,10 @@
                 </div>
             </div>
 
+            <!-- AS DUAS VISÕES POSSÍVEIS DO LADO DIREITO -->
             <div class="tasks-panel" id="tasks-container"></div>
+            <div class="tasks-panel" id="summary-container" style="display: none;"></div>
+            
         </div>
     </div>
 
@@ -359,9 +373,10 @@
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
 
-        // --- GESTÃO DE ESTADO (LOCALSTORAGE) ---
+        // --- GESTÃO DE ESTADO E FILTROS ---
         let filtrosVisao = { minhas: true, equipe: true }; 
         let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
+        let visualizandoResumo = false; // Lógica do botão RESUMO LIGA/DESLIGA
 
         function carregarFiltrosLocal() {
             let salvo = localStorage.getItem('boonus_filtros');
@@ -384,6 +399,88 @@
                 pendentes: filtrosAtivos.pendentes,
                 prioridades: filtrosAtivos.prioridades
             }));
+        }
+
+        // --- SISTEMA DO BOTÃO RESUMO (NA COLUNA DAS TAREFAS) ---
+        function toggleResumo() {
+            visualizandoResumo = !visualizandoResumo;
+            const btn = document.getElementById('btn-resumo');
+            
+            if (visualizandoResumo) {
+                btn.classList.add('active-visao');
+                document.getElementById('tasks-container').style.display = 'none';
+                document.getElementById('summary-container').style.display = 'block';
+                renderizarResumoTabela();
+            } else {
+                btn.classList.remove('active-visao');
+                document.getElementById('tasks-container').style.display = 'flex';
+                document.getElementById('summary-container').style.display = 'none';
+            }
+        }
+
+        function calcularResumoDoDia() {
+            const ano = dataPointer.getFullYear();
+            const mes = dataPointer.getMonth();
+            const dia = dataPointer.getDate();
+
+            let tarefasDoDia = tarefasGlobais.filter(t => {
+                const isMinha = !t.id_equipe;
+                const isEquipe = t.id_equipe !== null;
+                if (!filtrosVisao.minhas && isMinha) return false;
+                if (!filtrosVisao.equipe && isEquipe) return false;
+
+                const d = new Date(t.data_agendamento);
+                return d.getFullYear() === ano && d.getMonth() === mes && d.getDate() === dia;
+            });
+
+            let resumo = {};
+            tarefasDoDia.forEach(t => {
+                if (!resumo[t.categoria]) {
+                    resumo[t.categoria] = { total: 0, pendentes: 0, cor: '#555' };
+                    let catObj = categoriasGlobais.find(c => c.nome === t.categoria);
+                    if(catObj) resumo[t.categoria].cor = catObj.cor;
+                }
+                resumo[t.categoria].total++;
+                if (t.status !== 'Concluido') { 
+                    resumo[t.categoria].pendentes++;
+                }
+            });
+            return resumo;
+        }
+
+        function renderizarResumoTabela() {
+            const container = document.getElementById('summary-container');
+            const resumo = calcularResumoDoDia();
+            const categoriasKeys = Object.keys(resumo);
+
+            if (categoriasKeys.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: #777; margin-top: 50px; font-size:1.1em;">Nenhuma tarefa agendada para este dia.</div>`;
+                return;
+            }
+
+            let html = `
+                <table class="summary-table">
+                    <tr style="background: #222;">
+                        <th>CATEGORIA</th>
+                        <th style="text-align: center;">TOTAL</th>
+                        <th style="text-align: center;">PENDENTES</th>
+                    </tr>
+            `;
+
+            categoriasKeys.forEach(cat => {
+                const r = resumo[cat];
+                const pendenteColor = r.pendentes > 0 ? '#FFEB3B' : '#4CAF50';
+                html += `
+                    <tr>
+                        <td style="color: ${r.cor};">${cat.toUpperCase()}</td>
+                        <td style="text-align: center; color: white;">${r.total}</td>
+                        <td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+            container.innerHTML = html;
         }
 
         // --- CONTROLE DOS FILTROS DENTRO DO MODAL CONFIG ---
@@ -663,9 +760,9 @@
             let tarefasFiltradas = tarefasGlobais.filter(t => {
                 const isMinha = !t.id_equipe;
                 const isEquipe = t.id_equipe !== null;
-                if (filtrosVisao.minhas && isMinha) return true;
-                if (filtrosVisao.equipe && isEquipe) return true;
-                return false; 
+                if (!filtrosVisao.minhas && isMinha) return false;
+                if (!filtrosVisao.equipe && isEquipe) return false;
+                return true; 
             });
 
             tarefasFiltradas = tarefasFiltradas.filter(t => {
@@ -719,8 +816,8 @@
             }
 
             // Atualiza a tabela de resumo instantaneamente se ela estiver na tela
-            if (typeof mostrandoResumo !== 'undefined' && mostrandoResumo) {
-                renderizarResumoSlide();
+            if (visualizandoResumo) {
+                renderizarResumoTabela();
             }
         }
 
@@ -777,113 +874,37 @@
             abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null);
         }
 
-        // --- CÁLCULO DE ESTATÍSTICAS (NOVO) ---
-        function calcularResumoDoDia() {
-            const ano = dataPointer.getFullYear();
-            const mes = dataPointer.getMonth();
-            const dia = dataPointer.getDate();
-
-            let tarefasDoDia = tarefasGlobais.filter(t => {
-                const isMinha = !t.id_equipe;
-                const isEquipe = t.id_equipe !== null;
-                if (!filtrosVisao.minhas && isMinha) return false;
-                if (!filtrosVisao.equipe && isEquipe) return false;
-
-                const d = new Date(t.data_agendamento);
-                return d.getFullYear() === ano && d.getMonth() === mes && d.getDate() === dia;
-            });
-
-            let resumo = {};
-            tarefasDoDia.forEach(t => {
-                if (!resumo[t.categoria]) {
-                    resumo[t.categoria] = { total: 0, pendentes: 0, cor: '#555' };
-                    let catObj = categoriasGlobais.find(c => c.nome === t.categoria);
-                    if(catObj) resumo[t.categoria].cor = catObj.cor;
-                }
-                resumo[t.categoria].total++;
-                if (t.status !== 'Concluido') { 
-                    resumo[t.categoria].pendentes++;
-                }
-            });
-            return resumo;
-        }
-
-        function renderizarResumoSlide() {
-            if(tarefaAlertaAtual) return;
-            const container = document.getElementById('news-container');
-            const resumo = calcularResumoDoDia();
-            const categoriasKeys = Object.keys(resumo);
-
-            if (categoriasKeys.length === 0) {
-                container.innerHTML = `<div class="news-slide"><div class="news-meta" style="margin-bottom:15px; font-size: 1.2em;">📊 STATUS DO DIA</div><div style="color: #aaa; font-size: 1.2em;">Nenhuma tarefa agendada para o dia selecionado.</div></div>`;
-                return;
-            }
-
-            let htmlResumo = `<div class="news-slide" style="width: 100%; max-width: 600px;">
-                                <div class="news-meta" style="margin-bottom: 15px; font-size: 1.2em;">📊 STATUS DA AGENDA</div>
-                                <table class="summary-table">
-                                    <tr>
-                                        <th>CATEGORIA</th>
-                                        <th style="text-align: center;">TOTAL</th>
-                                        <th style="text-align: center;">PENDENTES</th>
-                                    </tr>`;
-
-            categoriasKeys.forEach(cat => {
-                const r = resumo[cat];
-                const pendenteColor = r.pendentes > 0 ? '#FFEB3B' : '#4CAF50';
-                htmlResumo += `
-                    <tr>
-                        <td style="color: ${r.cor};">${cat.toUpperCase()}</td>
-                        <td style="text-align: center; color: white;">${r.total}</td>
-                        <td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td>
-                    </tr>
-                `;
-            });
-
-            htmlResumo += `</table></div>`;
-            container.innerHTML = htmlResumo;
-        }
-
-        // --- MÓDULO DE NOTÍCIAS E ALTERNÂNCIA (PING-PONG) ---
+        // --- MÓDULO DE NOTÍCIAS FIXO NO PAINEL ESQUERDO ---
         let noticiasGlobais = []; let indiceNoticiaAtual = 0; let loopNoticias;
-        let mostrandoResumo = false; 
-
         async function carregarNoticias() {
             try {
                 const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.infomoney.com.br/feed/'); const data = await response.json();
                 noticiasGlobais = data.items.map(item => { let imgSrc = item.thumbnail || (item.enclosure && item.enclosure.link) || ''; if (!imgSrc) { const match = item.content.match(/<img[^>]+src="([^">]+)"/); if (match) imgSrc = match[1]; } return { titulo: item.title, imagem: imgSrc, dataPub: new Date(item.pubDate).toLocaleDateString('pt-BR') }; });
-                
                 if (noticiasGlobais.length > 0) { 
                     indiceNoticiaAtual = 0; 
                     renderizarNoticiaSlide(); 
-                    mostrandoResumo = false;
                     if(loopNoticias) clearInterval(loopNoticias); 
                     loopNoticias = setInterval(proximaNoticia, 15000); 
                 }
             } catch (error) {
-                if(loopNoticias) clearInterval(loopNoticias);
-                loopNoticias = setInterval(() => { if(!tarefaAlertaAtual) renderizarResumoSlide(); }, 15000);
-                renderizarResumoSlide();
+                document.getElementById('news-container').innerHTML = '<p style="color:#777;">Erro ao sintonizar radar.</p>';
             }
         }
         
         function renderizarNoticiaSlide() {
-            if(tarefaAlertaAtual) return; const container = document.getElementById('news-container'); const noticia = noticiasGlobais[indiceNoticiaAtual]; if(!noticia) return;
+            if(tarefaAlertaAtual) return; 
+            const container = document.getElementById('news-container'); 
+            const noticia = noticiasGlobais[indiceNoticiaAtual]; 
+            if(!noticia) return;
             const htmlImagem = noticia.imagem ? `<img src="${noticia.imagem}" class="news-image" alt="Imagem">` : '';
             container.innerHTML = `<div class="news-slide">${htmlImagem}<div class="news-title">${noticia.titulo}</div><div class="news-meta">FONTE: INFOMONEY | ${noticia.dataPub}</div></div>`;
         }
         
         function proximaNoticia() { 
             if(!tarefaAlertaAtual) { 
-                if (!mostrandoResumo) {
-                    renderizarResumoSlide();
-                    mostrandoResumo = true;
-                } else {
-                    indiceNoticiaAtual++; 
-                    if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; 
-                    renderizarNoticiaSlide(); 
-                    mostrandoResumo = false;
-                }
+                indiceNoticiaAtual++; 
+                if(indiceNoticiaAtual >= noticiasGlobais.length) indiceNoticiaAtual = 0; 
+                renderizarNoticiaSlide(); 
             } 
         }
 
