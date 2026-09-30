@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agenda | Boonus</title>
     
-    <!-- TAGS ANTI-CACHE -->
+    <!-- TAGS ANTI-CACHE PARA FORÇAR ATUALIZAÇÃO NO PWA/IOS -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <meta name="description" content="Painel Executivo Boonus. Gestão de produtividade e controle de agenda.">
+    <meta name="description" content="Painel Executivo Boonus. Gestão de produtividade, acompanhamento de mercado e controle de agenda para escritórios de investimentos.">
+    <meta name="keywords" content="agenda, produtividade, painel executivo, investimentos, boonus">
+
     <meta property="og:title" content="Boonus Agenda">
+    <meta property="og:description" content="Painel Executivo de Gestão, Produtividade e Mercado.">
+    <meta property="og:image" content="https://tv.boonus.app.br/agenda/capa-whatsapp.jpg">
     <meta property="og:url" content="https://tv.boonus.app.br/agenda/">
     <meta property="og:type" content="website">
 
@@ -71,7 +75,6 @@
         .btn-adiar-gigante { background: #222; color: white; border: 2px solid white; }
         .btn-editar-gigante { background: #444; color: white; }
 
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes pulseRed { 0% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } 50% { box-shadow: inset 0 0 50px rgba(244, 67, 54, 0.2); } 100% { box-shadow: inset 0 0 0px rgba(244, 67, 54, 0); } }
 
         /* TAREFAS E TABELA RESUMO (CENTRALIZADAS) */
@@ -81,6 +84,8 @@
         .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
         .team-icon { color: #2196F3; margin-right: 8px; font-size: 1em; }
+        .recurrence-icon { color: #00BCD4; margin-right: 8px; font-size: 1.1em; }
+        
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9em; color: #bbb;}
         .task-cat-name { font-weight: bold; letter-spacing: 1px; display: flex; align-items: center;}
         .task-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
@@ -113,7 +118,7 @@
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 12px; margin-top: 8px; border-radius: 5px; }
         .cat-list-color { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
         
-        /* --- ADAPTAÇÃO INTELIGENTE PARA TELAS MENORES E MOBILE --- */
+        /* --- ADAPTAÇÃO MOBILE --- */
         @media (max-width: 1024px) {
             #alert-container { padding: 20px; }
             .giant-card { padding: 25px; }
@@ -122,14 +127,12 @@
             .giant-btn { width: 100%; font-size: 1em; padding: 12px; }
         }
 
-        /* Celular Vertical: SAIR + Data em cima, resto embaixo */
         @media (max-width: 768px) and (orientation: portrait) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-top-mobile { width: 100%; justify-content: space-between; gap: 5px; }
             .header-right { justify-content: center; width: 100%; flex-wrap: wrap; gap: 8px;}
         }
 
-        /* Celular Horizontal */
         @media (max-height: 500px) and (orientation: landscape) {
             .header { padding: 5px 10px; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
             .header::-webkit-scrollbar { display: none; }
@@ -211,7 +214,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ADIAMENTO (NOVO) -->
+    <!-- MODAL DE ADIAMENTO INTELIGENTE -->
     <div class="modal-overlay" id="snoozeModal">
         <div class="modal-content" style="width: 320px; text-align: center;">
             <h3 style="margin-top:0;">Adiar Tarefa</h3>
@@ -226,11 +229,14 @@
         </div>
     </div>
 
-    <!-- MODAL DE TAREFA -->
+    <!-- MODAL DE TAREFA (COM RECORRÊNCIA) -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal-content">
             <h3 id="modal-title">Nova Tarefa</h3>
             <input type="hidden" id="task-id">
+            <input type="hidden" id="task-recurrence-id">
+            <input type="hidden" id="task-original-date">
+            
             <label>O que precisa ser feito?</label>
             <input type="text" id="task-title-input" placeholder="Ex: Ligar para Fulano">
             <label>Categoria</label>
@@ -244,6 +250,17 @@
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
             
+            <!-- CONTROLE DE REPETIÇÃO (Só aparece na criação) -->
+            <div id="container-recorrencia">
+                <label style="color: #00BCD4;">🔁 Repetição (Opcional)</label>
+                <select id="task-recurrence">
+                    <option value="none">Não se repete</option>
+                    <option value="diaria">Diariamente (Próximos 30 dias)</option>
+                    <option value="semanal">Semanalmente (Próximas 12 semanas)</option>
+                    <option value="mensal">Mensalmente (Próximos 12 meses)</option>
+                </select>
+            </div>
+
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 20px; background: #000; padding: 10px; border-radius: 5px; border-left: 4px solid #FFEB3B;">
                 <input type="checkbox" id="task-priority" style="width: 20px; height: 20px; margin: 0;">
                 <strong style="color: white; font-size: 0.9em;">Marcar como Prioridade Urgente</strong>
@@ -267,7 +284,6 @@
     <!-- MODAL DE CONFIGURAÇÕES -->
     <div class="modal-overlay" id="configModal">
         <div class="modal-content" style="padding-top: 15px;">
-            
             <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none;">
                 <button class="nav-btn active-visao" onclick="alternarAbaConfig('filtro')" id="tab-filtro">Filtros</button>
                 <button class="nav-btn" onclick="alternarAbaConfig('cat')" id="tab-cat">Categorias</button>
@@ -285,7 +301,6 @@
                     <input type="checkbox" id="chk-visao-equipe" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
                     <strong style="color: white; font-size: 0.9em;">👥 TAREFAS DA EQUIPE</strong>
                 </label>
-
                 <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
                 <h4 style="margin-top: 0; color: #aaa;">Status e Prazos</h4>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
@@ -311,12 +326,10 @@
                 <label>Cor de Identificação</label>
                 <div class="color-palette" id="color-picker"></div>
                 <input type="hidden" id="selected-color" value="#F44336">
-                
                 <label id="container-cat-equipe" style="display: none; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px;">
                     <input type="checkbox" id="cat-is-equipe" style="width: 15px; height: 15px; margin: 0;">
                     <strong style="color: #2196F3; font-size: 0.9em;">Disponibilizar para Equipe 👥</strong>
                 </label>
-
                 <div class="modal-actions">
                     <button class="nav-btn btn-action" id="btn-add-cat" onclick="adicionarCategoriaDB()">Adicionar</button>
                 </div>
@@ -350,7 +363,6 @@
         
         let currentUser = null;
         let minhaEquipe = null; 
-        
         let tarefasGlobais = [];
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
@@ -359,7 +371,7 @@
         let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
         let visualizandoResumo = false; 
 
-        // VARIÁVEIS DO MENU DE ADIAMENTO
+        // VARIÁVEIS DE ADIAMENTO
         let tarefaAdiarId = null;
         let tarefaAdiarData = null;
 
@@ -389,7 +401,6 @@
         function toggleResumo() {
             visualizandoResumo = !visualizandoResumo;
             const btn = document.getElementById('btn-resumo');
-            
             if (visualizandoResumo) {
                 btn.classList.add('active-visao');
                 document.getElementById('tasks-container').style.display = 'none';
@@ -425,9 +436,7 @@
                     if(catObj) resumo[t.categoria].cor = catObj.cor;
                 }
                 resumo[t.categoria].total++;
-                if (t.status !== 'Concluido') { 
-                    resumo[t.categoria].pendentes++;
-                }
+                if (t.status !== 'Concluido') { resumo[t.categoria].pendentes++; }
             });
             return resumo;
         }
@@ -442,27 +451,12 @@
                 return;
             }
 
-            let html = `
-                <table class="summary-table">
-                    <tr style="background: #222;">
-                        <th>CATEGORIA</th>
-                        <th style="text-align: center;">TOTAL</th>
-                        <th style="text-align: center;">PENDENTES</th>
-                    </tr>
-            `;
-
+            let html = `<table class="summary-table"><tr style="background: #222;"><th>CATEGORIA</th><th style="text-align: center;">TOTAL</th><th style="text-align: center;">PENDENTES</th></tr>`;
             categoriasKeys.forEach(cat => {
                 const r = resumo[cat];
                 const pendenteColor = r.pendentes > 0 ? '#FFEB3B' : '#4CAF50';
-                html += `
-                    <tr>
-                        <td style="color: ${r.cor};">${cat.toUpperCase()}</td>
-                        <td style="text-align: center; color: white;">${r.total}</td>
-                        <td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td>
-                    </tr>
-                `;
+                html += `<tr><td style="color: ${r.cor};">${cat.toUpperCase()}</td><td style="text-align: center; color: white;">${r.total}</td><td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td></tr>`;
             });
-
             html += `</table>`;
             container.innerHTML = html;
         }
@@ -668,14 +662,19 @@
             renderizarTarefas(); motorDeAlertas(); 
         }
 
+        // --- SISTEMA DE SALVAMENTO COM RECORRÊNCIA ---
         async function salvarTarefaDB() {
             const id = document.getElementById('task-id').value;
+            const groupId = document.getElementById('task-recurrence-id').value;
+            const originalDate = document.getElementById('task-original-date').value;
+            
             const titulo = document.getElementById('task-title-input').value;
             const categoria = document.getElementById('task-category-select').value;
             const status = document.getElementById('task-status').value;
             const dataIso = new Date(document.getElementById('task-date').value).toISOString();
             const prioridade = document.getElementById('task-priority').checked;
             const isEquipe = document.getElementById('task-is-equipe').checked;
+            const tipoRecorrencia = document.getElementById('task-recurrence').value;
             
             if(!titulo) return alert('Preencha o título da tarefa.');
 
@@ -685,21 +684,73 @@
             document.getElementById('btn-salvar-tarefa').innerText = '...';
             
             if (id) {
+                // Modo Edição
                 const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
                 if (error) alert("Erro ao editar: " + error.message);
+                
+                // Se for parte de um grupo, propaga as alterações de texto/categoria
+                if (!error && groupId && groupId !== 'undefined' && groupId !== '') {
+                    if (confirm("Aplicar as alterações de TÍTULO, CATEGORIA e PRIORIDADE para TODAS as repetições futuras desta tarefa? \n\n(Os horários/dias delas não serão alterados)")) {
+                        await supabaseClient.from('tarefas').update({ titulo, categoria, prioridade, id_equipe: idEquipeInserir })
+                            .eq('id_grupo_recorrencia', groupId)
+                            .gt('data_agendamento', originalDate);
+                    }
+                }
             } else {
-                const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
-                if (error) alert("Erro ao salvar: " + error.message);
+                // Modo Criação
+                if (tipoRecorrencia !== 'none') {
+                    // Cria em Lote (Recorrência)
+                    let newGroupId = 'REC-' + Date.now();
+                    let insertArray = [];
+                    let baseDate = new Date(dataIso);
+                    let qtd = tipoRecorrencia === 'diaria' ? 30 : 12; // Diária: 30x. Semanal/Mensal: 12x.
+
+                    for(let i = 0; i < qtd; i++) {
+                        let d = new Date(baseDate);
+                        if(tipoRecorrencia === 'diaria') d.setDate(d.getDate() + i);
+                        if(tipoRecorrencia === 'semanal') d.setDate(d.getDate() + (i * 7));
+                        if(tipoRecorrencia === 'mensal') d.setMonth(d.getMonth() + i);
+
+                        insertArray.push({
+                            id_usuario: currentUser.id, id_equipe: idEquipeInserir,
+                            titulo, categoria, 
+                            status: (i === 0 ? status : 'Pendente'), // Só a 1ª pode nascer concluída/andamento
+                            data_agendamento: d.toISOString(), 
+                            prioridade,
+                            id_grupo_recorrencia: newGroupId
+                        });
+                    }
+                    const { error } = await supabaseClient.from('tarefas').insert(insertArray);
+                    if (error) alert("Erro ao salvar repetições: " + error.message);
+                } else {
+                    // Criação Normal Única
+                    const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
+                    if (error) alert("Erro ao salvar: " + error.message);
+                }
             }
             
             document.getElementById('btn-salvar-tarefa').innerText = 'Salvar Tarefa';
             fecharModais(); await carregarTarefasDB(); 
         }
 
+        // --- SISTEMA DE EXCLUSÃO COM RECORRÊNCIA ---
         async function excluirTarefa() {
             const id = document.getElementById('task-id').value; if(!id) return;
-            if(!confirm('Apagar tarefa?')) return;
-            await supabaseClient.from('tarefas').delete().eq('id', id);
+            const groupId = document.getElementById('task-recurrence-id').value;
+            const originalDate = document.getElementById('task-original-date').value;
+
+            if(!confirm('Deseja excluir esta tarefa?')) return;
+
+            if (groupId && groupId !== 'undefined' && groupId !== '') {
+                if (confirm('⚠️ Esta é uma tarefa que se repete.\n\nDeseja apagar também TODAS AS REPETIÇÕES FUTURAS? \n\n[OK] = Apagar esta e as futuras\n[Cancelar] = Apagar SOMENTE esta')) {
+                    await supabaseClient.from('tarefas').delete().eq('id_grupo_recorrencia', groupId).gte('data_agendamento', originalDate);
+                } else {
+                    await supabaseClient.from('tarefas').delete().eq('id', id);
+                }
+            } else {
+                await supabaseClient.from('tarefas').delete().eq('id', id);
+            }
+            
             fecharModais(); await carregarTarefasDB(); 
         }
         
@@ -710,7 +761,7 @@
             await carregarTarefasDB(); 
         }
 
-        // --- NOVO MOTOR DE ADIAMENTO ---
+        // --- MOTOR INTELIGENTE DE ADIAMENTO (MENU RÁPIDO) ---
         function abrirModalAdiamento(id, dataAtual) {
             tarefaAdiarId = id;
             tarefaAdiarData = dataAtual;
@@ -726,7 +777,6 @@
             const agora = new Date();
             let dataObj = new Date(tarefaAdiarData);
             
-            // Regra de Ouro: Se a tarefa já está no passado, recomeça a partir de AGORA
             if (dataObj < agora) { 
                 dataObj = new Date(agora); 
             }
@@ -778,6 +828,7 @@
                     let iconesExtra = '';
                     if(t.prioridade) iconesExtra += `<span class="priority-icon" title="Prioridade">⭐</span>`;
                     if(t.id_equipe) iconesExtra += `<span class="team-icon" title="Tarefa da Equipe">👥</span>`;
+                    if(t.id_grupo_recorrencia) iconesExtra += `<span class="recurrence-icon" title="Repetição">🔁</span>`;
                     
                     const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
@@ -786,7 +837,7 @@
                             <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
                             <div class="task-title">${t.titulo}</div>
                             <div class="task-actions">
-                                <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade}, ${t.id_equipe !== null})">✎ Editar</button>
+                                <button class="t-btn" onclick="abrirModalTarefa('${t.id}', '${t.titulo.replace(/'/g, "\\'")}', '${t.categoria}', '${t.status}', '${t.data_agendamento}', ${t.prioridade}, ${t.id_equipe !== null}, '${t.id_grupo_recorrencia || ''}')">✎ Editar</button>
                                 <button class="t-btn snooze" onclick="abrirModalAdiamento('${t.id}', '${t.data_agendamento}')">⏰ Adiar</button>
                                 <button class="t-btn done" onclick="concluirTarefaDB('${t.id}')">✓ Concluir</button>
                             </div>
@@ -842,7 +893,7 @@
 
         function editarTarefaGigante() {
             if(!tarefaAlertaAtual) return;
-            abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null);
+            abrirModalTarefa(tarefaAlertaAtual.id, tarefaAlertaAtual.titulo.replace(/'/g, "\\'"), tarefaAlertaAtual.categoria, tarefaAlertaAtual.status, tarefaAlertaAtual.data_agendamento, tarefaAlertaAtual.prioridade, tarefaAlertaAtual.id_equipe !== null, tarefaAlertaAtual.id_grupo_recorrencia || '');
         }
 
         let bloqueioDeTela = null;
@@ -861,15 +912,23 @@
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        function abrirModalTarefa(id = '', titulo = '', categoria = categoriasGlobais[0]?.nome || '', status = 'Pendente', dataIso = '', prioridade = false, isEquipe = false) {
+        function abrirModalTarefa(id = '', titulo = '', categoria = categoriasGlobais[0]?.nome || '', status = 'Pendente', dataIso = '', prioridade = false, isEquipe = false, grupoRecorrencia = '') {
             document.getElementById('taskModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = id ? 'Editar Tarefa' : 'Nova Tarefa';
             document.getElementById('task-id').value = id;
+            document.getElementById('task-recurrence-id').value = grupoRecorrencia;
+            document.getElementById('task-original-date').value = dataIso;
+            
             document.getElementById('task-title-input').value = titulo;
             document.getElementById('task-status').value = status;
             document.getElementById('task-date').value = formatarDataParaInputHTML(dataIso);
             document.getElementById('task-priority').checked = prioridade;
             document.getElementById('task-is-equipe').checked = isEquipe;
+            
+            // Oculta a opção de criar repetição se a tarefa já existe
+            if(id) { document.getElementById('container-recorrencia').style.display = 'none'; }
+            else { document.getElementById('container-recorrencia').style.display = 'block'; document.getElementById('task-recurrence').value = 'none'; }
+            
             document.getElementById('btn-excluir-tarefa').style.display = id ? 'block' : 'none'; 
             renderizarSelectCategorias(); document.getElementById('task-category-select').value = categoria;
         }
