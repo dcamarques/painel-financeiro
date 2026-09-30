@@ -77,7 +77,6 @@
         .tasks-panel { width: 100%; max-width: 800px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; -ms-overflow-style: none; scrollbar-width: none; }
         .tasks-panel::-webkit-scrollbar { display: none; } 
         
-        /* OTIMIZAÇÃO DAS BORDAS E COR DO CARTÃO */
         .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; transition: opacity 0.3s; }
         .task-card.is-priority { background: #332f1a; }
         
@@ -94,9 +93,20 @@
         .t-btn.done { background: var(--primary); color: white;}
         .t-btn.snooze { background: #ff9800; color: #000; }
 
+        /* --- ESTILOS DO NOVO DASHBOARD DE PERFORMANCE --- */
+        .perf-card { background: #1a1a1a; border-radius: 12px; padding: 25px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 20px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .perf-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2em; color: #fff; letter-spacing: 1px;}
+        .perf-stats { display: flex; justify-content: space-between; font-size: 0.9em; color: #aaa; text-align: center;}
+        .perf-stat-item { display: flex; flex-direction: column; align-items: center; width: 33%; }
+        .perf-stat-value { font-size: 2em; font-weight: bold; color: #fff; margin-top: 5px; }
+        .perf-bar-bg { width: 100%; height: 14px; background: #333; border-radius: 10px; overflow: hidden; position: relative; }
+        @keyframes fillBar { from { width: 0; } }
+        .perf-bar-fill { height: 100%; border-radius: 10px; animation: fillBar 1s ease-out forwards; }
+
+        /* Nova Tabela Mais Espaçada */
         .summary-table { width: 100%; background: var(--card-bg); border-radius: 8px; border-collapse: collapse; overflow: hidden; font-size: 1.1em; }
-        .summary-table th { padding: 15px; text-align: left; color: #aaa; background: #222; font-weight: bold; text-transform: uppercase; }
-        .summary-table td { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; }
+        .summary-table th { padding: 18px 15px; text-align: left; color: #aaa; background: #222; font-weight: bold; text-transform: uppercase; }
+        .summary-table td { padding: 22px 15px; border-bottom: 1px solid #333; font-weight: bold; }
 
         /* STATUS BADGE */
         .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -130,6 +140,8 @@
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-top-mobile { width: 100%; justify-content: space-between; gap: 5px; }
             .header-right { justify-content: center; width: 100%; flex-wrap: wrap; gap: 8px;}
+            
+            .perf-stat-value { font-size: 1.5em; } /* Ajuste fino na fonte do gráfico para celular */
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
@@ -249,7 +261,7 @@
             <label>Data e Hora</label>
             <input type="datetime-local" id="task-date">
             
-            <!-- CONTROLE DE REPETIÇÃO (Só aparece na criação) -->
+            <!-- CONTROLE DE REPETIÇÃO -->
             <div id="container-recorrencia">
                 <label style="color: #00BCD4;">🔁 Repetição (Opcional)</label>
                 <select id="task-recurrence">
@@ -312,7 +324,7 @@
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
                     <input type="checkbox" id="chk-filtro-vencidas" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
-                    <strong style="color: white; font-size: 0.9em;">⚠️️ VENCIDAS</strong>
+                    <strong style="color: white; font-size: 0.9em;">⚠️ VENCIDAS</strong>
                 </label>
             </div>
 
@@ -362,6 +374,7 @@
         
         let currentUser = null;
         let minhaEquipe = null; 
+        
         let tarefasGlobais = [];
         let categoriasGlobais = [];
         const defaultColors = ['#F44336','#4CAF50','#2196F3','#FFEB3B','#FF9800','#00BCD4','#9C27B0','#E91E63','#795548','#9E9E9E'];
@@ -450,12 +463,57 @@
                 return;
             }
 
-            let html = `<table class="summary-table"><tr style="background: #222;"><th>CATEGORIA</th><th style="text-align: center;">TOTAL</th><th style="text-align: center;">PENDENTES</th></tr>`;
+            let totalGeral = 0;
+            let pendentesGeral = 0;
+            
+            categoriasKeys.forEach(cat => {
+                totalGeral += resumo[cat].total;
+                pendentesGeral += resumo[cat].pendentes;
+            });
+            
+            let concluidasGeral = totalGeral - pendentesGeral;
+            let percentual = totalGeral === 0 ? 0 : Math.round((concluidasGeral / totalGeral) * 100);
+            
+            // Cores do gráfico baseadas na performance
+            let corPerformance = percentual === 100 ? '#4CAF50' : (percentual >= 50 ? '#FFEB3B' : '#F44336');
+
+            let html = `
+                <!-- NOVO DASHBOARD DE PERFORMANCE -->
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span>PERFORMANCE DO DIA</span>
+                        <span style="color: ${corPerformance};">${percentual}%</span>
+                    </div>
+                    <div class="perf-bar-bg">
+                        <div class="perf-bar-fill" style="width: ${percentual}%; background: ${corPerformance};"></div>
+                    </div>
+                    <div class="perf-stats">
+                        <div class="perf-stat-item"><span>TOTAL</span><span class="perf-stat-value">${totalGeral}</span></div>
+                        <div class="perf-stat-item"><span>CONCLUÍDAS</span><span class="perf-stat-value" style="color: #4CAF50;">${concluidasGeral}</span></div>
+                        <div class="perf-stat-item"><span>PENDENTES</span><span class="perf-stat-value" style="color: #F44336;">${pendentesGeral}</span></div>
+                    </div>
+                </div>
+
+                <table class="summary-table">
+                    <tr style="background: #222;">
+                        <th>CATEGORIA</th>
+                        <th style="text-align: center;">TOTAL</th>
+                        <th style="text-align: center;">PENDENTES</th>
+                    </tr>
+            `;
+
             categoriasKeys.forEach(cat => {
                 const r = resumo[cat];
                 const pendenteColor = r.pendentes > 0 ? '#FFEB3B' : '#4CAF50';
-                html += `<tr><td style="color: ${r.cor};">${cat.toUpperCase()}</td><td style="text-align: center; color: white;">${r.total}</td><td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td></tr>`;
+                html += `
+                    <tr>
+                        <td style="color: ${r.cor};">${cat.toUpperCase()}</td>
+                        <td style="text-align: center; color: white;">${r.total}</td>
+                        <td style="text-align: center; color: ${pendenteColor};">${r.pendentes}</td>
+                    </tr>
+                `;
             });
+
             html += `</table>`;
             container.innerHTML = html;
         }
@@ -826,7 +884,7 @@
                     
                     const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
-                    // O SEGREDO DO ENQUADRAMENTO DE CONTEXTO: Bordas com 6px laterais e 1px cima/baixo, abraçando toda a tarefa na cor da categoria
+                    // NOVO ENQUADRAMENTO DE CONTEXTO: Bordas com 6px laterais e 1px cima/baixo, abraçando toda a tarefa na cor da categoria
                     container.innerHTML += `
                         <div class="${cardClass}" style="border-style: solid; border-width: 1px 6px; border-color: ${cor};" id="task-${t.id}">
                             <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
