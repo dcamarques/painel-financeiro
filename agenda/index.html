@@ -10,12 +10,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <meta name="description" content="Painel Executivo Boonus. Gestão de produtividade, acompanhamento de mercado e controle de agenda para escritórios de investimentos.">
-    <meta name="keywords" content="agenda, produtividade, painel executivo, investimentos, boonus">
-
+    <meta name="description" content="Painel Executivo Boonus. Gestão de produtividade e controle de agenda.">
     <meta property="og:title" content="Boonus Agenda">
-    <meta property="og:description" content="Painel Executivo de Gestão, Produtividade e Mercado.">
-    <meta property="og:image" content="https://tv.boonus.app.br/agenda/capa-whatsapp.jpg">
     <meta property="og:url" content="https://tv.boonus.app.br/agenda/">
     <meta property="og:type" content="website">
 
@@ -80,8 +76,11 @@
         /* TAREFAS E TABELA RESUMO (CENTRALIZADAS) */
         .tasks-panel { width: 100%; max-width: 800px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; -ms-overflow-style: none; scrollbar-width: none; }
         .tasks-panel::-webkit-scrollbar { display: none; } 
-        .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid transparent; transition: opacity 0.3s; }
-        .task-card.is-priority { border-color: #FFEB3B; background: #332f1a; }
+        
+        /* OTIMIZAÇÃO DAS BORDAS E COR DO CARTÃO */
+        .task-card { background: var(--card-bg); border-radius: 8px; display: flex; flex-direction: column; padding: 15px; position: relative; transition: opacity 0.3s; }
+        .task-card.is-priority { background: #332f1a; }
+        
         .priority-icon { color: #FFEB3B; margin-right: 8px; font-size: 1.2em; text-shadow: 0 0 5px rgba(255,235,59,0.5); }
         .team-icon { color: #2196F3; margin-right: 8px; font-size: 1em; }
         .recurrence-icon { color: #00BCD4; margin-right: 8px; font-size: 1.1em; }
@@ -313,7 +312,7 @@
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #222; padding: 12px; border-radius: 5px; margin-bottom: 8px;">
                     <input type="checkbox" id="chk-filtro-vencidas" onchange="atualizarFiltrosModal()" style="width: 20px; height: 20px; margin: 0;">
-                    <strong style="color: white; font-size: 0.9em;">⚠️ VENCIDAS</strong>
+                    <strong style="color: white; font-size: 0.9em;">⚠️️ VENCIDAS</strong>
                 </label>
             </div>
 
@@ -684,11 +683,9 @@
             document.getElementById('btn-salvar-tarefa').innerText = '...';
             
             if (id) {
-                // Modo Edição
                 const { error } = await supabaseClient.from('tarefas').update({ titulo, categoria, status, data_agendamento: dataIso, prioridade, id_equipe: idEquipeInserir }).eq('id', id);
                 if (error) alert("Erro ao editar: " + error.message);
                 
-                // Se for parte de um grupo, propaga as alterações de texto/categoria
                 if (!error && groupId && groupId !== 'undefined' && groupId !== '') {
                     if (confirm("Aplicar as alterações de TÍTULO, CATEGORIA e PRIORIDADE para TODAS as repetições futuras desta tarefa? \n\n(Os horários/dias delas não serão alterados)")) {
                         await supabaseClient.from('tarefas').update({ titulo, categoria, prioridade, id_equipe: idEquipeInserir })
@@ -697,13 +694,11 @@
                     }
                 }
             } else {
-                // Modo Criação
                 if (tipoRecorrencia !== 'none') {
-                    // Cria em Lote (Recorrência)
                     let newGroupId = 'REC-' + Date.now();
                     let insertArray = [];
                     let baseDate = new Date(dataIso);
-                    let qtd = tipoRecorrencia === 'diaria' ? 30 : 12; // Diária: 30x. Semanal/Mensal: 12x.
+                    let qtd = tipoRecorrencia === 'diaria' ? 30 : 12; 
 
                     for(let i = 0; i < qtd; i++) {
                         let d = new Date(baseDate);
@@ -714,7 +709,7 @@
                         insertArray.push({
                             id_usuario: currentUser.id, id_equipe: idEquipeInserir,
                             titulo, categoria, 
-                            status: (i === 0 ? status : 'Pendente'), // Só a 1ª pode nascer concluída/andamento
+                            status: (i === 0 ? status : 'Pendente'), 
                             data_agendamento: d.toISOString(), 
                             prioridade,
                             id_grupo_recorrencia: newGroupId
@@ -723,7 +718,6 @@
                     const { error } = await supabaseClient.from('tarefas').insert(insertArray);
                     if (error) alert("Erro ao salvar repetições: " + error.message);
                 } else {
-                    // Criação Normal Única
                     const { error } = await supabaseClient.from('tarefas').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, titulo, categoria, status, data_agendamento: dataIso, prioridade }]);
                     if (error) alert("Erro ao salvar: " + error.message);
                 }
@@ -832,8 +826,9 @@
                     
                     const cardClass = t.prioridade ? 'task-card is-priority' : 'task-card';
 
+                    // O SEGREDO DO ENQUADRAMENTO DE CONTEXTO: Bordas com 6px laterais e 1px cima/baixo, abraçando toda a tarefa na cor da categoria
                     container.innerHTML += `
-                        <div class="${cardClass}" style="border-left: 8px solid ${cor};" id="task-${t.id}">
+                        <div class="${cardClass}" style="border-style: solid; border-width: 1px 6px; border-color: ${cor};" id="task-${t.id}">
                             <div class="task-header"><span class="task-cat-name" style="color: ${cor};">${iconesExtra} ${t.categoria.toUpperCase()}</span><strong>${dataFormatada}</strong><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></div>
                             <div class="task-title">${t.titulo}</div>
                             <div class="task-actions">
@@ -925,7 +920,6 @@
             document.getElementById('task-priority').checked = prioridade;
             document.getElementById('task-is-equipe').checked = isEquipe;
             
-            // Oculta a opção de criar repetição se a tarefa já existe
             if(id) { document.getElementById('container-recorrencia').style.display = 'none'; }
             else { document.getElementById('container-recorrencia').style.display = 'block'; document.getElementById('task-recurrence').value = 'none'; }
             
