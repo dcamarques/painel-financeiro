@@ -55,6 +55,7 @@
         .header-center h3 { margin: 0; padding: 0 15px; text-transform: uppercase; cursor: pointer; transition: color 0.2s; font-size: 1.1rem; letter-spacing: 1px; white-space: nowrap;}
         .header-center h3:hover { color: var(--primary); }
 
+        /* LAYOUT CENTRALIZADO SEM NOTÍCIAS */
         .main-content { display: flex; flex: 1; overflow: hidden; justify-content: center; position: relative;}
         
         /* CONTAINER ALERTA MULTIPLO E CASCATA */
@@ -127,7 +128,12 @@
         .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
         .modal-content h3 { margin-top: 0; margin-bottom: 15px; }
         .modal-content label { display: block; margin-top: 15px; font-size: 0.9em; color: #ccc; }
-        .modal-content input[type="text"], .modal-content input[type="email"], .modal-content input[type="datetime-local"], .modal-content select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; }
+        
+        /* O SEGREDO DO DARK MODE NOS CALENDÁRIOS NATIVOS */
+        .modal-content input[type="text"], .modal-content input[type="email"], .modal-content input[type="datetime-local"], .modal-content select { 
+            width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; color-scheme: dark; 
+        }
+
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .color-palette { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
@@ -196,7 +202,7 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL -->
+    <!-- TELA PRINCIPAL (HEADER OTIMIZADO) -->
     <div id="painel">
         <div class="header">
             <div class="header-top-mobile">
@@ -264,7 +270,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE TAREFA -->
+    <!-- MODAL DE TAREFA (COM FORÇAMENTO DE PICKER PARA SAMSUNG) -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal-content">
             <h3 id="modal-title">Nova Tarefa</h3>
@@ -282,8 +288,10 @@
                 <option value="Em andamento" style="color: #FFEB3B; font-weight: bold;">Em andamento (Amarelo)</option>
                 <option value="Concluido" style="color: #4CAF50; font-weight: bold;">Concluído (Verde)</option>
             </select>
+            
             <label>Data e Hora</label>
-            <input type="datetime-local" id="task-date">
+            <!-- GATILHO FORÇADO PARA ABRIR O CALENDÁRIO NO SAMSUNG NOTE 10/ANDROID -->
+            <input type="datetime-local" id="task-date" onclick="try{this.showPicker();}catch(e){}">
             
             <div id="container-recorrencia">
                 <label style="color: #00BCD4;">🔁 Repetição (Opcional)</label>
@@ -406,7 +414,6 @@
         let filtrosAtivos = { vencidas: false, pendentes: true, prioridades: false };
         let visualizandoResumo = false; 
 
-        // VARIÁVEIS DE ALERTAS
         let tarefasAtrasadasFila = [];
         let indiceAlertaAtual = 0;
         let modoAdiarCascata = false; 
@@ -563,13 +570,29 @@
             if (error) alert('Erro ao cadastrar: ' + error.message); else { alert('Sucesso! Pode entrar.'); checarSessao(); }
         }
 
+        async function recuperarSenha() {
+            const email = document.getElementById('email-input').value;
+            if(!email) return alert('Digite seu e-mail no campo acima.');
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if (error) alert('Erro: ' + error.message); else alert('Link enviado para o e-mail!');
+        }
+
         async function checarSessao() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 currentUser = session.user;
+                const { data: perfil } = await supabaseClient.from('perfis').select('data_vencimento').eq('id_usuario', currentUser.id).single();
+                if (perfil && perfil.data_vencimento && new Date(perfil.data_vencimento) < new Date()) {
+                    document.getElementById('login-wrapper').style.display = 'none';
+                    document.getElementById('bloqueio-wrapper').style.display = 'flex'; return;
+                }
+
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('painel').style.display = 'flex';
-                atualizarDisplayData(); inicializarPaletaDeCores(); 
+                
+                atualizarDisplayData(); 
+                inicializarPaletaDeCores(); 
+                
                 await carregarEquipe(); await carregarCategoriasDB(); await carregarTarefasDB(); 
                 setInterval(motorDeAlertas, 30000); iniciarEscutaRealtime(); 
             }
@@ -591,6 +614,37 @@
             if (!minhaEquipe) { filtrosVisao.equipe = false; filtrosVisao.minhas = true; salvarFiltrosLocal(); }
         }
 
+        async function criarEquipe() {
+            const nome = document.getElementById('nome-equipe').value.trim();
+            if(!nome) return alert('Digite um nome para a equipe.');
+            const { error } = await supabaseClient.from('equipes').insert([{ nome: nome, id_criador: currentUser.id }]);
+            if(error) alert('Erro: ' + error.message); else { alert('Equipe criada!'); await carregarEquipe(); renderizarTarefas(); }
+        }
+
+        async function adicionarMembro() {
+            const email = document.getElementById('email-membro').value.trim().toLowerCase();
+            if(!email) return;
+            if(email === currentUser.email) return alert('Você já é o dono.');
+            const { error } = await supabaseClient.from('membros_equipe').insert([{ id_equipe: minhaEquipe.id, email: email }]);
+            if(error) alert('Erro: ' + error.message); else { document.getElementById('email-membro').value = ''; carregarMembrosEquipe(); }
+        }
+
+        async function removerMembro(id) {
+            if(!confirm('Remover este parceiro da equipe?')) return;
+            await supabaseClient.from('membros_equipe').delete().eq('id', id);
+            carregarMembrosEquipe();
+        }
+
+        async function carregarMembrosEquipe() {
+            const list = document.getElementById('lista-membros'); list.innerHTML = 'Carregando membros...';
+            const { data } = await supabaseClient.from('membros_equipe').select('*').eq('id_equipe', minhaEquipe.id);
+            list.innerHTML = '';
+            if(!data || data.length === 0) { list.innerHTML = '<span style="color:#777;font-size:0.9em;">Nenhum membro convidado.</span>'; return; }
+            data.forEach(m => {
+                list.innerHTML += `<div class="cat-list-item"><span>👥 ${m.email}</span><button class="t-btn btn-danger" onclick="removerMembro('${m.id}')">X</button></div>`;
+            });
+        }
+
         async function carregarCategoriasDB() {
             let queryStr = `id_usuario.eq.${currentUser.id}`;
             if (minhaEquipe) queryStr += `,id_equipe.eq.${minhaEquipe.id}`;
@@ -600,6 +654,26 @@
                 return carregarCategoriasDB();
             }
             categoriasGlobais = data; renderizarListaConfigCategorias(); renderizarSelectCategorias();
+        }
+
+        async function adicionarCategoriaDB() {
+            const nome = document.getElementById('new-cat-name').value.trim(); const cor = document.getElementById('selected-color').value;
+            const isEquipe = document.getElementById('cat-is-equipe').checked;
+            if(!nome) return alert('Digite o nome da categoria.');
+            let idEquipeInserir = (isEquipe && minhaEquipe) ? minhaEquipe.id : null; 
+
+            document.getElementById('btn-add-cat').innerText = 'Salvando...';
+            const { error } = await supabaseClient.from('categorias').insert([{ id_usuario: currentUser.id, id_equipe: idEquipeInserir, nome, cor }]);
+            document.getElementById('btn-add-cat').innerText = 'Adicionar';
+            
+            if(error) alert('Erro ao salvar no banco: ' + error.message); 
+            else { document.getElementById('new-cat-name').value = ''; await carregarCategoriasDB(); }
+        }
+
+        async function removerCategoriaDB(id) {
+            if(!confirm('Tem certeza?')) return;
+            await supabaseClient.from('categorias').delete().eq('id', id);
+            await carregarCategoriasDB(); renderizarTarefas();
         }
 
         async function carregarTarefasDB() {
@@ -675,13 +749,10 @@
             await carregarTarefasDB(); 
         }
 
-        // ============================================================================
-        // SISTEMA DE ESCUTA EM TEMPO REAL BLINDADO COM "DEBOUNCE" (ANTI-INUNDAÇÃO)
-        // ============================================================================
+        // --- SISTEMA TEMPO REAL BLINDADO COM "DEBOUNCE" ---
         let debounceSync;
         function sincronizarBancoDeDadosEmTempoReal() {
             clearTimeout(debounceSync);
-            // Espera meio segundo para deixar a "cascata" inteira do celular terminar de gravar no banco, antes de atualizar a tela do computador
             debounceSync = setTimeout(() => {
                 carregarTarefasDB();
                 carregarCategoriasDB();
@@ -695,9 +766,6 @@
                 .subscribe();
         }
 
-        // ============================================================================
-        // MOTOR DE ALERTAS: FILA, CARROSSEL E CASCATA
-        // ============================================================================
         function motorDeAlertas() {
             const agora = new Date();
             tarefasAtrasadasFila = tarefasGlobais.filter(t => t.status !== 'Concluido' && new Date(t.data_agendamento) <= agora).sort((a,b) => new Date(a.data_agendamento) - new Date(b.data_agendamento)); 
@@ -712,24 +780,17 @@
 
         function renderizarCartaoAlerta() {
             if (tarefasAtrasadasFila.length === 0) return desligarAlertaGigante();
-            
             tarefaAlertaAtual = tarefasAtrasadasFila[indiceAlertaAtual];
-            
             document.getElementById('tasks-container').style.display = 'none'; 
             document.getElementById('summary-container').style.display = 'none'; 
             document.getElementById('alert-container').style.display = 'flex';
-            
             document.getElementById('alert-counter').innerText = `ALERTA ${indiceAlertaAtual + 1} DE ${tarefasAtrasadasFila.length}`;
-            
             document.getElementById('btn-prev-alerta').disabled = (indiceAlertaAtual === 0);
             document.getElementById('btn-next-alerta').disabled = (indiceAlertaAtual === tarefasAtrasadasFila.length - 1);
-            
             document.getElementById('btn-adiar-cascata').style.display = (tarefasAtrasadasFila.length > 1) ? 'block' : 'none';
-
             const cor = (categoriasGlobais.find(c => c.nome === tarefaAlertaAtual.categoria) || {}).cor || '#F44336';
             document.getElementById('giant-card').style.backgroundColor = cor;
             document.getElementById('giant-title').innerText = tarefaAlertaAtual.titulo;
-            
             const hora = new Date(tarefaAlertaAtual.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
             let lblContexto = tarefaAlertaAtual.id_equipe ? '👥 EQUIPE' : '👤 PESSOAL';
             document.getElementById('giant-time').innerText = `${lblContexto} | ${tarefaAlertaAtual.categoria.toUpperCase()} | ${hora}`;
